@@ -19,9 +19,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
-            UserSeeder::class,
             SettingsSeeder::class,
+            // Divisions before users: the division officers are assigned to
+            // a division by slug as they are created.
             DivisionSeeder::class,
+            UserSeeder::class,
             SliderSeeder::class,
             PortfolioSeeder::class,
             EditorialSeeder::class,

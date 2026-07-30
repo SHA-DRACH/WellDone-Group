@@ -44,22 +44,63 @@ final class Brand
         $value = setting($key);
 
         if (blank($value)) {
-            return null;
+            return self::discover();
         }
 
         if (Str::startsWith($value, ['http://', 'https://', '//'])) {
             return $value;
         }
 
-        // Shipped asset: only use it if the file is actually on disk.
+        // Shipped asset: only use it if the file is actually on disk,
+        // otherwise fall back to whatever artwork is in the brand folder.
         if (Str::startsWith($value, '/')) {
-            return file_exists(public_path(ltrim($value, '/'))) ? asset(ltrim($value, '/')) : null;
+            return file_exists(public_path(ltrim($value, '/')))
+                ? asset(ltrim($value, '/'))
+                : self::discover();
         }
 
         // Uploaded through the CMS.
         return Storage::disk('public')->exists($value)
             ? Storage::disk('public')->url($value)
-            : null;
+            : self::discover();
+    }
+
+    /**
+     * Last resort: use whatever image has been dropped into
+     * public/images/brand. This means the logo works as soon as the file is
+     * saved, whatever it happens to be called, without anyone having to
+     * match a filename or edit a setting first.
+     */
+    private static function discover(): ?string
+    {
+        static $found;
+
+        if ($found !== null) {
+            return $found ?: null;
+        }
+
+        $directory = public_path('images/brand');
+
+        if (! is_dir($directory)) {
+            return ($found = false) ? null : null;
+        }
+
+        foreach (['png', 'svg', 'webp', 'jpg', 'jpeg'] as $extension) {
+            $matches = glob($directory.'/*.'.$extension) ?: [];
+
+            if ($matches !== []) {
+                // Prefer a file named like a logo when several are present.
+                usort($matches, fn ($a, $b) => Str::contains(basename($a), 'logo') ? -1 : 1);
+
+                $found = asset('images/brand/'.basename($matches[0]));
+
+                return $found;
+            }
+        }
+
+        $found = false;
+
+        return null;
     }
 
     private static function fallbackMark(): string

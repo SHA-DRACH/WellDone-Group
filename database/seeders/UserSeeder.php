@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Division;
 use App\Models\User;
 use App\Support\Roles;
 use Illuminate\Database\Seeder;
@@ -69,9 +70,18 @@ class UserSeeder extends Seeder
             ],
         ];
 
+        // One officer per business division, so each division dashboard has a
+        // signed-in owner out of the box. In normal operation an
+        // administrator creates these from Admin → Users, which also emails
+        // the new user a link to set their own password.
+        foreach ($this->divisionOfficers() as $officer) {
+            $accounts[] = $officer;
+        }
+
         foreach ($accounts as $account) {
             $role = $account['role'];
-            unset($account['role']);
+            $divisionSlug = $account['division'] ?? null;
+            unset($account['role'], $account['division']);
 
             $user = User::query()->updateOrCreate(
                 ['email' => $account['email']],
@@ -79,6 +89,9 @@ class UserSeeder extends Seeder
                     'password' => Hash::make('WellDone@2026'),
                     'email_verified_at' => now(),
                     'is_active' => true,
+                    'division_id' => $divisionSlug
+                        ? Division::query()->where('slug', $divisionSlug)->value('id')
+                        : null,
                 ])
             );
 
@@ -86,5 +99,50 @@ class UserSeeder extends Seeder
         }
 
         $this->command?->info('Seeded '.count($accounts).' staff accounts (password: WellDone@2026).');
+    }
+
+    /**
+     * Division-scoped accounts. These users hold no group-level role, so
+     * App\Support\Navigation routes them straight to their own division
+     * dashboard on sign-in and denies them any other division.
+     *
+     * @return array<int, array<string, string>>
+     */
+    protected function divisionOfficers(): array
+    {
+        return [
+            [
+                'name' => 'Prince Tarr',
+                'email' => 'mining@welldonegroup.com',
+                'position' => 'Mining & Quarry Operations Officer',
+                'department' => 'Mining',
+                'role' => Roles::SALES_OFFICER,
+                'division' => 'mining-quarry',
+            ],
+            [
+                'name' => 'Miatta Freeman',
+                'email' => 'logistics@welldonegroup.com',
+                'position' => 'Procurement & Logistics Officer',
+                'department' => 'Logistics',
+                'role' => Roles::SALES_OFFICER,
+                'division' => 'procurement-logistics',
+            ],
+            [
+                'name' => 'Yassah Toe',
+                'email' => 'medical@welldonegroup.com',
+                'position' => 'Medical Equipment Officer',
+                'department' => 'Medical',
+                'role' => Roles::SALES_OFFICER,
+                'division' => 'medical-equipment',
+            ],
+            [
+                'name' => 'Nathan Gbeh',
+                'email' => 'ictdesk@welldonegroup.com',
+                'position' => 'ICT Services Officer',
+                'department' => 'ICT',
+                'role' => Roles::SALES_OFFICER,
+                'division' => 'ict-services',
+            ],
+        ];
     }
 }

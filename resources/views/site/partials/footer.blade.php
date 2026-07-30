@@ -51,7 +51,7 @@
                 <a class="navbar-brand mb-3 d-inline-flex align-items-center" href="{{ route('site.home') }}">
                     @if(\App\Support\Brand::hasLogo())
                         <img src="{{ brand('logo_light') }}" class="brand-logo brand-logo--footer"
-                             alt="{{ setting('company.name') }}" width="66" height="66">
+                             alt="{{ setting('company.name') }}" width="104" height="66">
                     @else
                         <span class="brand-mark" aria-hidden="true"><strong>WD</strong></span>
                     @endif
@@ -97,6 +97,13 @@
                     <li><a href="{{ route('site.careers.index') }}">Careers</a></li>
                     <li><a href="{{ route('site.csr') }}">Responsibility</a></li>
                     <li><a href="{{ route('site.downloads.index') }}">Downloads</a></li>
+                    <li>
+                        @auth
+                            <a href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}">My Dashboard</a>
+                        @else
+                            <a href="{{ route('login') }}">Staff Login</a>
+                        @endauth
+                    </li>
                 </ul>
             </div>
 

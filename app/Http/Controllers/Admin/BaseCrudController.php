@@ -192,11 +192,11 @@ abstract class BaseCrudController extends Controller
             ->with('success', $this->label.' created successfully.');
     }
 
-    public function show(Model $record = null): RedirectResponse
+    public function show(string|int $id): RedirectResponse
     {
         // Most modules have no separate detail screen — editing is the detail
         // view. Modules that need one override this.
-        return redirect()->route("admin.{$this->routeName}.edit", $record);
+        return redirect()->route("admin.{$this->routeName}.edit", $this->findForEdit($id));
     }
 
     public function edit(Request $request, string|int $id): View
@@ -255,9 +255,28 @@ abstract class BaseCrudController extends Controller
     // Internals
     // ------------------------------------------------------------------
 
+    /**
+     * Resolve the record from the URL segment.
+     *
+     * These models expose a slug as their route key, so `route(..., $record)`
+     * puts the slug in the URL — looking it up by primary key would 404 on
+     * every edit. Resolve by whatever the model declares as its route key,
+     * which still works for models keyed by id.
+     */
     protected function findForEdit(string|int $id): Model
     {
-        return $this->model::query()->findOrFail($id);
+        $instance = new $this->model;
+        $routeKey = $instance->getRouteKeyName();
+
+        $query = $this->model::query();
+
+        // Numeric ids stay usable even on slugged models, so links built by
+        // hand or held in an old bookmark keep working.
+        if ($routeKey !== $instance->getKeyName() && is_numeric($id)) {
+            return $query->where($instance->getKeyName(), $id)->firstOrFail();
+        }
+
+        return $query->where($routeKey, $id)->firstOrFail();
     }
 
     /**

@@ -27,7 +27,9 @@
       "PowerShell(cmd /c \"chcp 65001 >nul && C:\\\\laragon\\\\bin\\\\mysql\\\\mysql-8.4.3-winx64\\\\bin\\\\mysql.exe -u root --default-character-set=utf8mb4 welldone < C:\\\\Users\\\\jimic\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--laragon-www-welldone\\\\b1f148f6-eef9-46bc-a75f-41ce1439623e\\\\scratchpad\\\\brand.sql\")",
       "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:8000/about\" -UseBasicParsing -TimeoutSec 60; \"STATUS $\\($r.StatusCode\\)\"; \\($r.Content -split \"`n\" | Select-String -Pattern 'rel=\"icon\"|brand-logo|page-header__watermark|brand-mark' | Select-Object -First 6\\) } catch { \"ERR: $\\($_.Exception.Message\\)\" })",
       "PowerShell(Select-String -Path C:\\\\laragon\\\\www\\\\welldone\\\\storage\\\\logs\\\\laravel.log -Pattern 'local\\\\.ERROR' | Select-Object -Last 3 | ForEach-Object { $_.Line.Substring\\(0, [Math]::Min\\(600, $_.Line.Length\\)\\) })",
-      "PowerShell(Select-String -Path C:\\\\laragon\\\\www\\\\welldone\\\\storage\\\\logs\\\\laravel.log -Pattern 'local\\\\.ERROR' | Select-Object -Last 1 | ForEach-Object { $_.Line.Substring\\(0, [Math]::Min\\(500, $_.Line.Length\\)\\) })"
+      "PowerShell(Select-String -Path C:\\\\laragon\\\\www\\\\welldone\\\\storage\\\\logs\\\\laravel.log -Pattern 'local\\\\.ERROR' | Select-Object -Last 1 | ForEach-Object { $_.Line.Substring\\(0, [Math]::Min\\(500, $_.Line.Length\\)\\) })",
+      "PowerShell(cmd /c \"C:\\\\laragon\\\\bin\\\\mysql\\\\mysql-8.4.3-winx64\\\\bin\\\\mysql.exe -u root --default-character-set=utf8mb4 welldone < C:\\\\Users\\\\jimic\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--laragon-www-welldone\\\\b1f148f6-eef9-46bc-a75f-41ce1439623e\\\\scratchpad\\\\brand2.sql\")",
+      "PowerShell(cmd /c \"cd /d C:\\\\laragon\\\\www\\\\welldone && npm run build 2>&1\" | Select-String -Pattern 'built in|error during build' | Select-Object -Last 3; $php = \"C:\\\\laragon\\\\bin\\\\php\\\\php-8.3.30-Win32-vs16-x64\\\\php.exe\"; & $php C:\\\\laragon\\\\www\\\\welldone\\\\artisan optimize:clear --no-ansi | Out-Null; \"caches cleared\")"
     ]
   }
 }

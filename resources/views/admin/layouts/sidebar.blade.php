@@ -14,8 +14,8 @@
 <aside class="admin-sidebar">
     <a href="{{ route('admin.dashboard') }}" class="admin-brand">
         @if(\App\Support\Brand::hasLogo())
-            <img src="{{ brand('logo_light') }}" alt="" width="40" height="40"
-                 style="border-radius:.55rem; object-fit:contain; background:#fff; padding:2px;">
+            <img src="{{ brand('logo_light') }}" alt="" width="58" height="40"
+                 style="border-radius:.5rem; object-fit:contain; background:#fff; padding:3px;">
         @else
             <span class="brand-mark" aria-hidden="true"><strong>WD</strong></span>
         @endif

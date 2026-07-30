@@ -230,19 +230,25 @@ body {
 
   // The supplied logo is a round emblem, so it is sized to the header height
   // and kept square rather than stretched to a wordmark box.
+  // The emblem is a wide oval with a banner beneath it, so it is shown whole
+  // (`contain`) rather than cropped — a circular mask would cut off the oval's
+  // tips and the strapline.
   .brand-logo {
-    height: 58px;
-    width: 58px;
+    height: 62px;
+    width: auto;
+    max-width: 96px;
     object-fit: contain;
     flex: 0 0 auto;
   }
 
+  // On the dark footer the artwork's white field needs a plate behind it,
+  // rounded rather than circular for the same reason.
   .brand-logo--footer {
-    height: 64px;
-    width: 64px;
+    height: 66px;
+    max-width: 104px;
     background: #fff;
-    border-radius: 50%;
-    padding: 3px;
+    border-radius: 0.6rem;
+    padding: 4px;
   }
 
   @include media-breakpoint-down(sm) {
@@ -914,18 +920,22 @@ body {
     right: 3%;
     top: 50%;
     transform: translateY(-50%);
-    width: clamp(200px, 26vw, 340px);
+    width: clamp(220px, 26vw, 360px);
     height: auto;
-    opacity: 0.14;
+    object-fit: contain;
+    // `luminosity` maps the artwork's tones onto the banner's blue rather
+    // than laying its white field over the top, so the square edge of the
+    // source image never reads as a white box.
+    opacity: 0.13;
     mix-blend-mode: luminosity;
     pointer-events: none;
     user-select: none;
     z-index: 0;
 
     @include media-breakpoint-down(md) {
-      right: -12%;
-      opacity: 0.08;
-      width: 260px;
+      right: -14%;
+      opacity: 0.07;
+      width: 240px;
     }
   }
 

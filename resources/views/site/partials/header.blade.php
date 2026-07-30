@@ -25,6 +25,22 @@
                 <li><a href="{{ route('site.careers.index') }}">Careers</a></li>
                 <li><a href="{{ route('site.downloads.index') }}">Downloads</a></li>
                 <li><a href="{{ route('site.faqs') }}">FAQs</a></li>
+
+                {{-- Staff entry point. Signed-in users get a direct link to
+                     whichever dashboard their role and division imply. --}}
+                @auth
+                    <li>
+                        <a href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}" class="fw-semibold">
+                            <i class="fa-solid fa-gauge-high me-1"></i>My Dashboard
+                        </a>
+                    </li>
+                @else
+                    <li>
+                        <a href="{{ route('login') }}" class="fw-semibold">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i>Staff Login
+                        </a>
+                    </li>
+                @endauth
                 @foreach(['facebook' => 'facebook-f', 'linkedin' => 'linkedin-in', 'twitter' => 'x-twitter', 'instagram' => 'instagram', 'youtube' => 'youtube'] as $key => $icon)
                     @if($url = setting("social.$key"))
                         <li>
@@ -45,7 +61,7 @@
             <a class="navbar-brand" href="{{ route('site.home') }}">
                 @if(\App\Support\Brand::hasLogo())
                     <img src="{{ brand('logo') }}" class="brand-logo"
-                         alt="{{ setting('company.name') }}" width="62" height="62">
+                         alt="{{ setting('company.name') }}" width="96" height="62">
                     <span class="brand-text">
                         <strong>{{ setting('company.name') }}</strong>
                         <span>{{ setting('company.slogan') }}</span>
@@ -152,6 +168,31 @@
                         <a class="btn btn-primary w-100" href="{{ route('site.quote.create') }}">
                             <i class="fa-solid fa-file-invoice me-2"></i>Request a Quote
                         </a>
+                    </li>
+
+                    {{-- The top bar carries the staff link on desktop, but it
+                         is hidden below lg — so repeat it inside the collapse
+                         for mobile, and keep a compact icon on desktop. --}}
+                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                        @auth
+                            <a class="btn btn-outline-primary w-100 d-lg-none"
+                               href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}">
+                                <i class="fa-solid fa-gauge-high me-2"></i>My Dashboard
+                            </a>
+                            <a class="btn btn-outline-primary d-none d-lg-inline-flex"
+                               href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}"
+                               data-bs-toggle="tooltip" title="Go to my dashboard" aria-label="My dashboard">
+                                <i class="fa-solid fa-gauge-high"></i>
+                            </a>
+                        @else
+                            <a class="btn btn-outline-primary w-100 d-lg-none" href="{{ route('login') }}">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Staff Login
+                            </a>
+                            <a class="btn btn-outline-primary d-none d-lg-inline-flex" href="{{ route('login') }}"
+                               data-bs-toggle="tooltip" title="Staff login" aria-label="Staff login">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                            </a>
+                        @endauth
                     </li>
                 </ul>
             </div>

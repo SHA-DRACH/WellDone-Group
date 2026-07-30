@@ -20,8 +20,8 @@
                 <a href="{{ route('site.home') }}" class="d-inline-flex flex-column align-items-center text-decoration-none">
                     @if(\App\Support\Brand::hasLogo())
                         <img src="{{ brand('logo_light') }}" alt="{{ setting('company.name') }}"
-                             width="96" height="96"
-                             style="object-fit: contain; background: #fff; border-radius: 50%; padding: 4px;">
+                             width="160" height="110"
+                             style="object-fit: contain; max-width: 100%; background: #fff; border-radius: .75rem; padding: 8px;">
                     @else
                         <span class="brand-mark mb-2" style="width:64px;height:64px;font-size:1.5rem;">
                             <strong>WD</strong>
