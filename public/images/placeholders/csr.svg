@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" width="640" height="420" role="img" aria-label="CSR initiative image">
+  <defs>
+    <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8f4ee"/>
+      <stop offset="100%" stop-color="#d4e7f2"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="url(#cg)"/>
+  <path d="M320 300c-70 0-110-46-110-104 0-44 30-76 74-76 22 0 36 10 36 10s14-10 36-10c44 0 74 32 74 76 0 58-40 104-110 104z" fill="#1e8e5a" fill-opacity=".3"/>
+  <path d="M0 420l160-70 140 40 170-60 170 50v40z" fill="#0b3c91" fill-opacity=".14"/>
+</svg>

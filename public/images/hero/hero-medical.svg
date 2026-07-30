@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Medical equipment and ICT">
+  <defs>
+    <linearGradient id="mdg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06142e"/>
+      <stop offset="50%" stop-color="#0b3c91"/>
+      <stop offset="100%" stop-color="#127a9e"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#mdg)"/>
+
+  <g fill="none" stroke="#ffffff" stroke-opacity=".22" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M760 470h120l50-110 70 240 60-160 45 90h270"/>
+  </g>
+
+  <g fill="#d4af37" opacity=".9">
+    <rect x="1230" y="215" width="46" height="150" rx="10"/>
+    <rect x="1178" y="267" width="150" height="46" rx="10"/>
+  </g>
+
+  <g fill="none" stroke="#d4af37" stroke-opacity=".28" stroke-width="2">
+    <circle cx="1253" cy="290" r="130"/>
+    <circle cx="1253" cy="290" r="200"/>
+  </g>
+
+  <g fill="#ffffff" opacity=".08">
+    <circle cx="240" cy="250" r="140"/>
+    <circle cx="430" cy="420" r="80"/>
+  </g>
+
+  <g fill="#06142e" opacity=".3">
+    <path d="M0 820l340-70 300 50 320-70 300 60 340-40v150H0z"/>
+  </g>
+</svg>

@@ -1,0 +1,91 @@
+// =============================================================
+// WellDone Group Inc. — Brand tokens & Bootstrap 5 overrides
+// These must be declared before Bootstrap is imported.
+// =============================================================
+
+// Brand palette
+$wd-royal-blue: #0b3c91;
+$wd-royal-blue-dark: #082b69;
+$wd-royal-blue-light: #1a55bd;
+$wd-gold: #d4af37;
+$wd-gold-dark: #b8952c;
+$wd-gold-light: #e5c766;
+$wd-ink: #333333;
+$wd-muted: #6b7280;
+$wd-surface: #f6f8fc;
+$wd-border: #e3e8f0;
+
+// Bootstrap theme colors
+$primary: $wd-royal-blue;
+$secondary: $wd-gold;
+$success: #1e8e5a;
+$info: #1a7fa8;
+$warning: #d98324;
+$danger: #c62828;
+$light: $wd-surface;
+$dark: #10192c;
+
+$body-bg: #ffffff;
+$body-color: $wd-ink;
+
+// Typography
+$font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+$headings-font-family: 'Poppins', 'Inter', 'Segoe UI', system-ui, sans-serif;
+$font-size-base: 1rem;
+$line-height-base: 1.7;
+$headings-font-weight: 700;
+$headings-line-height: 1.25;
+$headings-color: #0f1b33;
+
+$h1-font-size: 2.75rem;
+$h2-font-size: 2.125rem;
+$h3-font-size: 1.625rem;
+$h4-font-size: 1.3rem;
+$h5-font-size: 1.1rem;
+$h6-font-size: 1rem;
+
+// Shape & depth
+$border-radius: 0.65rem;
+$border-radius-sm: 0.45rem;
+$border-radius-lg: 1rem;
+$border-radius-xl: 1.35rem;
+$border-radius-pill: 50rem;
+$border-color: $wd-border;
+
+$box-shadow-sm: 0 2px 6px rgba(15, 27, 51, 0.06);
+$box-shadow: 0 10px 30px rgba(15, 27, 51, 0.08);
+$box-shadow-lg: 0 22px 60px rgba(15, 27, 51, 0.14);
+
+// Components
+$card-border-color: $wd-border;
+$card-border-radius: 1rem;
+$card-cap-bg: rgba($wd-royal-blue, 0.03);
+
+$btn-font-weight: 600;
+$btn-padding-y: 0.7rem;
+$btn-padding-x: 1.6rem;
+$btn-border-radius: 0.55rem;
+$btn-focus-width: 0.2rem;
+
+$input-btn-focus-color: rgba($wd-royal-blue, 0.25);
+$input-border-color: #d7dee9;
+$input-focus-border-color: $wd-royal-blue-light;
+$input-padding-y: 0.65rem;
+
+$navbar-padding-y: 0.85rem;
+$dropdown-border-color: $wd-border;
+$dropdown-border-radius: 0.85rem;
+$dropdown-link-hover-bg: rgba($wd-royal-blue, 0.06);
+$dropdown-link-active-bg: $wd-royal-blue;
+
+$table-border-color: $wd-border;
+$table-hover-bg: rgba($wd-royal-blue, 0.035);
+
+$link-color: $wd-royal-blue;
+$link-hover-color: $wd-royal-blue-dark;
+$link-decoration: none;
+$link-hover-decoration: underline;
+
+// Enable Bootstrap features we rely on
+$enable-negative-margins: true;
+$enable-cssgrid: true;

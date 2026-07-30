@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Hero slide image">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06142e"/>
+      <stop offset="50%" stop-color="#0b3c91"/>
+      <stop offset="100%" stop-color="#12488f"/>
+    </linearGradient>
+    <radialGradient id="hgl" cx="75%" cy="25%" r="60%">
+      <stop offset="0%" stop-color="#d4af37" stop-opacity=".3"/>
+      <stop offset="100%" stop-color="#d4af37" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#hg)"/>
+  <rect width="1600" height="900" fill="url(#hgl)"/>
+  <path d="M0 760l260-140 220 90 300-170 260 120 300-150 260 110v280H0z" fill="#ffffff" fill-opacity=".07"/>
+</svg>
