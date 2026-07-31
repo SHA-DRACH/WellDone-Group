@@ -38,8 +38,7 @@ class ContactMessageReceived extends Notification implements ShouldQueue
             // Replying to the alert reaches the enquirer directly.
             ->replyTo($message->email, $message->name);
 
-        // The messages module is being rolled out; only link to it once the
-        // route exists, so the notification never fails on a missing route.
+        // Guarded so the notification can never fail on a missing route.
         if (Route::has('admin.messages.show')) {
             $mail->action('Open in the admin panel', route('admin.messages.show', $message));
         }

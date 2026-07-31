@@ -15,10 +15,13 @@ class StoreContactMessageRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            // Verified account required to submit — see StoreQuoteRequestRequest.
+            'email' => ['required', 'email:rfc', 'max:190'],
             'phone' => ['nullable', 'string', 'max:40'],
             'company' => ['nullable', 'string', 'max:150'],
             'department' => ['nullable', 'string', 'in:general,sales,careers,support,accounts'],
+            // Routes the enquiry to a division so its team can see and answer it.
+            'division_id' => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('divisions', 'id')->where('is_active', true)],
             'subject' => ['required', 'string', 'max:200'],
             'message' => ['required', 'string', 'min:20', 'max:5000'],
             'website_url' => ['prohibited'],
@@ -42,7 +45,7 @@ class StoreContactMessageRequest extends FormRequest
     public function messageAttributes(): array
     {
         $data = $this->safe()->only([
-            'name', 'email', 'phone', 'company', 'department', 'subject', 'message',
+            'name', 'email', 'phone', 'company', 'department', 'division_id', 'subject', 'message',
         ]);
 
         foreach (['name', 'company', 'subject', 'message'] as $field) {

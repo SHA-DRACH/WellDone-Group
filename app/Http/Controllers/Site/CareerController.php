@@ -84,6 +84,7 @@ class CareerController extends Controller
 
             return JobApplication::query()->create(array_merge($request->applicationAttributes(), [
                 'career_id' => $career->id,
+                'user_id' => $request->user()->id,
                 'resume_path' => $path,
                 'resume_original_name' => $request->file('resume')->getClientOriginalName(),
                 'ip_address' => $request->ip(),

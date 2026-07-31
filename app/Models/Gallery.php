@@ -48,10 +48,20 @@ class Gallery extends Model
         return $query->orderBy('sort_order')->orderBy('title');
     }
 
+    /**
+     * Falls back to the first photo when no cover has been set — but only if
+     * the images relation is already loaded. Reaching for it otherwise would
+     * fire a query per row on any list screen.
+     */
     public function getCoverUrlAttribute(): ?string
     {
-        return $this->mediaUrl($this->cover_image)
-            ?? $this->images->first()?->url;
+        if ($url = $this->mediaUrl($this->cover_image)) {
+            return $url;
+        }
+
+        return $this->relationLoaded('images')
+            ? $this->images->first()?->url
+            : null;
     }
 
     public function getUrlAttribute(): string

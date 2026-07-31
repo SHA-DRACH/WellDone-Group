@@ -37,6 +37,15 @@ return [
 
     'mailers' => [
 
+        /*
+         * EmailJS, sent server-side through its REST API.
+         * Credentials live in config/services.php; the transport itself is
+         * registered in App\Providers\AppServiceProvider.
+         */
+        'emailjs' => [
+            'transport' => 'emailjs',
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),

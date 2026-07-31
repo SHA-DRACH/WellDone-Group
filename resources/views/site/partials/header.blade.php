@@ -26,18 +26,33 @@
                 <li><a href="{{ route('site.downloads.index') }}">Downloads</a></li>
                 <li><a href="{{ route('site.faqs') }}">FAQs</a></li>
 
-                {{-- Staff entry point. Signed-in users get a direct link to
-                     whichever dashboard their role and division imply. --}}
+                {{-- Signed-in users are linked to whichever home their role
+                     implies: clients to their account, staff to a dashboard. --}}
                 @auth
                     <li>
                         <a href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}" class="fw-semibold">
-                            <i class="fa-solid fa-gauge-high me-1"></i>My Dashboard
+                            <i class="fa-solid fa-{{ auth()->user()->isClient() ? 'circle-user' : 'gauge-high' }} me-1"></i>
+                            {{ auth()->user()->isClient() ? 'My Account' : 'My Dashboard' }}
                         </a>
+                    </li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-link p-0 align-baseline text-decoration-none"
+                                    style="color: rgba(255,255,255,.82); font-size: inherit;">
+                                Sign out
+                            </button>
+                        </form>
                     </li>
                 @else
                     <li>
                         <a href="{{ route('login') }}" class="fw-semibold">
-                            <i class="fa-solid fa-right-to-bracket me-1"></i>Staff Login
+                            <i class="fa-solid fa-right-to-bracket me-1"></i>Sign In
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('register') }}" class="fw-semibold">
+                            <i class="fa-solid fa-user-plus me-1"></i>Register
                         </a>
                     </li>
                 @endauth
@@ -175,21 +190,26 @@
                          for mobile, and keep a compact icon on desktop. --}}
                     <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                         @auth
-                            <a class="btn btn-outline-primary w-100 d-lg-none"
-                               href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}">
-                                <i class="fa-solid fa-gauge-high me-2"></i>My Dashboard
+                            @php($home = \App\Support\Navigation::homeRouteFor(auth()->user()))
+                            @php($icon = auth()->user()->isClient() ? 'circle-user' : 'gauge-high')
+                            @php($label = auth()->user()->isClient() ? 'My Account' : 'My Dashboard')
+
+                            <a class="btn btn-outline-primary w-100 d-lg-none" href="{{ $home }}">
+                                <i class="fa-solid fa-{{ $icon }} me-2"></i>{{ $label }}
                             </a>
-                            <a class="btn btn-outline-primary d-none d-lg-inline-flex"
-                               href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}"
-                               data-bs-toggle="tooltip" title="Go to my dashboard" aria-label="My dashboard">
-                                <i class="fa-solid fa-gauge-high"></i>
+                            <a class="btn btn-outline-primary d-none d-lg-inline-flex" href="{{ $home }}"
+                               data-bs-toggle="tooltip" title="{{ $label }}" aria-label="{{ $label }}">
+                                <i class="fa-solid fa-{{ $icon }}"></i>
                             </a>
                         @else
-                            <a class="btn btn-outline-primary w-100 d-lg-none" href="{{ route('login') }}">
-                                <i class="fa-solid fa-right-to-bracket me-2"></i>Staff Login
+                            <a class="btn btn-outline-primary w-100 d-lg-none mb-2" href="{{ route('login') }}">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
+                            </a>
+                            <a class="btn btn-primary w-100 d-lg-none" href="{{ route('register') }}">
+                                <i class="fa-solid fa-user-plus me-2"></i>Create an account
                             </a>
                             <a class="btn btn-outline-primary d-none d-lg-inline-flex" href="{{ route('login') }}"
-                               data-bs-toggle="tooltip" title="Staff login" aria-label="Staff login">
+                               data-bs-toggle="tooltip" title="Sign in or create an account" aria-label="Sign in">
                                 <i class="fa-solid fa-right-to-bracket"></i>
                             </a>
                         @endauth

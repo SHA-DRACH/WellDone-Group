@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CareerController;
 use App\Http\Controllers\Site\ContactController;
@@ -57,26 +58,36 @@ Route::name('site.')->group(function () {
         ->middleware('throttle:comment')
         ->name('blog.comments.store');
 
-    // --------------------------------------------------- Careers
+    /*
+     * Browsing is open to everyone; submitting is not.
+     *
+     * Quotation requests, job applications and contact enquiries all require
+     * a verified account, so every lead is traceable to a real, confirmed
+     * email address and the sender can follow it in their account area.
+     */
     Route::get('/careers', [CareerController::class, 'index'])->name('careers.index');
     Route::get('/careers/{career:slug}', [CareerController::class, 'show'])->name('careers.show');
-    Route::post('/careers/{career:slug}/apply', [CareerController::class, 'apply'])
-        ->middleware('throttle:job-application')
-        ->name('careers.apply');
 
-    // --------------------------------------------------- Quotations
     Route::get('/request-a-quote', [QuoteRequestController::class, 'create'])->name('quote.create');
-    Route::post('/request-a-quote', [QuoteRequestController::class, 'store'])
-        ->middleware('throttle:quote-request')
-        ->name('quote.store');
     Route::get('/request-a-quote/received/{reference}', [QuoteRequestController::class, 'thankYou'])
+        ->middleware('auth')
         ->name('quote.thanks');
 
-    // --------------------------------------------------- Contact
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-    Route::post('/contact', [ContactController::class, 'store'])
-        ->middleware('throttle:contact-form')
-        ->name('contact.store');
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::post('/careers/{career:slug}/apply', [CareerController::class, 'apply'])
+            ->middleware('throttle:job-application')
+            ->name('careers.apply');
+
+        Route::post('/request-a-quote', [QuoteRequestController::class, 'store'])
+            ->middleware('throttle:quote-request')
+            ->name('quote.store');
+
+        Route::post('/contact', [ContactController::class, 'store'])
+            ->middleware('throttle:contact-form')
+            ->name('contact.store');
+    });
 
     // --------------------------------------------------- Downloads
     Route::get('/downloads', [DownloadController::class, 'index'])->name('downloads.index');
@@ -102,7 +113,30 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 |--------------------------------------------------------------------------
 */
 
-Auth::routes(['verify' => true, 'register' => false]);
+// Public self-registration is open: RegisterController assigns the Client
+// role, which carries no admin permissions.
+Auth::routes(['verify' => true, 'register' => true]);
+
+/*
+|--------------------------------------------------------------------------
+| Client account portal
+|--------------------------------------------------------------------------
+|
+| Where registered visitors track their own quotation requests, job
+| applications and enquiries. Every query is scoped to the signed-in user.
+|
+*/
+
+Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
+    Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');
+    Route::get('/requests', [AccountController::class, 'quotes'])->name('quotes');
+    Route::get('/requests/{quote}', [AccountController::class, 'quote'])->name('quotes.show');
+    Route::get('/applications', [AccountController::class, 'applications'])->name('applications');
+    Route::get('/messages', [AccountController::class, 'messages'])->name('messages');
+    Route::get('/profile', [AccountController::class, 'profile'])->name('profile');
+    Route::put('/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [AccountController::class, 'updatePassword'])->name('profile.password');
+});
 
 // laravel/ui points a few flows at /home. Send everyone to the destination
 // their role and division imply — the same rule the login controller uses.

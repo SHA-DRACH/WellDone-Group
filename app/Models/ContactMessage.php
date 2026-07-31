@@ -14,7 +14,7 @@ class ContactMessage extends Model
     public const STATUSES = ['new', 'read', 'replied', 'archived', 'spam'];
 
     protected $fillable = [
-        'name', 'email', 'phone', 'company', 'department', 'subject', 'message',
+        'user_id', 'division_id', 'name', 'email', 'phone', 'company', 'department', 'subject', 'message',
         'status', 'reply_body', 'replied_by', 'replied_at', 'read_at',
         'ip_address', 'user_agent',
     ];
@@ -30,6 +30,18 @@ class ContactMessage extends Model
     public function repliedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'replied_by');
+    }
+
+    /** The registered account that sent this enquiry, if any. */
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** The division this enquiry was routed to, if the sender chose one. */
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class);
     }
 
     public function scopeUnread(Builder $query): Builder

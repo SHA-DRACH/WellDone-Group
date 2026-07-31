@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Mail\Transport\EmailJsTransport;
 use App\Services\SeoManager;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Factory as HttpClient;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
@@ -26,6 +29,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // Bootstrap 5 markup for all paginators.
         Paginator::useBootstrapFive();
+
+        $this->registerEmailJsTransport();
 
         // Catch N+1 queries and mass-assignment mistakes during development.
         Model::preventLazyLoading(! $this->app->isProduction());
@@ -71,6 +76,37 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->isProduction()) {
             URL::forceScheme('https');
         }
+    }
+
+    /**
+     * Makes `MAIL_MAILER=emailjs` available.
+     *
+     * Registered as a Symfony transport so every existing Mailable and
+     * Notification works unchanged — swapping between EmailJS, SMTP and
+     * Mailpit is a one-line change in .env.
+     */
+    protected function registerEmailJsTransport(): void
+    {
+        Mail::extend('emailjs', function (array $config) {
+            $config = array_merge(config('services.emailjs', []), $config);
+
+            foreach (['service_id', 'template_id', 'public_key', 'private_key'] as $key) {
+                if (blank($config[$key] ?? null)) {
+                    throw new \RuntimeException(
+                        "EmailJS is missing its {$key}. Set EMAILJS_".strtoupper($key)." in .env."
+                    );
+                }
+            }
+
+            return new EmailJsTransport(
+                app(HttpClient::class),
+                $config['service_id'],
+                $config['template_id'],
+                $config['public_key'],
+                $config['private_key'],
+                (int) ($config['timeout'] ?? 30),
+            );
+        });
     }
 
     /**

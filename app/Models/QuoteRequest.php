@@ -22,7 +22,7 @@ class QuoteRequest extends Model
     public const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 
     protected $fillable = [
-        'reference', 'division_id', 'contact_name', 'company_name', 'email', 'phone',
+        'reference', 'user_id', 'division_id', 'contact_name', 'company_name', 'email', 'phone',
         'country', 'city', 'project_title', 'description', 'budget_range', 'currency',
         'timeline', 'preferred_start_date', 'delivery_location', 'status', 'priority',
         'assigned_to', 'internal_notes', 'quoted_amount', 'quoted_at', 'responded_at',
@@ -71,6 +71,12 @@ class QuoteRequest extends Model
     public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /** The registered account that submitted this request, if any. */
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // -------------------------------------------------- Scopes

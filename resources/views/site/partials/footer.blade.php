@@ -99,11 +99,16 @@
                     <li><a href="{{ route('site.downloads.index') }}">Downloads</a></li>
                     <li>
                         @auth
-                            <a href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}">My Dashboard</a>
+                            <a href="{{ \App\Support\Navigation::homeRouteFor(auth()->user()) }}">
+                                {{ auth()->user()->isClient() ? 'My Account' : 'My Dashboard' }}
+                            </a>
                         @else
-                            <a href="{{ route('login') }}">Staff Login</a>
+                            <a href="{{ route('login') }}">Sign In</a>
                         @endauth
                     </li>
+                    @guest
+                        <li><a href="{{ route('register') }}">Create an Account</a></li>
+                    @endguest
                 </ul>
             </div>
 

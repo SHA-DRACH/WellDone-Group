@@ -15,7 +15,8 @@ class StoreJobApplicationRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:150'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            // Verified account required to apply — see StoreQuoteRequestRequest.
+            'email' => ['required', 'email:rfc', 'max:190'],
             'phone' => ['required', 'string', 'max:40'],
             'country' => ['nullable', 'string', 'max:80'],
             'city' => ['nullable', 'string', 'max:80'],

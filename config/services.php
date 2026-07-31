@@ -14,6 +14,22 @@ return [
     |
     */
 
+    /*
+     * EmailJS — used by the `emailjs` mailer (App\Mail\Transport\EmailJsTransport).
+     *
+     * The private key must never be exposed to the browser; it is only ever
+     * read here, server-side. In the EmailJS dashboard, enable
+     * Account → Security → "Allow EmailJS API for non-browser applications",
+     * otherwise the REST endpoint rejects server-side calls.
+     */
+    'emailjs' => [
+        'service_id' => env('EMAILJS_SERVICE_ID'),
+        'template_id' => env('EMAILJS_TEMPLATE_ID'),
+        'public_key' => env('EMAILJS_PUBLIC_KEY'),
+        'private_key' => env('EMAILJS_PRIVATE_KEY'),
+        'timeout' => env('EMAILJS_TIMEOUT', 30),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

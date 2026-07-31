@@ -22,7 +22,7 @@ class JobApplication extends Model
     public const STATUSES = ['new', 'reviewing', 'shortlisted', 'interview', 'offered', 'hired', 'rejected'];
 
     protected $fillable = [
-        'career_id', 'reference', 'full_name', 'email', 'phone', 'country', 'city',
+        'career_id', 'reference', 'user_id', 'full_name', 'email', 'phone', 'country', 'city',
         'cover_letter', 'resume_path', 'resume_original_name', 'portfolio_url',
         'linkedin_url', 'years_experience', 'highest_qualification', 'expected_salary',
         'available_from', 'status', 'internal_notes', 'reviewed_by', 'reviewed_at',
@@ -64,6 +64,12 @@ class JobApplication extends Model
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /** The registered account that submitted this application, if any. */
+    public function submitter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function scopeStatus(Builder $query, ?string $status): Builder

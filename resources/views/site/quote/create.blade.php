@@ -12,6 +12,8 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-9">
+                    @include('site.partials.auth-required', ['what' => 'send a quotation request'])
+
                     <div class="form-panel">
                         <form method="POST" action="{{ route('site.quote.store') }}"
                               enctype="multipart/form-data" data-quote-wizard novalidate>
@@ -167,10 +169,12 @@
                                 <p class="text-muted small mb-4">We will send your reference number to this address immediately.</p>
 
                                 <div class="row g-3">
+                                    {{-- Pre-filled from the signed-in account; still editable. --}}
                                     <div class="col-md-6">
                                         <label class="form-label" for="contact_name">Your name <span class="required-mark">*</span></label>
                                         <input type="text" class="form-control @error('contact_name') is-invalid @enderror"
-                                               id="contact_name" name="contact_name" value="{{ old('contact_name') }}"
+                                               id="contact_name" name="contact_name"
+                                               value="{{ old('contact_name', auth()->user()?->name) }}"
                                                required maxlength="150">
                                         @error('contact_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
@@ -178,20 +182,22 @@
                                     <div class="col-md-6">
                                         <label class="form-label" for="company_name">Organisation</label>
                                         <input type="text" class="form-control" id="company_name" name="company_name"
-                                               value="{{ old('company_name') }}" maxlength="150">
+                                               value="{{ old('company_name', auth()->user()?->position) }}" maxlength="150">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label" for="quote-email">Email <span class="required-mark">*</span></label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                               id="quote-email" name="email" value="{{ old('email') }}" required maxlength="190">
+                                               id="quote-email" name="email"
+                                               value="{{ old('email', auth()->user()?->email) }}" required maxlength="190">
                                         @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label" for="quote-phone">Phone <span class="required-mark">*</span></label>
                                         <input type="tel" class="form-control @error('phone') is-invalid @enderror"
-                                               id="quote-phone" name="phone" value="{{ old('phone') }}" required maxlength="40">
+                                               id="quote-phone" name="phone"
+                                               value="{{ old('phone', auth()->user()?->phone) }}" required maxlength="40">
                                         @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
 

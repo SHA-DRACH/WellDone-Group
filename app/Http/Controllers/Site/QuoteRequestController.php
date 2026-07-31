@@ -48,6 +48,9 @@ class QuoteRequestController extends Controller
     {
         $quote = DB::transaction(function () use ($request) {
             $quote = QuoteRequest::query()->create(array_merge($request->quoteAttributes(), [
+                // Submissions require a verified account, so the lead is
+                // always attributable and the requester can track it.
+                'user_id' => $request->user()->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => substr((string) $request->userAgent(), 0, 250),
             ]));

@@ -37,6 +37,8 @@ class QuoteRequestSubmitted extends Notification implements ShouldQueue
 
         return $mail
             ->line('A member of our team will review the scope and respond with a written quotation. Please quote your reference number in any correspondence.')
+            // Sent from the no-reply address, so point replies at a monitored inbox.
+            ->replyTo(setting('contact.email_sales', setting('contact.email_general')), setting('company.name'))
             ->salutation('Kind regards,'."\n".setting('company.name'));
     }
 }

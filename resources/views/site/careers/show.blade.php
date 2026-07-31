@@ -52,6 +52,8 @@
                             Your résumé must be a PDF or Word document, no larger than 5&nbsp;MB.
                         </p>
 
+                        @include('site.partials.auth-required', ['what' => 'apply for this role'])
+
                         @if(! $career->is_open)
                             <div class="alert alert-warning mb-0">
                                 <i class="fa-solid fa-circle-info me-2"></i>
@@ -65,24 +67,28 @@
                                     <label>Website<input type="text" name="website_url" tabindex="-1" autocomplete="off"></label>
                                 </div>
 
+                                {{-- Pre-filled from the signed-in account; still editable. --}}
                                 <div class="col-md-6">
                                     <label class="form-label" for="full_name">Full name <span class="required-mark">*</span></label>
                                     <input type="text" class="form-control @error('full_name') is-invalid @enderror"
-                                           id="full_name" name="full_name" value="{{ old('full_name') }}" required maxlength="150">
+                                           id="full_name" name="full_name"
+                                           value="{{ old('full_name', auth()->user()?->name) }}" required maxlength="150">
                                     @error('full_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="email">Email <span class="required-mark">*</span></label>
                                     <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                           id="email" name="email" value="{{ old('email') }}" required maxlength="190">
+                                           id="email" name="email"
+                                           value="{{ old('email', auth()->user()?->email) }}" required maxlength="190">
                                     @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="phone">Phone <span class="required-mark">*</span></label>
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror"
-                                           id="phone" name="phone" value="{{ old('phone') }}" required maxlength="40">
+                                           id="phone" name="phone"
+                                           value="{{ old('phone', auth()->user()?->phone) }}" required maxlength="40">
                                     @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
 

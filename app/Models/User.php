@@ -87,6 +87,32 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(JobApplication::class, 'reviewed_by');
     }
 
+    // -------------------------------------------------- Client portal
+
+    /** Quotation requests this account has submitted. */
+    public function quoteRequests(): HasMany
+    {
+        return $this->hasMany(QuoteRequest::class, 'user_id');
+    }
+
+    /** Job applications this account has submitted. */
+    public function jobApplications(): HasMany
+    {
+        return $this->hasMany(JobApplication::class, 'user_id');
+    }
+
+    /** Contact enquiries this account has sent. */
+    public function contactMessages(): HasMany
+    {
+        return $this->hasMany(ContactMessage::class, 'user_id');
+    }
+
+    /** True for a self-registered public account rather than staff. */
+    public function isClient(): bool
+    {
+        return $this->hasRole(\App\Support\Roles::CLIENT);
+    }
+
     // -------------------------------------------------- Scopes
 
     public function scopeActive(Builder $query): Builder

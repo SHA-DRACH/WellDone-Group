@@ -32,7 +32,13 @@ class StoreQuoteRequestRequest extends FormRequest
             // Step 3 — who is asking
             'contact_name' => ['required', 'string', 'max:150'],
             'company_name' => ['nullable', 'string', 'max:150'],
-            'email' => ['required', 'email:rfc,dns', 'max:190'],
+            /*
+             * `rfc` only, not `rfc,dns`. Submitting requires a verified
+             * account, so deliverability has already been proven by the
+             * confirmation link — a second DNS lookup adds latency and would
+             * reject addresses that registration accepted, stranding the user.
+             */
+            'email' => ['required', 'email:rfc', 'max:190'],
             'phone' => ['required', 'string', 'max:40'],
             'country' => ['nullable', 'string', 'max:80'],
             'city' => ['nullable', 'string', 'max:80'],

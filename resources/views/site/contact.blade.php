@@ -60,6 +60,8 @@
 
             <div class="row g-5">
                 <div class="col-lg-7" id="contact-form">
+                    @include('site.partials.auth-required', ['what' => 'send an enquiry'])
+
                     <div class="form-panel">
                         <h2 class="h4 mb-1">Send us a message</h2>
                         <p class="text-muted small mb-4">
@@ -74,33 +76,36 @@
                                 <label>Website<input type="text" name="website_url" tabindex="-1" autocomplete="off"></label>
                             </div>
 
+                            {{-- Pre-filled from the signed-in account; still editable. --}}
                             <div class="col-md-6">
                                 <label class="form-label" for="name">Name <span class="required-mark">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                       id="name" name="name" value="{{ old('name') }}" required maxlength="150">
+                                       id="name" name="name" value="{{ old('name', auth()->user()?->name) }}"
+                                       required maxlength="150">
                                 @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label" for="contact-email">Email <span class="required-mark">*</span></label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                       id="contact-email" name="email" value="{{ old('email') }}" required maxlength="190">
+                                       id="contact-email" name="email"
+                                       value="{{ old('email', auth()->user()?->email) }}" required maxlength="190">
                                 @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label" for="contact-phone">Phone</label>
                                 <input type="tel" class="form-control" id="contact-phone" name="phone"
-                                       value="{{ old('phone') }}" maxlength="40">
+                                       value="{{ old('phone', auth()->user()?->phone) }}" maxlength="40">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label" for="company">Organisation</label>
                                 <input type="text" class="form-control" id="company" name="company"
-                                       value="{{ old('company') }}" maxlength="150">
+                                       value="{{ old('company', auth()->user()?->position) }}" maxlength="150">
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <label class="form-label" for="department">Which team should see this?</label>
                                 <select class="form-select" id="department" name="department">
                                     <option value="general" @selected(old('department') === 'general')>General enquiry</option>
@@ -108,6 +113,20 @@
                                     <option value="careers" @selected(old('department') === 'careers')>Careers &amp; recruitment</option>
                                     <option value="support" @selected(old('department') === 'support')>Technical support</option>
                                     <option value="accounts" @selected(old('department') === 'accounts')>Accounts &amp; billing</option>
+                                </select>
+                            </div>
+
+                            {{-- Routing the enquiry to a division means that
+                                 division's own team can see and answer it. --}}
+                            <div class="col-md-6">
+                                <label class="form-label" for="division_id">Which division is this about?</label>
+                                <select class="form-select" id="division_id" name="division_id">
+                                    <option value="">Not sure / general</option>
+                                    @foreach(\App\Models\Division::query()->active()->ordered()->get() as $division)
+                                        <option value="{{ $division->id }}" @selected(old('division_id') == $division->id)>
+                                            {{ $division->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 

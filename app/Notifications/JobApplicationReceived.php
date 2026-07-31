@@ -41,8 +41,7 @@ class JobApplicationReceived extends Notification implements ShouldQueue
             ->line('**Available from:** '.($application->available_from?->format('j M Y') ?: 'Not stated'))
             ->line('The résumé is available from the application record in the admin panel.');
 
-        // The applications module is being rolled out; only link to it once
-        // the route exists, so the notification never fails on a missing route.
+        // Guarded so the notification can never fail on a missing route.
         if (Route::has('admin.applications.show')) {
             $mail->action('Review the application', route('admin.applications.show', $application));
         }

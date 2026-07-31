@@ -90,16 +90,143 @@ Where a user goes next is decided by `App\Support\Navigation`:
 
 A division dashboard shows that division's requests and orders, pipeline
 breakdown, most-requested services, active projects, recruitment activity and
-team size. Division staff can only open their own division — enforced on the
-query, not just hidden in the navigation. Group staff get a division switcher.
+team size. Group staff get a division switcher.
+
+### What a division head can and cannot see
+
+Division staff are confined to their own division across **every** module.
+The restriction is applied to the database query, not just hidden in the
+navigation, so it holds even against a guessed or hand-typed URL:
+
+| Module | Scoped by |
+|---|---|
+| Division dashboard | their own division only |
+| Quote requests | `division_id` on the request |
+| Contact enquiries | `division_id` chosen by the sender on the contact form |
+| Job applications | the division of the vacancy applied for |
+
+Anything belonging to another division — or a general enquiry with no
+division set — returns **403**. Group-level roles see everything.
+
+Division heads can reply to their own division's enquiries from inside the
+panel; the reply is emailed to the sender and kept on the record.
+
+### Registered visitors
+
+Members of the public register at `/register`, which creates a **Client**
+account. Client accounts carry no admin permissions whatsoever, so they can
+never reach the control panel.
+
+Submitting a quotation request, a job application or a contact enquiry
+requires a **verified** account. Visitors can browse everything freely; only
+the act of submitting is gated. This means every lead is traceable to a
+confirmed email address, and the sender can follow it at `/account`.
+
+The account area shows their quotation requests (with status and any quoted
+amount), their job applications and status, their enquiries with our replies,
+and their own details — which pre-fill the forms.
 
 ## Email
 
-Mail is sent server-side through Laravel's mailer, not a browser service like
-EmailJS — a client-side sender cannot be trusted with internal recipients and
-would expose credentials in the page. Locally it goes to Laragon's **Mailpit**
-(`127.0.0.1:1025`, inbox at <http://localhost:8025>); point `MAIL_*` in `.env`
-at your real SMTP host for production.
+Three mailers are available. Switch with `MAIL_MAILER` in `.env` — nothing
+else changes, because they all plug in behind Laravel's mailer:
+
+| `MAIL_MAILER` | Behaviour |
+|---|---|
+| `emailjs` | Sends through EmailJS (see below) |
+| `smtp` | Mailpit locally, or any real SMTP host |
+| `log` | Writes messages to `storage/logs` instead of sending |
+
+Out of the box this is set to `smtp` → Laragon's **Mailpit** on
+`127.0.0.1:1025`, which captures everything so you can read it at
+<http://localhost:8025> without emailing real people.
+
+### EmailJS
+
+Set `MAIL_MAILER=emailjs` and fill in the four values in `.env`:
+
+```
+MAIL_MAILER=emailjs
+
+EMAILJS_SERVICE_ID=service_xxxxxxx
+EMAILJS_TEMPLATE_ID=template_xxxxxxx
+EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxxx
+EMAILJS_PRIVATE_KEY=xxxxxxxxxxxxxxxx
+```
+
+Then check it works:
+
+```bash
+php artisan mail:test you@example.com --mailer=emailjs
+```
+
+#### Required setup in the EmailJS dashboard
+
+1. **Email Services** → connect the sending account → copy the **Service ID**.
+2. **Account → API Keys** → copy the **Public Key** and the **Private Key**.
+3. **Account → Security** → enable
+   **"Allow EmailJS API for non-browser applications"**. Without this the REST
+   endpoint refuses server-side calls and every message fails.
+4. **Email Templates** → create a template → copy the **Template ID**.
+
+The template must be built around the variables this application sends.
+The critical one is `message_html`, which must use **triple** braces so the
+HTML renders instead of being escaped:
+
+| Variable | Contains |
+|---|---|
+| `{{to_email}}` | Recipient address — put this in the template's **To** field |
+| `{{to_name}}` | Recipient name |
+| `{{from_name}}` | Sender name |
+| `{{reply_to}}` | Monitored inbox — put this in the template's **Reply To** field |
+| `{{subject}}` | Subject line — put this in the template's **Subject** field |
+| `{{{message_html}}}` | The full rendered email body |
+| `{{message}}` | Plain-text fallback |
+
+A minimal template body is just:
+
+```
+{{{message_html}}}
+```
+
+One template serves every message the site sends, because the whole body is
+rendered by Laravel and passed through.
+
+#### Worth knowing before you rely on it
+
+- EmailJS's free tier allows **200 emails a month**. A busy careers or
+  quotation period will exceed that; check your plan against expected volume.
+- It sends **one recipient per API call**, so a message addressed to several
+  people costs several sends against your quota.
+- It is built for contact forms rather than bulk transactional mail. If you
+  later outgrow it, switching to SMTP or a transactional provider is a
+  one-line change to `MAIL_MAILER` — no application code is affected.
+- The **private key is server-side only**. It lives in `.env`, is read in
+  `config/services.php`, and never reaches the browser. Do not put it in any
+  Blade template or JavaScript file.
+
+### Using SMTP instead
+
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.yourprovider.com
+MAIL_PORT=587
+MAIL_USERNAME=no-reply@welldonegroup.com
+MAIL_PASSWORD=your-smtp-password
+MAIL_SCHEME=tls
+MAIL_FROM_ADDRESS="no-reply@welldonegroup.com"
+MAIL_FROM_NAME="WellDone Group Inc."
+```
+
+Most providers require `MAIL_FROM_ADDRESS` to match an address you own and
+have verified, or mail will be rejected or land in spam. Set SPF and DKIM
+records for the domain at the same time.
+
+Outbound mail is sent from the no-reply address, but every client-facing
+message carries a **Reply-To** pointing at a monitored inbox — sales for
+quotations, HR for applications, and the department that answered for enquiry
+replies. Those addresses are configured in
+**Admin → Website Settings → Contact**, so replies always reach a real person.
 
 Notifications are queued (`QUEUE_CONNECTION=database`), so run a worker:
 
@@ -120,6 +247,7 @@ Mail sent automatically:
 | Job application submitted | Candidate | `JobApplicationSubmitted` with reference |
 | Job application submitted | HR inbox | `JobApplicationReceived` |
 | Newsletter signup | Subscriber | `NewsletterConfirmation` (double opt-in) |
+| Staff replies to an enquiry | Enquirer | `ContactMessageReply` |
 
 Internal recipients are configured in **Admin → Website Settings → System**.
 
@@ -139,33 +267,39 @@ multi-step Request a Quote, Downloads, `sitemap.xml`, `robots.txt`.
 All 30 public routes return 200, and the contact and quote forms were verified
 end to end.
 
-### Admin panel — foundation plus core modules
+### Admin panel — complete
 
-Built and verified: group dashboard (traffic sparkline, lead tiles, recent
-activity), per-division dashboards, Divisions, Services, Users (with the
-account-creation email flow), Quote Requests (queue, detail, assignment,
-attachment download), Website Settings, My Profile.
+165 routes across 26 modules, all verified.
 
-### Still to build
+**Dashboards** — group dashboard (traffic sparkline, lead tiles, recent
+activity) and a per-division dashboard for each business division.
 
-Their tables, models, policies, permissions and the shared `BaseCrudController`
-are all in place — each remaining module is a thin controller subclass, and
-most need no bespoke views because `admin/generic/{index,form}.blade.php`
-render from a column/field definition. `Admin\DivisionController` is the
-worked example.
+**Leads & enquiries** — Quote Requests (queue, detail, assignment, status
+pipeline, attachment download), Contact Messages (with in-panel reply that
+emails the enquirer), Job Applications (review workflow, résumé download),
+Newsletter Subscribers (with CSV export of confirmed addresses only).
 
-```
-projects (+ images)   blogs (+ categories, comments)   galleries (+ images)
-testimonials          partners                         sliders
-downloads             clients                          careers
-applications          messages                         newsletters
-team-members          certificates                     milestones
-csr-initiatives       faqs                             roles
-media library         seo                              activity log
-```
+**Corporate structure** — Divisions, Services, Clients.
 
-The routes for these are deliberately absent from `routes/admin.php` rather
-than pointing at classes that do not exist.
+**Website content** — Hero Slides, Projects (with gallery management),
+Galleries, News & Blog (rich text, tags, scheduling), Blog Categories,
+Comment moderation, Testimonials, Partners, Downloads.
+
+**Company profile** — Leadership & Team, Milestones, Certificates, CSR
+Initiatives, FAQs.
+
+**Recruitment** — Vacancies.
+
+**Administration** — Users, Roles & Permissions (grouped matrix), Media
+Library, SEO Metadata, Website Settings, Activity Log, My Profile.
+
+Around twenty of these are thin subclasses of `Admin\BaseCrudController`,
+which handles listing, search, filters, uploads, rich-text sanitising and
+authorisation. They declare a column set and a field set, and
+`admin/generic/{index,form}.blade.php` render both — so a new module is
+roughly eighty lines and no markup. `Admin\DivisionController` is the worked
+example; `Admin\ProjectController` shows how to extend the generic form with
+bespoke sections.
 
 ---
 

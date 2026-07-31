@@ -47,7 +47,9 @@ class MediaUploader
                 basename($path)
             );
         } else {
-            $image = Image::read($file->getRealPath());
+            // Intervention Image 4.2 renamed read() to decodePath() and
+            // encodeByExtension() to encodeUsingFileExtension().
+            $image = Image::decodePath($file->getRealPath());
 
             if ($maxWidth && $image->width() > $maxWidth) {
                 $image->scaleDown(width: $maxWidth);
@@ -55,7 +57,7 @@ class MediaUploader
 
             Storage::disk('public')->put(
                 $path,
-                (string) $image->encodeByExtension($extension, quality: 82)
+                (string) $image->encodeUsingFileExtension($extension, quality: 82)
             );
         }
 

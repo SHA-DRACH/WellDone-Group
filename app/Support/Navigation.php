@@ -29,9 +29,9 @@ final class Navigation
             return route('login');
         }
 
-        // Clients never see the back office.
+        // Registered visitors go to their own account area, never the back office.
         if ($user->hasRole(Roles::CLIENT)) {
-            return route('site.home');
+            return route('account.dashboard');
         }
 
         // Group-level staff see everything.

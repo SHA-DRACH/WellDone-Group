@@ -4,7 +4,10 @@
 
 @section('content')
     <h1 class="h4 mb-1">Sign in</h1>
-    <p class="text-muted small mb-4">Access the WellDone Group control panel.</p>
+    <p class="text-muted small mb-4">
+        Clients, applicants and staff all sign in here — you are taken to the
+        right place automatically.
+    </p>
 
     <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
@@ -44,7 +47,22 @@
         </button>
     </form>
 
-    <p class="text-muted small text-center mt-4 mb-0">
-        Accounts are created by an administrator. If you need access, contact your ICT manager.
+    @if(Route::has('register'))
+        <div class="text-center mt-4">
+            <p class="text-muted small mb-2">
+                New here? Create a free account to request a quotation, apply for
+                vacancies and track everything you send us.
+            </p>
+            <a href="{{ route('register') }}" class="btn btn-outline-primary w-100">
+                <i class="fa-solid fa-user-plus me-2"></i>Create an account
+            </a>
+        </div>
+    @endif
+
+    <hr class="my-4">
+
+    <p class="text-muted text-center mb-0" style="font-size:.78rem;">
+        Staff accounts are created by an administrator — contact your ICT manager
+        if you need access to the control panel.
     </p>
 @endsection

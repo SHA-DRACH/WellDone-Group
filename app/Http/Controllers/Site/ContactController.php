@@ -28,6 +28,7 @@ class ContactController extends Controller
     public function store(StoreContactMessageRequest $request): RedirectResponse
     {
         $message = ContactMessage::query()->create(array_merge($request->messageAttributes(), [
+            'user_id' => $request->user()->id,
             'ip_address' => $request->ip(),
             'user_agent' => substr((string) $request->userAgent(), 0, 250),
         ]));
