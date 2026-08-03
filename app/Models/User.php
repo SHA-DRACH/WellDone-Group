@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -43,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
         'two_factor_secret',
         'two_factor_recovery_codes',
+        'provider_id',
     ];
 
     protected function casts(): array
@@ -113,6 +115,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasRole(\App\Support\Roles::CLIENT);
     }
 
+    // -------------------------------------------------- HR
+
+    /** The employee record this login belongs to, if any. */
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
+    }
+
+    /** True when this account is attached to an employee record. */
+    public function isEmployee(): bool
+    {
+        return $this->employee()->exists();
+    }
+
     // -------------------------------------------------- Scopes
 
     public function scopeActive(Builder $query): Builder
@@ -139,9 +155,22 @@ class User extends Authenticatable implements MustVerifyEmail
 
     // -------------------------------------------------- Accessors & helpers
 
+    /**
+     * An uploaded avatar wins; otherwise fall back to the picture from the
+     * identity provider, so accounts created with Google already have one.
+     */
     public function getAvatarUrlAttribute(): ?string
     {
-        return $this->mediaUrl($this->avatar, asset('images/placeholders/avatar.svg'));
+        return $this->mediaUrl(
+            $this->avatar,
+            $this->provider_avatar ?: asset('images/placeholders/avatar.svg')
+        );
+    }
+
+    /** True when this account signs in through an identity provider. */
+    public function usesSocialLogin(): bool
+    {
+        return filled($this->provider);
     }
 
     public function getInitialsAttribute(): string
@@ -154,10 +183,25 @@ class User extends Authenticatable implements MustVerifyEmail
             ->implode('');
     }
 
-    /** Anyone who should be able to reach the admin panel at all. */
+    /**
+     * Anyone who should be able to reach the admin panel at all.
+     *
+     * Clients and plain Employees are excluded — an employee with no
+     * administrative role belongs in the self-service portal. Holding the
+     * Employee role alongside an administrative one is fine.
+     */
     public function canAccessAdmin(): bool
     {
-        return $this->is_active && ! $this->hasRole(\App\Support\Roles::CLIENT);
+        if (! $this->is_active || $this->hasRole(\App\Support\Roles::CLIENT)) {
+            return false;
+        }
+
+        $administrative = array_diff(
+            \App\Support\Roles::all(),
+            [\App\Support\Roles::CLIENT, \App\Support\Roles::EMPLOYEE]
+        );
+
+        return $this->hasAnyRole($administrative);
     }
 
     public function isSuperAdmin(): bool

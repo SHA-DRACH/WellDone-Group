@@ -78,6 +78,8 @@
         </button>
     </form>
 
+    @include('auth.partials.google-button', ['label' => 'Sign up with Google'])
+
     <p class="text-center small mt-4 mb-0">
         Already registered? <a href="{{ route('login') }}">Sign in</a>
     </p>

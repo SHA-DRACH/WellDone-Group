@@ -41,7 +41,14 @@ class AppServiceProvider extends ServiceProvider
         // without a data migration. The map is enforced, so every model that
         // can appear on either side of a morph must be listed here.
         Relation::enforceMorphMap([
+            'announcement' => \App\Models\Announcement::class,
             'blog' => \App\Models\Blog::class,
+            'department' => \App\Models\Department::class,
+            'employee' => \App\Models\Employee::class,
+            'employee-bank-detail' => \App\Models\EmployeeBankDetail::class,
+            'employment-type' => \App\Models\EmploymentType::class,
+            'job-application-document' => \App\Models\JobApplicationDocument::class,
+            'position' => \App\Models\Position::class,
             'blog-category' => \App\Models\BlogCategory::class,
             'blog-comment' => \App\Models\BlogComment::class,
             'career' => \App\Models\Career::class,

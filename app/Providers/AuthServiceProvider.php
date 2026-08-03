@@ -85,6 +85,12 @@ class AuthServiceProvider extends ServiceProvider
         Faq::class => FaqPolicy::class,
         Setting::class => SettingPolicy::class,
         Seo::class => SeoPolicy::class,
+
+        // Human Resources
+        \App\Models\Employee::class => \App\Policies\EmployeePolicy::class,
+        \App\Models\Department::class => \App\Policies\DepartmentPolicy::class,
+        \App\Models\Position::class => \App\Policies\PositionPolicy::class,
+        \App\Models\Announcement::class => \App\Policies\AnnouncementPolicy::class,
     ];
 
     public function boot(): void

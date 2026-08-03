@@ -25,8 +25,8 @@
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center">
                 <label for="password" class="form-label mb-0">Password</label>
-                @if(Route::has('password.request'))
-                    <a class="small" href="{{ route('password.request') }}">Forgotten?</a>
+                @if(Route::has('password.otp.request'))
+                    <a class="small" href="{{ route('password.otp.request') }}">Forgotten?</a>
                 @endif
             </div>
             <input id="password" type="password"
@@ -47,6 +47,8 @@
         </button>
     </form>
 
+    @include('auth.partials.google-button', ['label' => 'Sign in with Google'])
+
     @if(Route::has('register'))
         <div class="text-center mt-4">
             <p class="text-muted small mb-2">
@@ -61,7 +63,33 @@
 
     <hr class="my-4">
 
-    <p class="text-muted text-center mb-0" style="font-size:.78rem;">
+    {{--
+        Fills in the HR email only — never a password. Signing in still goes
+        through the normal form, so this is a convenience and not a second
+        way into the application.
+    --}}
+    @if($hrEmail = \App\Support\Navigation::hrSignInAddress())
+        <div class="text-center">
+            <a href="#" class="small text-decoration-none" data-signin-as="{{ $hrEmail }}">
+                <i class="fa-solid fa-user-shield me-1"></i>Sign in as HR
+            </a>
+        </div>
+
+        @push('scripts')
+        <script>
+            document.querySelectorAll('[data-signin-as]').forEach((link) => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const email = document.getElementById('email');
+                    email.value = link.dataset.signinAs;
+                    document.getElementById('password').focus();
+                });
+            });
+        </script>
+        @endpush
+    @endif
+
+    <p class="text-muted text-center mb-0 mt-3" style="font-size:.78rem;">
         Staff accounts are created by an administrator — contact your ICT manager
         if you need access to the control panel.
     </p>

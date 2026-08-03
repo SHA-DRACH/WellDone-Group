@@ -125,6 +125,49 @@ final class Permissions
 
     public const ACTIVITY_VIEW = 'activity.view';
 
+    // ------------------------------------------------------------------
+    // Human Resources
+    // ------------------------------------------------------------------
+
+    public const EMPLOYEES_VIEW = 'employees.view';
+    public const EMPLOYEES_CREATE = 'employees.create';
+    public const EMPLOYEES_UPDATE = 'employees.update';
+    public const EMPLOYEES_DELETE = 'employees.delete';
+
+    /**
+     * Salary and bank details are a separate right from the employee record.
+     * An HR officer maintains staff details every day without needing to see
+     * what anyone is paid.
+     */
+    public const EMPLOYEES_VIEW_SALARY = 'employees.view_salary';
+    public const EMPLOYEES_UPDATE_SALARY = 'employees.update_salary';
+
+    /** National ID, passport and date of birth. */
+    public const EMPLOYEES_VIEW_SENSITIVE = 'employees.view_sensitive';
+
+    public const DEPARTMENTS_VIEW = 'departments.view';
+    public const DEPARTMENTS_CREATE = 'departments.create';
+    public const DEPARTMENTS_UPDATE = 'departments.update';
+    public const DEPARTMENTS_DELETE = 'departments.delete';
+
+    public const POSITIONS_VIEW = 'positions.view';
+    public const POSITIONS_CREATE = 'positions.create';
+    public const POSITIONS_UPDATE = 'positions.update';
+    public const POSITIONS_DELETE = 'positions.delete';
+
+    public const RECRUITMENT_VIEW = 'recruitment.view';
+    public const RECRUITMENT_UPDATE = 'recruitment.update';
+    public const RECRUITMENT_SCHEDULE = 'recruitment.schedule';
+    public const RECRUITMENT_DECIDE = 'recruitment.decide';
+    public const RECRUITMENT_HIRE = 'recruitment.hire';
+
+    public const ANNOUNCEMENTS_VIEW = 'announcements.view';
+    public const ANNOUNCEMENTS_CREATE = 'announcements.create';
+    public const ANNOUNCEMENTS_UPDATE = 'announcements.update';
+    public const ANNOUNCEMENTS_DELETE = 'announcements.delete';
+
+    public const HR_REPORTS_VIEW = 'hr_reports.view';
+
     /**
      * Every permission, grouped by module. The keys drive the grouped
      * checkbox layout on the role edit screen.
@@ -157,6 +200,29 @@ final class Permissions
             'settings' => [self::SETTINGS_VIEW, self::SETTINGS_UPDATE],
             'seo' => [self::SEO_VIEW, self::SEO_UPDATE],
             'activity' => [self::ACTIVITY_VIEW],
+
+            // ---------------------------------------------- Human Resources
+            'employees' => [
+                self::EMPLOYEES_VIEW, self::EMPLOYEES_CREATE, self::EMPLOYEES_UPDATE, self::EMPLOYEES_DELETE,
+                self::EMPLOYEES_VIEW_SALARY, self::EMPLOYEES_UPDATE_SALARY, self::EMPLOYEES_VIEW_SENSITIVE,
+            ],
+            'departments' => [
+                self::DEPARTMENTS_VIEW, self::DEPARTMENTS_CREATE,
+                self::DEPARTMENTS_UPDATE, self::DEPARTMENTS_DELETE,
+            ],
+            'positions' => [
+                self::POSITIONS_VIEW, self::POSITIONS_CREATE,
+                self::POSITIONS_UPDATE, self::POSITIONS_DELETE,
+            ],
+            'recruitment' => [
+                self::RECRUITMENT_VIEW, self::RECRUITMENT_UPDATE, self::RECRUITMENT_SCHEDULE,
+                self::RECRUITMENT_DECIDE, self::RECRUITMENT_HIRE,
+            ],
+            'announcements' => [
+                self::ANNOUNCEMENTS_VIEW, self::ANNOUNCEMENTS_CREATE,
+                self::ANNOUNCEMENTS_UPDATE, self::ANNOUNCEMENTS_DELETE,
+            ],
+            'hr_reports' => [self::HR_REPORTS_VIEW],
         ];
     }
 
@@ -192,6 +258,10 @@ final class Permissions
             'contact' => 'Contact Messages',
             'activity' => 'Activity Log',
             'media' => 'Media Library',
+            'employees' => 'Employee Records',
+            'recruitment' => 'Recruitment',
+            'hr_reports' => 'HR Reports',
+            'announcements' => 'Internal Announcements',
             default => str($module)->replace('_', ' ')->title()->toString(),
         };
     }

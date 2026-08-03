@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\HrDashboardController;
+use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogCommentController;
 use App\Http\Controllers\Admin\BlogController;
@@ -98,6 +103,16 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::resource('milestones', MilestoneController::class)->except(['show']);
     Route::resource('csr-initiatives', CsrInitiativeController::class)->except(['show']);
     Route::resource('faqs', FaqController::class)->except(['show']);
+
+    // ------------------------------------------------ Human Resources
+    Route::get('hr', [HrDashboardController::class, 'index'])->name('hr.dashboard');
+
+    Route::post('employees/{employee}/login', [EmployeeController::class, 'createLogin'])->name('employees.login');
+    Route::resource('employees', EmployeeController::class);
+
+    Route::resource('departments', DepartmentController::class)->except(['show']);
+    Route::resource('positions', PositionController::class)->except(['show']);
+    Route::resource('announcements', AnnouncementController::class)->except(['show']);
 
     // ------------------------------------------------ Recruitment
     Route::resource('careers', CareerController::class);

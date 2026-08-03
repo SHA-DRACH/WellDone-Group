@@ -42,5 +42,15 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
 
         RateLimiter::for('downloads', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
+        /*
+         * One-time codes. OtpService already caps how many codes an address
+         * may receive; this is the per-IP ceiling that stops one machine
+         * cycling through many addresses, and limits guessing attempts.
+         */
+        RateLimiter::for('otp', fn (Request $request) => [
+            Limit::perMinute(10)->by($request->ip()),
+            Limit::perHour(40)->by($request->ip()),
+        ]);
     }
 }

@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\OtpPasswordResetController;
+use App\Http\Controllers\Auth\OtpVerificationController;
+use App\Http\Controllers\Portal\PortalController;
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CareerController;
 use App\Http\Controllers\Site\ContactController;
@@ -117,6 +121,38 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 // role, which carries no admin permissions.
 Auth::routes(['verify' => true, 'register' => true]);
 
+// "Continue with Google". Accounts created this way are Clients, exactly as
+// through the registration form — social sign-in never grants staff access.
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+/*
+|--------------------------------------------------------------------------
+| One-time codes
+|--------------------------------------------------------------------------
+|
+| Six-digit codes emailed to the user, as an alternative to the verification
+| and reset links. Easier on a phone, where a link often opens in a browser
+| with no session and quietly fails.
+|
+| Rate limited: sending is capped per address by OtpService, and these routes
+| add a per-IP ceiling on top.
+|
+*/
+
+Route::middleware('throttle:otp')->group(function () {
+    // Verify the signed-in user's own address.
+    Route::get('/verify-email/code', [OtpVerificationController::class, 'show'])->name('otp.verify');
+    Route::post('/verify-email/code/send', [OtpVerificationController::class, 'send'])->name('otp.send');
+    Route::post('/verify-email/code', [OtpVerificationController::class, 'verify'])->name('otp.confirm');
+
+    // Reset a forgotten password with a code instead of a link.
+    Route::get('/password/code', [OtpPasswordResetController::class, 'request'])->name('password.otp.request');
+    Route::post('/password/code', [OtpPasswordResetController::class, 'send'])->name('password.otp.send');
+    Route::get('/password/code/verify', [OtpPasswordResetController::class, 'verify'])->name('password.otp.verify');
+    Route::post('/password/code/reset', [OtpPasswordResetController::class, 'update'])->name('password.otp.update');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Client account portal
@@ -126,6 +162,25 @@ Auth::routes(['verify' => true, 'register' => true]);
 | applications and enquiries. Every query is scoped to the signed-in user.
 |
 */
+
+/*
+|--------------------------------------------------------------------------
+| Employee self-service portal
+|--------------------------------------------------------------------------
+|
+| For staff with an employee record. Everything is scoped to the signed-in
+| person; employment terms are read-only here and belong to HR.
+|
+*/
+
+Route::middleware(['auth', 'verified'])->prefix('portal')->name('portal.')->group(function () {
+    Route::get('/', [PortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [PortalController::class, 'profile'])->name('profile');
+    Route::put('/profile', [PortalController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [PortalController::class, 'updatePassword'])->name('profile.password');
+    Route::get('/announcements', [PortalController::class, 'announcements'])->name('announcements');
+    Route::get('/announcements/{announcement:slug}', [PortalController::class, 'announcement'])->name('announcements.show');
+});
 
 Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
     Route::get('/', [AccountController::class, 'dashboard'])->name('dashboard');

@@ -124,4 +124,22 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Markdown Mail Settings
+    |--------------------------------------------------------------------------
+    |
+    | The `welldone` theme carries the company colours; the matching header
+    | and footer live in resources/views/vendor/mail/html.
+    |
+    */
+
+    'markdown' => [
+        'theme' => env('MAIL_THEME', 'welldone'),
+
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
 ];

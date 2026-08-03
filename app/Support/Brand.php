@@ -59,9 +59,11 @@ final class Brand
                 : self::discover();
         }
 
-        // Uploaded through the CMS.
+        // Uploaded through the CMS. Absolutised because the logo is also used
+        // in email templates, and mail clients cannot resolve a root-relative
+        // path — it would render as a broken image in every message.
         return Storage::disk('public')->exists($value)
-            ? Storage::disk('public')->url($value)
+            ? url(Storage::disk('public')->url($value))
             : self::discover();
     }
 

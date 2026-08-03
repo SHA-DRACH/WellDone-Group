@@ -15,6 +15,20 @@ return [
     */
 
     /*
+     * Google OAuth — "Continue with Google" on the sign-in and register
+     * screens. Credentials come from Google Cloud Console → APIs & Services →
+     * Credentials → OAuth 2.0 Client ID (type: Web application).
+     *
+     * The redirect URI registered there must match GOOGLE_REDIRECT_URI here
+     * exactly, including scheme, port and trailing path.
+     */
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL').'/auth/google/callback'),
+    ],
+
+    /*
      * EmailJS — used by the `emailjs` mailer (App\Mail\Transport\EmailJsTransport).
      *
      * The private key must never be exposed to the browser; it is only ever

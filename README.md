@@ -11,8 +11,14 @@ Logistics, Medical Equipment & Supplies, and ICT Services & Systems.
 ## First run
 
 ```bash
-composer install && npm install && npm run build && php artisan migrate --seed
+composer install && npm install && npm run build && php artisan storage:link && php artisan migrate --seed
 ```
+
+`storage:link` is not optional. Uploaded media — avatars, team photos,
+project galleries, the logo — is written to `storage/app/public` and served
+from `public/storage`. Without the symlink every uploaded image returns 404
+while the files sit safely on disk, which looks exactly like a broken upload.
+Run it again after any fresh clone or deploy.
 
 The database (`welldone`) is already created, migrated and seeded on this
 machine. To rebuild it from scratch:
@@ -23,9 +29,18 @@ php artisan migrate:fresh --seed
 
 ### Serving the site
 
-Laragon publishes this project at **http://welldone.test**, which matches
-`APP_URL` in `.env`. If you run `php artisan serve` instead, change `APP_URL`
-to `http://127.0.0.1:8000` first — uploaded media URLs are built from it.
+`APP_URL` is set to `http://127.0.0.1:8000` to match `php artisan serve`. If
+you switch to Laragon's virtual host at `http://welldone.test`, change
+`APP_URL` to match.
+
+It has to match the address you actually browse, because `APP_URL` is what
+builds the links inside emails — verification, password reset — and any
+absolute URL generated outside a web request, such as from a queued job. A
+mismatch produces verification links that lead nowhere.
+
+Uploaded media is *not* affected: the `public` disk URL is deliberately
+root-relative (`/storage`), so images resolve against whatever host served
+the page and keep working across localhost, the vhost and production.
 
 ### Development accounts
 
@@ -137,9 +152,103 @@ else changes, because they all plug in behind Laravel's mailer:
 | `smtp` | Mailpit locally, or any real SMTP host |
 | `log` | Writes messages to `storage/logs` instead of sending |
 
-Out of the box this is set to `smtp` → Laragon's **Mailpit** on
-`127.0.0.1:1025`, which captures everything so you can read it at
-<http://localhost:8025> without emailing real people.
+**Currently configured: Gmail SMTP, sending for real.** Mail goes out through
+`smtp.gmail.com:587` authenticated as `sjimice6@gmail.com`.
+
+Two Gmail constraints worth knowing:
+
+- `MAIL_PASSWORD` must be a **Google App Password**, not the account
+  password. Generate one at Google Account → Security → 2-Step Verification →
+  App passwords.
+- Gmail only lets you send **as the authenticated account** or a verified
+  alias, so `MAIL_FROM_ADDRESS` is the Gmail address. Recipients see the
+  Gmail address, not `@welldonegroup.com`. To send as the company domain you
+  need Google Workspace (or any host) with a mailbox on that domain — then
+  just change `MAIL_USERNAME`, `MAIL_PASSWORD` and `MAIL_FROM_ADDRESS`.
+- Free Gmail allows roughly **500 messages a day**; Workspace allows 2,000.
+
+To go back to capturing mail locally instead of sending it, point the SMTP
+settings at Mailpit (`127.0.0.1:1025`, no auth) and read it at
+<http://localhost:8025>. The commented block in `.env` has the exact values.
+
+Check the configuration at any time with:
+
+```bash
+php artisan mail:test you@example.com
+```
+
+### Hiding the personal Gmail address
+
+`MAIL_FROM_NAME` is set to **WellDone Group Inc.**, so that is the sender name
+every normal mail client displays. The underlying Gmail address is still
+visible if a recipient expands the sender details — Gmail refuses to send as
+an address it has not verified, so this cannot be fixed in code.
+
+Two ways to remove it properly:
+
+1. **Gmail alias.** Gmail → Settings → Accounts and Import → *Send mail as* →
+   add `info@welldonegroup.com`, complete the verification email, then set
+   `MAIL_FROM_ADDRESS` to it.
+2. **A mailbox on the company domain** (Google Workspace, cPanel, any host).
+   Change `MAIL_USERNAME`, `MAIL_PASSWORD` and `MAIL_FROM_ADDRESS` to match.
+
+Option 2 is the better answer for a company site: it also improves
+deliverability, because the sending domain then matches the brand.
+
+### Email branding
+
+Messages use a branded template rather than Laravel's default:
+
+- royal-blue header carrying the WellDone logo, company name and slogan
+- gold call-to-action buttons
+- footer with the registered name, address, phone and website
+
+The template lives in `resources/views/vendor/mail/html`, and the colours in
+`html/themes/welldone.css` (selected by `MAIL_THEME`).
+
+**The logo will not load while the site runs on `127.0.0.1`.** Mail clients
+fetch images over the public internet and cannot reach your machine. It
+appears correctly as soon as the site is on a public domain; until then the
+company name and slogan carry the branding on their own.
+
+## Sign in with Google
+
+Visitors can register or sign in with a Google account. Accounts created this
+way get the **Client** role, exactly like the registration form — social
+sign-in never grants staff access. The email is treated as verified, because
+Google has already confirmed it.
+
+The button only appears once credentials are configured, so it never leads to
+a dead end.
+
+### Setting it up
+
+1. **Google Cloud Console** → create or select a project.
+2. **APIs & Services → OAuth consent screen** → configure it (External is
+   fine) and add your email as a test user while in testing mode.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID** →
+   application type **Web application**.
+4. Under *Authorised redirect URIs*, add this **exactly** — scheme, host, port
+   and path all have to match or Google returns `redirect_uri_mismatch`:
+
+   ```
+   http://127.0.0.1:8000/auth/google/callback
+   ```
+
+   Add the production URL alongside it when you deploy.
+5. Copy the client ID and secret into `.env`:
+
+   ```
+   GOOGLE_CLIENT_ID=xxxxxxxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=xxxxxxxxxxxx
+   ```
+
+### How accounts are matched
+
+An existing account is matched on the provider's own user id first, then on
+email address. Matching on email is safe here because Google has verified
+ownership of it — so a visitor who registered with a password can later use
+the Google button and reach the same account rather than a duplicate.
 
 ### EmailJS
 

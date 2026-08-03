@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -19,14 +20,27 @@ class JobApplication extends Model
 {
     use HasFactory;
 
-    public const STATUSES = ['new', 'reviewing', 'shortlisted', 'interview', 'offered', 'hired', 'rejected'];
+    /** The recruitment pipeline, in the order a candidate moves through it. */
+    public const STATUSES = [
+        'new', 'under_review', 'shortlisted', 'interview_scheduled',
+        'interview_completed', 'offered', 'hired', 'rejected', 'withdrawn',
+    ];
+
+    /** Stages from which a candidate can still progress. */
+    public const OPEN_STATUSES = [
+        'new', 'under_review', 'shortlisted', 'interview_scheduled',
+        'interview_completed', 'offered',
+    ];
 
     protected $fillable = [
-        'career_id', 'reference', 'user_id', 'full_name', 'email', 'phone', 'country', 'city',
+        'career_id', 'reference', 'user_id', 'employee_id', 'full_name', 'email', 'phone', 'country', 'city',
         'cover_letter', 'resume_path', 'resume_original_name', 'portfolio_url',
         'linkedin_url', 'years_experience', 'highest_qualification', 'expected_salary',
         'available_from', 'status', 'internal_notes', 'reviewed_by', 'reviewed_at',
         'ip_address',
+        'interview_at', 'interview_location', 'interview_mode', 'interview_notes',
+        'interview_score', 'offered_salary', 'offer_start_date', 'offered_at',
+        'rejection_reason',
     ];
 
     protected function casts(): array
@@ -35,6 +49,11 @@ class JobApplication extends Model
             'available_from' => 'date',
             'reviewed_at' => 'datetime',
             'years_experience' => 'integer',
+            'interview_at' => 'datetime',
+            'offered_at' => 'datetime',
+            'offer_start_date' => 'date',
+            'interview_score' => 'integer',
+            'offered_salary' => 'decimal:2',
         ];
     }
 
@@ -72,6 +91,38 @@ class JobApplication extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /** The employee record created when this candidate was hired. */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    /** Certificates, cover letters and other supporting uploads. */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(JobApplicationDocument::class);
+    }
+
+    /** Still moving through the pipeline — neither rejected nor withdrawn. */
+    public function scopeOpen(Builder $query): Builder
+    {
+        return $query->whereIn('status', self::OPEN_STATUSES);
+    }
+
+    /** Interviews coming up, soonest first. */
+    public function scopeUpcomingInterviews(Builder $query): Builder
+    {
+        return $query->whereNotNull('interview_at')
+            ->where('interview_at', '>=', now())
+            ->orderBy('interview_at');
+    }
+
+    /** True once this candidate has been converted into an employee record. */
+    public function getIsConvertedAttribute(): bool
+    {
+        return $this->employee_id !== null;
+    }
+
     public function scopeStatus(Builder $query, ?string $status): Builder
     {
         return $query->when(
@@ -101,11 +152,29 @@ class JobApplication extends Model
     {
         return match ($this->status) {
             'new' => 'primary',
-            'reviewing' => 'info',
-            'shortlisted', 'interview' => 'warning',
-            'offered', 'hired' => 'success',
+            'under_review' => 'info',
+            'shortlisted' => 'warning',
+            'interview_scheduled', 'interview_completed' => 'warning',
+            'offered' => 'info',
+            'hired' => 'success',
             'rejected' => 'danger',
+            'withdrawn' => 'secondary',
             default => 'secondary',
+        };
+    }
+
+    /** Position of this candidate in the pipeline, for a progress indicator. */
+    public function getStageNumberAttribute(): int
+    {
+        return match ($this->status) {
+            'new' => 1,
+            'under_review' => 2,
+            'shortlisted' => 3,
+            'interview_scheduled' => 4,
+            'interview_completed' => 5,
+            'offered' => 6,
+            'hired' => 7,
+            default => 0,
         };
     }
 }

@@ -185,13 +185,40 @@
             </a>
         @endcan
 
-        {{-- ------------------------------------------------ Recruitment --}}
-        @can('careers.view')
-            <div class="nav-section">Recruitment</div>
-            <a class="nav-link {{ active_when('admin.careers.*') }}" href="{{ route('admin.careers.index') }}">
-                <i class="fa-solid fa-briefcase"></i> Vacancies
-            </a>
-        @endcan
+        {{-- ------------------------------------------------ Human Resources --}}
+        @canany(['employees.view', 'departments.view', 'positions.view', 'announcements.view', 'careers.view'])
+            <div class="nav-section">Human Resources</div>
+
+            @can('employees.view')
+                <a class="nav-link {{ active_when('admin.hr.*') }}" href="{{ route('admin.hr.dashboard') }}">
+                    <i class="fa-solid fa-chart-pie"></i> HR Dashboard
+                </a>
+                <a class="nav-link {{ active_when('admin.employees.*') }}" href="{{ route('admin.employees.index') }}">
+                    <i class="fa-solid fa-users"></i> Employees
+                </a>
+            @endcan
+
+            @can('departments.view')
+                <a class="nav-link {{ active_when('admin.departments.*') }}" href="{{ route('admin.departments.index') }}">
+                    <i class="fa-solid fa-building-user"></i> Departments
+                </a>
+            @endcan
+            @can('positions.view')
+                <a class="nav-link {{ active_when('admin.positions.*') }}" href="{{ route('admin.positions.index') }}">
+                    <i class="fa-solid fa-user-tag"></i> Positions
+                </a>
+            @endcan
+            @can('announcements.view')
+                <a class="nav-link {{ active_when('admin.announcements.*') }}" href="{{ route('admin.announcements.index') }}">
+                    <i class="fa-solid fa-bullhorn"></i> Announcements
+                </a>
+            @endcan
+            @can('careers.view')
+                <a class="nav-link {{ active_when('admin.careers.*') }}" href="{{ route('admin.careers.index') }}">
+                    <i class="fa-solid fa-briefcase"></i> Vacancies
+                </a>
+            @endcan
+        @endcanany
 
         {{-- ------------------------------------------------ Platform --}}
         @canany(['users.view', 'roles.view', 'media.view', 'seo.view', 'settings.view', 'activity.view'])

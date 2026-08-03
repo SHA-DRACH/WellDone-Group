@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             // Divisions before users: the division officers are assigned to
             // a division by slug as they are created.
             DivisionSeeder::class,
+            // Departments and positions before users, so staff accounts can
+            // be attached to the HR structure.
+            HrStructureSeeder::class,
             UserSeeder::class,
             SliderSeeder::class,
             PortfolioSeeder::class,

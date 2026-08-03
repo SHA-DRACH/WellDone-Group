@@ -41,7 +41,20 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            /*
+             * Root-relative on purpose.
+             *
+             * Building this from APP_URL means every uploaded image is served
+             * from that exact host — so browsing the site at 127.0.0.1:8000
+             * while APP_URL says welldone.test leaves every avatar, logo and
+             * photo pointing at a host the browser may not resolve.
+             *
+             * A leading-slash path resolves against whatever host the page was
+             * loaded from, so uploads work on welldone.test, 127.0.0.1:8000 and
+             * the production domain without touching config. Set
+             * FILESYSTEM_PUBLIC_URL if assets ever move to a CDN.
+             */
+            'url' => env('FILESYSTEM_PUBLIC_URL', '/storage'),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

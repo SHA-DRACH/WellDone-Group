@@ -48,6 +48,27 @@ class UserSeeder extends Seeder
                 'role' => Roles::HR_MANAGER,
             ],
             [
+                'name' => 'Rebecca Nyanti',
+                'email' => 'hrdirector@welldonegroup.com',
+                'position' => 'HR Director',
+                'department' => 'Human Resources',
+                'role' => Roles::HR_DIRECTOR,
+            ],
+            [
+                'name' => 'Korto Wesseh',
+                'email' => 'hrofficer@welldonegroup.com',
+                'position' => 'HR Officer',
+                'department' => 'Human Resources',
+                'role' => Roles::HR_OFFICER,
+            ],
+            [
+                'name' => 'J. Wesley Kollie',
+                'email' => 'ceo@welldonegroup.com',
+                'position' => 'Group Chief Executive Officer',
+                'department' => 'Executive',
+                'role' => Roles::CEO,
+            ],
+            [
                 'name' => 'Joseph Weah',
                 'email' => 'marketing@welldonegroup.com',
                 'position' => 'Marketing Officer',
