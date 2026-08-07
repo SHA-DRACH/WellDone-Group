@@ -121,26 +121,17 @@ class JobApplicationController extends Controller
      */
     protected function scopedQuery(): Builder
     {
-        $query = JobApplication::query();
-        $user = auth()->user();
-
-        if (Navigation::isDivisionScoped($user)) {
-            $query->whereHas('career', fn (Builder $q) => $q->where('division_id', $user->division_id));
-        }
-
-        return $query;
+        return JobApplication::query()->withinDivisionOf(auth()->user());
     }
 
     protected function assertWithinScope(JobApplication $application): void
     {
-        $user = auth()->user();
+        $application->loadMissing('career:id,division_id');
 
-        if (Navigation::isDivisionScoped($user)) {
-            abort_unless(
-                $application->career?->division_id === $user->division_id,
-                403,
-                'This application is for a vacancy in another division.'
-            );
-        }
+        abort_unless(
+            $application->isVisibleTo(auth()->user()),
+            403,
+            'This application is for a vacancy in another division.'
+        );
     }
 }

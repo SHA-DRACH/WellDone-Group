@@ -132,10 +132,41 @@ Members of the public register at `/register`, which creates a **Client**
 account. Client accounts carry no admin permissions whatsoever, so they can
 never reach the control panel.
 
-Submitting a quotation request, a job application or a contact enquiry
-requires a **verified** account. Visitors can browse everything freely; only
-the act of submitting is gated. This means every lead is traceable to a
-confirmed email address, and the sender can follow it at `/account`.
+Visitors can browse everything freely without an account at all. An account is
+needed to submit a quotation request, a job application or a contact enquiry,
+so every lead is traceable to a confirmed address and the sender can follow it
+at `/account`.
+
+### Confirming an address happens before sign-in
+
+An address nobody has confirmed cannot become a signed-in session. Registering
+does not sign the new account in, and correct credentials for an unconfirmed
+account do not either — both land on the same screen at `/verify-email/code`,
+with the code field ready and a fresh code already sent.
+
+Two ways through it, and the visitor picks:
+
+| | What it does |
+|---|---|
+| **The six-digit code** | Typed on the confirmation screen. Confirms the address *and* signs them in — they proved control of the inbox a moment ago, so making them retype the password they just typed serves nobody. Expires after ten minutes; five wrong attempts locks that code. |
+| **The link in the same email** | Confirms the address and returns them to the sign-in form. It does **not** sign anyone in: a link can be forwarded and sits in an inbox indefinitely, so it proves an address is reachable, not that whoever opened it owns the account. |
+
+Neither path requires an existing session. That is the point — Laravel's stock
+verification route sits behind `auth`, which assumes the link is opened in the
+same signed-in browser that asked for it. Mail gets read on a phone, the link
+opens in a browser with no session, and the visitor is bounced to a sign-in
+form they cannot get past until they verify. Verifying before sign-in closes
+that loop.
+
+The account waiting to confirm is held in the session
+(`App\Support\PendingVerification`), never in the URL, so the address being
+confirmed cannot be guessed or swapped from outside that browser. It grants
+nothing: a pending account reaches the confirmation screen and nothing else.
+
+"Continue with Google" accounts are confirmed on creation — Google has already
+proved ownership of the address — so they sign in directly. Staff logins
+created by HR go through the same confirmation as everyone else, then straight
+on to the forced password change.
 
 The account area shows their quotation requests (with status and any quoted
 amount), their job applications and status, their enquiries with our replies,
@@ -177,23 +208,32 @@ Check the configuration at any time with:
 php artisan mail:test you@example.com
 ```
 
-### Hiding the personal Gmail address
+### Sender address
 
-`MAIL_FROM_NAME` is set to **WellDone Group Inc.**, so that is the sender name
-every normal mail client displays. The underlying Gmail address is still
-visible if a recipient expands the sender details — Gmail refuses to send as
-an address it has not verified, so this cannot be fixed in code.
+Two different addresses are in play, and they do different jobs:
 
-Two ways to remove it properly:
+- `MAIL_USERNAME` — **the transport.** `sjimice6@gmail.com` is the account that
+  authenticates to Gmail and physically carries the mail. Recipients never
+  need to see it.
+- `MAIL_FROM_ADDRESS` — **the company address.** `welldonegroupinc@gmail.com`
+  is what messages are sent from, and it is also the general contact address
+  and the recipient for enquiry notifications.
 
-1. **Gmail alias.** Gmail → Settings → Accounts and Import → *Send mail as* →
-   add `info@welldonegroup.com`, complete the verification email, then set
-   `MAIL_FROM_ADDRESS` to it.
-2. **A mailbox on the company domain** (Google Workspace, cPanel, any host).
-   Change `MAIL_USERNAME`, `MAIL_PASSWORD` and `MAIL_FROM_ADDRESS` to match.
+`MAIL_FROM_NAME` is **WellDone Group Inc.**, so that is the sender name every
+normal mail client displays.
 
-Option 2 is the better answer for a company site: it also improves
-deliverability, because the sending domain then matches the brand.
+**One step is required outside this repository.** Gmail only sends as an
+address the sending account has verified. Until then it silently rewrites the
+From back to `sjimice6@gmail.com` — the mail still arrives, it just shows the
+wrong sender. To finish it, sign in as `sjimice6@gmail.com` → Settings →
+Accounts and Import → *Send mail as* → add `welldonegroupinc@gmail.com` and
+click the link in the verification email Google sends there. No code or config
+changes; it starts working the moment the alias is verified.
+
+The stronger long-term answer is a mailbox on the company domain (Google
+Workspace, cPanel, any host), with `MAIL_USERNAME`, `MAIL_PASSWORD` and
+`MAIL_FROM_ADDRESS` all on that domain. Deliverability improves when the
+sending domain matches the brand.
 
 ### Email branding
 
@@ -362,6 +402,60 @@ Internal recipients are configured in **Admin → Website Settings → System**.
 
 ---
 
+## Site assistant
+
+A chat helper sits in the corner of every public page. It answers questions
+about the company and walks visitors through the things they came to do —
+request a quotation, apply for a job, reach the right department, find a
+document.
+
+**It works with no configuration and no API key.** Answers are retrieved from
+the site's own content: divisions, services, projects, open vacancies,
+downloads, FAQs, articles and the settings table, compiled into a knowledge
+base (`App\Services\Assistant\KnowledgeBase`) and matched against the question
+by a weighted term scorer (`Retriever`). Publish a service and the assistant
+knows about it; take a vacancy down and it stops mentioning it. Nothing is
+hand-maintained and nothing can go stale.
+
+Because every answer is retrieved rather than recalled, the assistant cannot
+invent a price, a deadline or a service that does not exist. When nothing
+matches well enough it says so and hands the visitor the phone number.
+
+### Turning on the conversational phrasing
+
+Set `ANTHROPIC_API_KEY` in `.env` (Anthropic Console → API Keys). Claude then
+phrases the answer and resolves follow-ups like *"and how long does that
+take?"* against the conversation so far. The facts are identical either way —
+the model only ever sees the entries the retriever selected, and is instructed
+to answer from them alone. If the API is slow, down or unconfigured, the reply
+falls back to the local phrasing; the widget never breaks because a third party
+is having a bad day.
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-opus-5
+ANTHROPIC_EFFORT=low     # low | medium | high | xhigh | max
+```
+
+`ANTHROPIC_EFFORT` trades answer depth against speed and cost. Visitors are
+waiting on a chat bubble and the questions are shallow, so `low` is the right
+default here.
+
+### Operating it
+
+- **Settings → Assistant** in the admin panel carries the on/off switch, the
+  assistant's name, its opening message, and the starter questions offered as
+  buttons.
+- `ASSISTANT_ENABLED=false` removes the widget entirely, whatever the setting
+  says.
+- The knowledge base is cached for 15 minutes, so new content appears on its
+  own. `php artisan assistant:refresh` rebuilds it immediately and reports how
+  many entries it holds.
+- Conversations live in the visitor's session and are never written to the
+  database — they are thrown away when the tab closes.
+- Rate limited to 10 questions a minute and 80 an hour per IP, which is what
+  stops a script running up a bill on the account.
+
 ## What is built
 
 ### Public website — complete
@@ -371,7 +465,8 @@ partners, news, CTA, newsletter), About, Leadership, CSR, Certifications,
 FAQs, Privacy, Terms, Divisions index + detail, Services index + detail,
 Projects index (filterable) + detail, Gallery, News/blog index + detail with
 moderated comments, Careers index + detail with résumé upload, Contact,
-multi-step Request a Quote, Downloads, `sitemap.xml`, `robots.txt`.
+multi-step Request a Quote, Downloads, `sitemap.xml`, `robots.txt`, and the
+site assistant on every page.
 
 All 30 public routes return 200, and the contact and quote forms were verified
 end to end.
@@ -430,6 +525,10 @@ bespoke sections.
   hours, and invalidated centrally in `AppServiceProvider` when content changes.
 - `Model::preventLazyLoading()` is on outside production, so an N+1 fails loudly
   in development rather than shipping.
+- **The assistant retrieves, it does not recall.** The knowledge base is built
+  from published records, the language model is optional and only ever phrases
+  what the retriever already selected. That is what keeps an answer about a
+  tender deadline honest, and it is why the widget still works with no API key.
 
 ## Security
 

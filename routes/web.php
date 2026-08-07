@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Auth\ForcedPasswordChangeController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\OtpPasswordResetController;
 use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Portal\PortalController;
+use App\Http\Controllers\Site\AssistantController;
 use App\Http\Controllers\Site\BlogController;
 use App\Http\Controllers\Site\CareerController;
 use App\Http\Controllers\Site\ContactController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Site\ProjectController;
 use App\Http\Controllers\Site\QuoteRequestController;
 use App\Http\Controllers\Site\ServiceController;
 use App\Http\Controllers\Site\SitemapController;
+use App\Support\Navigation;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -99,6 +102,18 @@ Route::name('site.')->group(function () {
         ->middleware('throttle:downloads')
         ->name('downloads.get');
 
+    /*
+     * --------------------------------------------------- Site assistant
+     *
+     * The chat widget in the corner of every page. Open to everyone, signed in
+     * or not — it only reads published content and only ever answers questions
+     * about the site, so there is nothing here to protect behind an account.
+     */
+    Route::post('/assistant/ask', [AssistantController::class, 'ask'])
+        ->middleware('throttle:assistant')
+        ->name('assistant.ask');
+    Route::delete('/assistant/history', [AssistantController::class, 'reset'])->name('assistant.reset');
+
     // --------------------------------------------------- Newsletter
     Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
         ->middleware('throttle:newsletter')
@@ -120,6 +135,17 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 // Public self-registration is open: RegisterController assigns the Client
 // role, which carries no admin permissions.
 Auth::routes(['verify' => true, 'register' => true]);
+
+/*
+ * Signing out is a POST, so typing /logout into the address bar would
+ * otherwise be a bare "405 Method Not Allowed". This answers the GET with a
+ * confirmation carrying a fresh token, which also makes it safe against a
+ * browser or link-scanner prefetching the URL and quietly ending the session.
+ */
+Route::get('/logout', fn () => auth()->check()
+    ? response()->view('auth.logout')
+    : redirect()->route('login')
+)->name('logout.confirm');
 
 // "Continue with Google". Accounts created this way are Clients, exactly as
 // through the registration form — social sign-in never grants staff access.
@@ -151,6 +177,15 @@ Route::middleware('throttle:otp')->group(function () {
     Route::post('/password/code', [OtpPasswordResetController::class, 'send'])->name('password.otp.send');
     Route::get('/password/code/verify', [OtpPasswordResetController::class, 'verify'])->name('password.otp.verify');
     Route::post('/password/code/reset', [OtpPasswordResetController::class, 'update'])->name('password.otp.update');
+});
+
+// Where an account whose first password was set by HR chooses its own. Left
+// outside the throttle group: EnsurePasswordIsChanged sends people here on
+// every request, so rate limiting it would lock them out of the only screen
+// they are allowed to reach.
+Route::middleware('auth')->group(function () {
+    Route::get('/password/change', [ForcedPasswordChangeController::class, 'show'])->name('password.change');
+    Route::put('/password/change', [ForcedPasswordChangeController::class, 'update'])->name('password.change.update');
 });
 
 /*
@@ -195,6 +230,6 @@ Route::middleware(['auth'])->prefix('account')->name('account.')->group(function
 
 // laravel/ui points a few flows at /home. Send everyone to the destination
 // their role and division imply — the same rule the login controller uses.
-Route::get('/home', fn () => redirect()->to(\App\Support\Navigation::homeRouteFor(auth()->user())))
+Route::get('/home', fn () => redirect()->to(Navigation::homeRouteFor(auth()->user())))
     ->middleware('auth')
     ->name('home');

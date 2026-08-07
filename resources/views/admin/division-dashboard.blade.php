@@ -9,7 +9,15 @@
     </span>
 @endsection
 
-@section('page-subtitle', $division->tagline)
+{{--
+    Guarded because the tagline is optional. Blade's two-argument @section
+    decides which form it is by whether the second argument is null — pass
+    null and it opens an output buffer waiting for an @endsection that this
+    file does not have, swallowing the rest of the page.
+--}}
+@if(filled($division->tagline))
+    @section('page-subtitle', $division->tagline)
+@endif
 
 @section('page-actions')
     @if($switchable->isNotEmpty())

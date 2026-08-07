@@ -21,7 +21,7 @@ use Illuminate\Validation\Rules\Password;
  */
 class OtpPasswordResetController extends Controller
 {
-    public const PURPOSE = 'password_reset';
+    public const PURPOSE = OtpService::PURPOSE_PASSWORD_RESET;
 
     public function __construct(protected OtpService $otp)
     {
@@ -94,6 +94,11 @@ class OtpPasswordResetController extends Controller
             // A correct code proves control of the mailbox, so treat the
             // address as verified if it was not already.
             'email_verified_at' => $user->email_verified_at ?? now(),
+            // Choosing their own password is precisely what the flag waits
+            // for. Left set, it traps the account: the change screen wants
+            // the password HR handed over, which they never knew, and rejects
+            // the new one for matching the current password.
+            'must_change_password' => false,
             // Force other sessions to sign in again with the new password.
             'remember_token' => Str::random(60),
         ])->save();

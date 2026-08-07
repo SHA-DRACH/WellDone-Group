@@ -27,6 +27,23 @@ final class Roles
     public const CLIENT = 'Client';
 
     // ------------------------------------------------------------------
+    // Business divisions
+    // ------------------------------------------------------------------
+
+    /**
+     * The head of one business division — Mining & Quarry, Procurement &
+     * Logistics, Medical Equipment, ICT Services.
+     *
+     * Runs their division and sees only their division. The confinement comes
+     * from App\Support\DivisionScope and is applied to the query, not to the
+     * navigation, so it holds when a URL is typed by hand.
+     */
+    public const DIVISION_MANAGER = 'Division Manager';
+
+    /** Works inside one division under its head; may act, but not delete. */
+    public const DIVISION_OFFICER = 'Division Officer';
+
+    // ------------------------------------------------------------------
     // Human Resources
     // ------------------------------------------------------------------
 
@@ -56,6 +73,8 @@ final class Roles
             self::MARKETING_OFFICER,
             self::SALES_OFFICER,
             self::ICT_MANAGER,
+            self::DIVISION_MANAGER,
+            self::DIVISION_OFFICER,
             self::EMPLOYEE,
             self::CLIENT,
         ];
@@ -125,6 +144,8 @@ final class Roles
                 Permissions::forModule('hr_reports'),
                 Permissions::forModule('careers'),
                 Permissions::forModule('applications'),
+                Permissions::forModule('leave'),
+                Permissions::forModule('leave_types'),
                 [$p::DASHBOARD_VIEW, $p::CONTACT_VIEW, $p::MEDIA_VIEW, $p::USERS_VIEW],
             ),
 
@@ -144,6 +165,8 @@ final class Roles
                     $p::EMPLOYEES_VIEW_SALARY, $p::EMPLOYEES_VIEW_SENSITIVE,
                     $p::DEPARTMENTS_VIEW, $p::POSITIONS_VIEW,
                     $p::DASHBOARD_VIEW, $p::CONTACT_VIEW, $p::MEDIA_VIEW,
+                    $p::LEAVE_VIEW, $p::LEAVE_CREATE, $p::LEAVE_UPDATE, $p::LEAVE_APPROVE,
+                    $p::LEAVE_TYPES_VIEW, $p::LEAVE_BALANCES_ADJUST,
                 ],
             ),
 
@@ -161,6 +184,9 @@ final class Roles
                     $p::ANNOUNCEMENTS_VIEW, $p::ANNOUNCEMENTS_CREATE,
                     $p::CAREERS_VIEW, $p::HR_REPORTS_VIEW,
                     $p::DASHBOARD_VIEW, $p::MEDIA_VIEW,
+                    // Keys in the paper forms; granting them is not theirs.
+                    $p::LEAVE_VIEW, $p::LEAVE_CREATE, $p::LEAVE_UPDATE,
+                    $p::LEAVE_TYPES_VIEW,
                 ],
             ),
 
@@ -180,6 +206,9 @@ final class Roles
                 $p::APPLICATIONS_VIEW,
                 $p::ANNOUNCEMENTS_VIEW,
                 $p::HR_REPORTS_VIEW,
+                // Approves their own department's leave; the policy scopes it.
+                $p::LEAVE_VIEW,
+                $p::LEAVE_APPROVE,
             ],
 
             /*
@@ -197,6 +226,7 @@ final class Roles
                 $p::HR_REPORTS_VIEW,
                 $p::QUOTES_VIEW, $p::PROJECTS_VIEW, $p::DIVISIONS_VIEW,
                 $p::ACTIVITY_VIEW,
+                $p::LEAVE_VIEW, $p::LEAVE_TYPES_VIEW,
             ],
 
             /*
@@ -205,6 +235,64 @@ final class Roles
              * from a permission.
              */
             self::EMPLOYEE => [],
+
+            /*
+             * Division Manager — the head of one business division.
+             *
+             * The permissions read as though they were group-wide; they are
+             * not. Every one of them is applied through DivisionScope, which
+             * narrows the query to the division recorded on the account. The
+             * separation matters: a permission answers "may this role do this
+             * at all", and the scope answers "to whose records". Trying to
+             * express confinement as a permission would need one role per
+             * division and a re-seed every time a division is added.
+             */
+            self::DIVISION_MANAGER => array_merge(
+                Permissions::forModule('quotes'),
+                Permissions::forModule('projects'),
+                Permissions::forModule('services'),
+                Permissions::forModule('galleries'),
+                Permissions::forModule('careers'),
+                Permissions::forModule('applications'),
+                Permissions::forModule('clients'),
+                Permissions::forModule('downloads'),
+                [
+                    $p::DASHBOARD_VIEW,
+                    $p::DIVISIONS_VIEW,
+                    $p::CONTACT_VIEW, $p::CONTACT_REPLY,
+                    $p::TESTIMONIALS_VIEW, $p::TESTIMONIALS_CREATE, $p::TESTIMONIALS_UPDATE,
+                    // Team, FAQs and certificates are group content; a
+                    // division head reads them but does not rewrite them.
+                    $p::COMPANY_VIEW,
+                    $p::MEDIA_VIEW, $p::MEDIA_CREATE,
+                    // Their own people, without pay or identity documents —
+                    // those stay with HR and the CEO.
+                    $p::EMPLOYEES_VIEW,
+                    $p::DEPARTMENTS_VIEW, $p::POSITIONS_VIEW,
+                    $p::ANNOUNCEMENTS_VIEW,
+                    $p::LEAVE_VIEW, $p::LEAVE_APPROVE,
+                ],
+            ),
+
+            /*
+             * Division Officer — day-to-day work inside one division. Same
+             * confinement, without the authority to delete anything or to
+             * approve leave.
+             */
+            self::DIVISION_OFFICER => [
+                $p::DASHBOARD_VIEW,
+                $p::DIVISIONS_VIEW,
+                $p::QUOTES_VIEW, $p::QUOTES_UPDATE, $p::QUOTES_ASSIGN,
+                $p::PROJECTS_VIEW, $p::PROJECTS_UPDATE,
+                $p::SERVICES_VIEW,
+                $p::GALLERIES_VIEW, $p::GALLERIES_CREATE, $p::GALLERIES_UPDATE,
+                $p::CAREERS_VIEW,
+                $p::APPLICATIONS_VIEW, $p::APPLICATIONS_UPDATE,
+                $p::CLIENTS_VIEW,
+                $p::CONTACT_VIEW, $p::CONTACT_REPLY,
+                $p::MEDIA_VIEW, $p::MEDIA_CREATE,
+                $p::ANNOUNCEMENTS_VIEW,
+            ],
 
             self::MARKETING_OFFICER => array_merge(
                 Permissions::forModule('blogs'),

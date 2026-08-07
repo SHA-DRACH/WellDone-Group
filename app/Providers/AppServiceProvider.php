@@ -2,15 +2,54 @@
 
 namespace App\Providers;
 
+use App\Listeners\EmbedBrandLogo;
 use App\Mail\Transport\EmailJsTransport;
+use App\Models\Announcement;
+use App\Models\Blog;
+use App\Models\BlogCategory;
+use App\Models\BlogComment;
+use App\Models\Career;
+use App\Models\Certificate;
+use App\Models\Client;
+use App\Models\ContactMessage;
+use App\Models\CsrInitiative;
+use App\Models\Department;
+use App\Models\Division;
+use App\Models\Download;
+use App\Models\Employee;
+use App\Models\EmployeeBankDetail;
+use App\Models\EmploymentType;
+use App\Models\Faq;
+use App\Models\Gallery;
+use App\Models\GalleryImage;
+use App\Models\JobApplication;
+use App\Models\JobApplicationDocument;
+use App\Models\Milestone;
+use App\Models\Newsletter;
+use App\Models\Partner;
+use App\Models\Position;
+use App\Models\Project;
+use App\Models\ProjectImage;
+use App\Models\QuoteRequest;
+use App\Models\QuoteRequestFile;
+use App\Models\Seo;
+use App\Models\Service;
+use App\Models\Setting;
+use App\Models\Slider;
+use App\Models\Tag;
+use App\Models\TeamMember;
+use App\Models\Testimonial;
+use App\Models\User;
 use App\Services\SeoManager;
 use App\Support\Settings;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Client\Factory as HttpClient;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Client\Factory as HttpClient;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +71,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registerEmailJsTransport();
 
+        // Ships the logo inside every branded email, rather than linking to it.
+        Event::listen(MessageSending::class, EmbedBrandLogo::class);
+
         // Catch N+1 queries and mass-assignment mistakes during development.
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
@@ -41,41 +83,41 @@ class AppServiceProvider extends ServiceProvider
         // without a data migration. The map is enforced, so every model that
         // can appear on either side of a morph must be listed here.
         Relation::enforceMorphMap([
-            'announcement' => \App\Models\Announcement::class,
-            'blog' => \App\Models\Blog::class,
-            'department' => \App\Models\Department::class,
-            'employee' => \App\Models\Employee::class,
-            'employee-bank-detail' => \App\Models\EmployeeBankDetail::class,
-            'employment-type' => \App\Models\EmploymentType::class,
-            'job-application-document' => \App\Models\JobApplicationDocument::class,
-            'position' => \App\Models\Position::class,
-            'blog-category' => \App\Models\BlogCategory::class,
-            'blog-comment' => \App\Models\BlogComment::class,
-            'career' => \App\Models\Career::class,
-            'certificate' => \App\Models\Certificate::class,
-            'client' => \App\Models\Client::class,
-            'contact-message' => \App\Models\ContactMessage::class,
-            'csr-initiative' => \App\Models\CsrInitiative::class,
-            'division' => \App\Models\Division::class,
-            'download' => \App\Models\Download::class,
-            'faq' => \App\Models\Faq::class,
-            'gallery' => \App\Models\Gallery::class,
-            'gallery-image' => \App\Models\GalleryImage::class,
-            'job-application' => \App\Models\JobApplication::class,
-            'milestone' => \App\Models\Milestone::class,
-            'newsletter' => \App\Models\Newsletter::class,
-            'partner' => \App\Models\Partner::class,
-            'project' => \App\Models\Project::class,
-            'project-image' => \App\Models\ProjectImage::class,
-            'quote-request' => \App\Models\QuoteRequest::class,
-            'quote-request-file' => \App\Models\QuoteRequestFile::class,
-            'service' => \App\Models\Service::class,
-            'setting' => \App\Models\Setting::class,
-            'slider' => \App\Models\Slider::class,
-            'tag' => \App\Models\Tag::class,
-            'team-member' => \App\Models\TeamMember::class,
-            'testimonial' => \App\Models\Testimonial::class,
-            'user' => \App\Models\User::class,
+            'announcement' => Announcement::class,
+            'blog' => Blog::class,
+            'department' => Department::class,
+            'employee' => Employee::class,
+            'employee-bank-detail' => EmployeeBankDetail::class,
+            'employment-type' => EmploymentType::class,
+            'job-application-document' => JobApplicationDocument::class,
+            'position' => Position::class,
+            'blog-category' => BlogCategory::class,
+            'blog-comment' => BlogComment::class,
+            'career' => Career::class,
+            'certificate' => Certificate::class,
+            'client' => Client::class,
+            'contact-message' => ContactMessage::class,
+            'csr-initiative' => CsrInitiative::class,
+            'division' => Division::class,
+            'download' => Download::class,
+            'faq' => Faq::class,
+            'gallery' => Gallery::class,
+            'gallery-image' => GalleryImage::class,
+            'job-application' => JobApplication::class,
+            'milestone' => Milestone::class,
+            'newsletter' => Newsletter::class,
+            'partner' => Partner::class,
+            'project' => Project::class,
+            'project-image' => ProjectImage::class,
+            'quote-request' => QuoteRequest::class,
+            'quote-request-file' => QuoteRequestFile::class,
+            'service' => Service::class,
+            'setting' => Setting::class,
+            'slider' => Slider::class,
+            'tag' => Tag::class,
+            'team-member' => TeamMember::class,
+            'testimonial' => Testimonial::class,
+            'user' => User::class,
         ]);
 
         $this->flushSiteCacheOnContentChange();
@@ -100,7 +142,7 @@ class AppServiceProvider extends ServiceProvider
             foreach (['service_id', 'template_id', 'public_key', 'private_key'] as $key) {
                 if (blank($config[$key] ?? null)) {
                     throw new \RuntimeException(
-                        "EmailJS is missing its {$key}. Set EMAILJS_".strtoupper($key)." in .env."
+                        "EmailJS is missing its {$key}. Set EMAILJS_".strtoupper($key).' in .env.'
                     );
                 }
             }
@@ -125,23 +167,23 @@ class AppServiceProvider extends ServiceProvider
     protected function flushSiteCacheOnContentChange(): void
     {
         $models = [
-            \App\Models\Blog::class,
-            \App\Models\BlogCategory::class,
-            \App\Models\Certificate::class,
-            \App\Models\Client::class,
-            \App\Models\CsrInitiative::class,
-            \App\Models\Division::class,
-            \App\Models\Download::class,
-            \App\Models\Faq::class,
-            \App\Models\Gallery::class,
-            \App\Models\Milestone::class,
-            \App\Models\Partner::class,
-            \App\Models\Project::class,
-            \App\Models\Seo::class,
-            \App\Models\Service::class,
-            \App\Models\Slider::class,
-            \App\Models\TeamMember::class,
-            \App\Models\Testimonial::class,
+            Blog::class,
+            BlogCategory::class,
+            Certificate::class,
+            Client::class,
+            CsrInitiative::class,
+            Division::class,
+            Download::class,
+            Faq::class,
+            Gallery::class,
+            Milestone::class,
+            Partner::class,
+            Project::class,
+            Seo::class,
+            Service::class,
+            Slider::class,
+            TeamMember::class,
+            Testimonial::class,
         ];
 
         $flush = function (): void {

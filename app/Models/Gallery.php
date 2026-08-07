@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasMediaPaths;
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Gallery extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
     use HasMediaPaths;
     use HasSlug;

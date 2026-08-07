@@ -35,7 +35,7 @@ class ClientAccountCreated extends Notification implements ShouldQueue
             ->line('• Request a written quotation and track its progress')
             ->line('• Apply for vacancies and follow your applications')
             ->line('• Keep a record of every enquiry you send us')
-            ->line('**Please confirm your email address** using the separate verification message we have just sent. Until you do, you will not be able to submit a request.')
+            ->line('**Please confirm your email address** using the code or link in the separate verification message we have just sent. Until you do, you will not be able to submit a request.')
             ->action('Go to your account', route('account.dashboard'))
             ->line('If you did not create this account, please ignore both emails and nothing further will happen.')
             ->salutation('Kind regards,'."\n".setting('company.name'));

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Notifications\ContactMessageReply;
+use App\Support\DivisionScope;
 use App\Support\Navigation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,23 +119,11 @@ class ContactMessageController extends Controller
      */
     protected function scopedQuery(): Builder
     {
-        $query = ContactMessage::query();
-        $user = auth()->user();
-
-        if (Navigation::isDivisionScoped($user)) {
-            $query->where('division_id', $user->division_id);
-        }
-
-        return $query;
+        return ContactMessage::query()->withinDivisionOf(auth()->user());
     }
 
     protected function assertWithinScope(ContactMessage $message): void
     {
-        $user = auth()->user();
-
-        if (Navigation::isDivisionScoped($user)) {
-            abort_unless($message->division_id === $user->division_id, 403,
-                'This enquiry belongs to another division.');
-        }
+        DivisionScope::assertVisible(auth()->user(), $message->division_id, 'enquiry');
     }
 }

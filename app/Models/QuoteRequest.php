@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
  */
 class QuoteRequest extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
 
     public const STATUSES = ['new', 'in_review', 'quoted', 'won', 'lost', 'closed'];
@@ -135,5 +137,14 @@ class QuoteRequest extends Model
             'low' => 'secondary',
             default => 'info',
         };
+    }
+
+    /**
+     * An enquiry that has not been routed yet belongs to nobody. Showing it
+     * to all four divisions would be noise, not access.
+     */
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
     }
 }

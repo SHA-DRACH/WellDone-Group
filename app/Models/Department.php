@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Department extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
     use HasSlug;
     use LogsActivity;
@@ -81,5 +83,14 @@ class Department extends Model
     public function scopeOrdered(Builder $query): Builder
     {
         return $query->orderBy('sort_order')->orderBy('name');
+    }
+
+    /**
+     * An absent division means a central department, which is HR's to manage
+     * rather than a division head's to browse.
+     */
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
     }
 }

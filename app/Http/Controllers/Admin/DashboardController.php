@@ -14,17 +14,29 @@ use App\Models\Project;
 use App\Models\QuoteRequest;
 use App\Models\Service;
 use App\Models\User;
+use App\Support\Navigation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
         // The dashboard is its own capability — it must not be tied to any
         // one module's permissions, or a sales officer would be locked out.
         abort_unless(auth()->user()->can(\App\Support\Permissions::DASHBOARD_VIEW), 403);
+
+        /*
+         * This screen counts the whole group: every division's requests,
+         * projects and staff. Somebody confined to one division has no
+         * business reading it, and the sign-in redirect alone is not enough —
+         * /admin can be typed, bookmarked, or reached by a stale link.
+         */
+        if (Navigation::isDivisionScoped(auth()->user())) {
+            return redirect()->to(Navigation::homeRouteFor(auth()->user()));
+        }
 
         return view('admin.dashboard', [
             'stats' => $this->statistics(),

@@ -248,10 +248,21 @@
                     <h2 class="h6 mb-2"><i class="fa-solid fa-key me-2"></i>Portal sign-in</h2>
                     <x-form.checkbox name="generate_login" label="Create a sign-in account"
                                      :value="false"
-                                     help="Emails the employee a link to set their own password. Requires a work email address." />
+                                     help="Requires a work email address." />
+
+                    <hr class="my-3">
+
+                    <x-form.input name="password" type="password" label="Set a password (optional)"
+                                  autocomplete="new-password"
+                                  help="At least 8 characters, upper and lower case, and a number." />
+                    <x-form.input name="password_confirmation" type="password" label="Confirm password"
+                                  autocomplete="new-password" />
+
                     <p class="text-muted mb-0" style="font-size:.75rem;">
-                        No password is generated or emailed — a password sitting in an inbox stays
-                        there indefinitely. The link expires.
+                        Leave both blank and the employee is emailed an expiring link to choose their
+                        own password — better, because then nobody else ever knows it. Set one here
+                        only for staff who cannot reliably receive email; they will be made to change
+                        it the first time they sign in.
                     </p>
                 </div>
             @else

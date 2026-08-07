@@ -30,7 +30,7 @@ class JobApplicationSubmitted extends Notification implements ShouldQueue
             ->line('**Your reference:** '.$this->application->reference)
             ->line('Our recruitment team will review your application. If your experience matches what the role requires, we will be in touch to arrange the next step.')
             ->line('Please note that owing to the volume of applications we receive, we are not always able to respond to every candidate individually.')
-            ->replyTo(setting('contact.email_hr', setting('contact.email_general')), setting('company.name'))
+            ->replyTo(setting('contact.email_hr', setting('contact.email_general', config('mail.from.address'))), setting('company.name'))
             ->salutation('Kind regards,'."\n".'Human Resources'."\n".setting('company.name'));
     }
 }

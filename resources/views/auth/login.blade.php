@@ -9,6 +9,14 @@
         right place automatically.
     </p>
 
+    {{-- Carries the outcome of confirming an address, which happens on the way here. --}}
+    @if(session('status'))
+        <div class="alert alert-success small d-flex align-items-start gap-2" role="status">
+            <i class="fa-solid fa-circle-check mt-1"></i>
+            <div>{{ session('status') }}</div>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
 

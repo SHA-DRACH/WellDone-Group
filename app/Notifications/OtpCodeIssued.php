@@ -57,7 +57,7 @@ class OtpCodeIssued extends Notification implements ShouldQueue
             ->line('**Never share it with anyone.** Nobody from '.setting('company.name')
                 .' will ask you for it — not by phone, not by email.')
             ->line('If you did not request this, you can ignore this message; nothing will change.')
-            ->replyTo(setting('contact.email_general'), setting('company.name'))
+            ->replyTo(setting('contact.email_general', config('mail.from.address')), setting('company.name'))
             ->salutation('Regards,'."\n".setting('company.name'));
     }
 }

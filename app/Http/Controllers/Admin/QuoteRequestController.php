@@ -7,7 +7,7 @@ use App\Models\Division;
 use App\Models\QuoteRequest;
 use App\Models\QuoteRequestFile;
 use App\Models\User;
-use App\Support\Navigation;
+use App\Support\DivisionScope;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -136,23 +136,11 @@ class QuoteRequestController extends Controller
     /** Base query, already narrowed to what this user is allowed to see. */
     protected function scopedQuery(): Builder
     {
-        $query = QuoteRequest::query();
-        $user = auth()->user();
-
-        if (Navigation::isDivisionScoped($user)) {
-            $query->where('division_id', $user->division_id);
-        }
-
-        return $query;
+        return QuoteRequest::query()->withinDivisionOf(auth()->user());
     }
 
     protected function assertWithinScope(QuoteRequest $quote): void
     {
-        $user = auth()->user();
-
-        if (Navigation::isDivisionScoped($user)) {
-            abort_unless($quote->division_id === $user->division_id, 403,
-                'This request belongs to another division.');
-        }
+        DivisionScope::assertVisible(auth()->user(), $quote->division_id, 'request');
     }
 }

@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasMediaPaths;
+use App\Models\Concerns\ScopedToDivision;
+use App\Notifications\VerifyEmailWithCode;
+use App\Services\OtpService;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +30,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
+    use ScopedToDivision;
     use HasFactory;
     use HasMediaPaths;
     use HasRoles;
@@ -52,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
@@ -156,6 +161,27 @@ class User extends Authenticatable implements MustVerifyEmail
     // -------------------------------------------------- Accessors & helpers
 
     /**
+     * Send the verification email with a one-time code beside the link.
+     *
+     * Overrides the framework's link-only message. Minting the code here means
+     * every route that asks for verification — registration, the resend
+     * button, an address changed in the profile — sends one email the
+     * recipient can act on either way, instead of making them request a second
+     * one to get a code.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $minted = app(OtpService::class)->mint(
+            $this->getEmailForVerification(),
+            OtpService::PURPOSE_EMAIL_VERIFICATION,
+            $this,
+            request()?->ip(),
+        );
+
+        $this->notify(new VerifyEmailWithCode($minted['code']));
+    }
+
+    /**
      * An uploaded avatar wins; otherwise fall back to the picture from the
      * identity provider, so accounts created with Google already have one.
      */
@@ -215,5 +241,14 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => now(),
             'last_login_ip' => $ip,
         ])->saveQuietly();
+    }
+
+    /**
+     * A group-level account has no division. Treating that as "belongs to
+     * everyone" would hand a division head the entire staff list.
+     */
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
     }
 }

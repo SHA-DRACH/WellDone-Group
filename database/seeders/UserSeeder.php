@@ -91,12 +91,12 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        // One officer per business division, so each division dashboard has a
-        // signed-in owner out of the box. In normal operation an
+        // A head for each business division, so every division dashboard has
+        // a signed-in owner out of the box. In normal operation an
         // administrator creates these from Admin → Users, which also emails
         // the new user a link to set their own password.
-        foreach ($this->divisionOfficers() as $officer) {
-            $accounts[] = $officer;
+        foreach ($this->divisionHeads() as $head) {
+            $accounts[] = $head;
         }
 
         foreach ($accounts as $account) {
@@ -104,17 +104,26 @@ class UserSeeder extends Seeder
             $divisionSlug = $account['division'] ?? null;
             unset($account['role'], $account['division']);
 
-            $user = User::query()->updateOrCreate(
-                ['email' => $account['email']],
-                array_merge($account, [
-                    'password' => Hash::make('WellDone@2026'),
-                    'email_verified_at' => now(),
-                    'is_active' => true,
-                    'division_id' => $divisionSlug
-                        ? Division::query()->where('slug', $divisionSlug)->value('id')
-                        : null,
-                ])
-            );
+            /*
+             * withTrashed matters: accounts are retired rather than removed,
+             * so a soft-deleted row keeps its address in the unique index. A
+             * plain updateOrCreate cannot see it and collides with the index
+             * instead of updating the row.
+             */
+            $user = User::withTrashed()->firstOrNew(['email' => $account['email']]);
+
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            $user->forceFill(array_merge($account, [
+                'password' => Hash::make('WellDone@2026'),
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'division_id' => $divisionSlug
+                    ? Division::query()->where('slug', $divisionSlug)->value('id')
+                    : null,
+            ]))->save();
 
             $user->syncRoles([$role]);
         }
@@ -123,45 +132,49 @@ class UserSeeder extends Seeder
     }
 
     /**
-     * Division-scoped accounts. These users hold no group-level role, so
-     * App\Support\Navigation routes them straight to their own division
-     * dashboard on sign-in and denies them any other division.
+     * The head of each business division.
+     *
+     * They hold the Division Manager role and carry a division_id, which is
+     * what confines them: App\Support\DivisionScope narrows every admin query
+     * to that division, and App\Support\Navigation sends them to its
+     * dashboard on sign-in. Neither depends on the navigation hiding
+     * anything — typing another division's URL is refused with a 403.
      *
      * @return array<int, array<string, string>>
      */
-    protected function divisionOfficers(): array
+    protected function divisionHeads(): array
     {
         return [
             [
                 'name' => 'Prince Tarr',
                 'email' => 'mining@welldonegroup.com',
-                'position' => 'Mining & Quarry Operations Officer',
-                'department' => 'Mining',
-                'role' => Roles::SALES_OFFICER,
+                'position' => 'Head of Mining & Quarry',
+                'department' => 'Mining & Quarry',
+                'role' => Roles::DIVISION_MANAGER,
                 'division' => 'mining-quarry',
             ],
             [
                 'name' => 'Miatta Freeman',
                 'email' => 'logistics@welldonegroup.com',
-                'position' => 'Procurement & Logistics Officer',
-                'department' => 'Logistics',
-                'role' => Roles::SALES_OFFICER,
+                'position' => 'Head of Procurement & Logistics',
+                'department' => 'Procurement & Logistics',
+                'role' => Roles::DIVISION_MANAGER,
                 'division' => 'procurement-logistics',
             ],
             [
                 'name' => 'Yassah Toe',
                 'email' => 'medical@welldonegroup.com',
-                'position' => 'Medical Equipment Officer',
-                'department' => 'Medical',
-                'role' => Roles::SALES_OFFICER,
+                'position' => 'Head of Medical Equipment & Supplies',
+                'department' => 'Medical Equipment',
+                'role' => Roles::DIVISION_MANAGER,
                 'division' => 'medical-equipment',
             ],
             [
                 'name' => 'Nathan Gbeh',
                 'email' => 'ictdesk@welldonegroup.com',
-                'position' => 'ICT Services Officer',
-                'department' => 'ICT',
-                'role' => Roles::SALES_OFFICER,
+                'position' => 'Head of ICT Services',
+                'department' => 'ICT Services',
+                'role' => Roles::DIVISION_MANAGER,
                 'division' => 'ict-services',
             ],
         ];

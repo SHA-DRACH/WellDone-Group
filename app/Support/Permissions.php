@@ -168,6 +168,24 @@ final class Permissions
 
     public const HR_REPORTS_VIEW = 'hr_reports.view';
 
+    /*
+     * Leave. Approving is deliberately separate from maintaining requests: an
+     * HR officer keys in a paper form on somebody's behalf every day without
+     * thereby being able to grant it.
+     */
+    public const LEAVE_VIEW = 'leave.view';
+    public const LEAVE_CREATE = 'leave.create';
+    public const LEAVE_UPDATE = 'leave.update';
+    public const LEAVE_DELETE = 'leave.delete';
+    public const LEAVE_APPROVE = 'leave.approve';
+
+    /** Entitlement rules and per-employee balance adjustments. */
+    public const LEAVE_TYPES_VIEW = 'leave_types.view';
+    public const LEAVE_TYPES_CREATE = 'leave_types.create';
+    public const LEAVE_TYPES_UPDATE = 'leave_types.update';
+    public const LEAVE_TYPES_DELETE = 'leave_types.delete';
+    public const LEAVE_BALANCES_ADJUST = 'leave_types.adjust_balances';
+
     /**
      * Every permission, grouped by module. The keys drive the grouped
      * checkbox layout on the role edit screen.
@@ -223,6 +241,14 @@ final class Permissions
                 self::ANNOUNCEMENTS_UPDATE, self::ANNOUNCEMENTS_DELETE,
             ],
             'hr_reports' => [self::HR_REPORTS_VIEW],
+            'leave' => [
+                self::LEAVE_VIEW, self::LEAVE_CREATE, self::LEAVE_UPDATE,
+                self::LEAVE_DELETE, self::LEAVE_APPROVE,
+            ],
+            'leave_types' => [
+                self::LEAVE_TYPES_VIEW, self::LEAVE_TYPES_CREATE, self::LEAVE_TYPES_UPDATE,
+                self::LEAVE_TYPES_DELETE, self::LEAVE_BALANCES_ADJUST,
+            ],
         ];
     }
 
@@ -261,6 +287,8 @@ final class Permissions
             'employees' => 'Employee Records',
             'recruitment' => 'Recruitment',
             'hr_reports' => 'HR Reports',
+            'leave' => 'Leave Requests',
+            'leave_types' => 'Leave Entitlement',
             'announcements' => 'Internal Announcements',
             default => str($module)->replace('_', ' ')->title()->toString(),
         };

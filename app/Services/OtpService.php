@@ -24,6 +24,12 @@ use Illuminate\Support\Str;
  */
 class OtpService
 {
+    public const PURPOSE_EMAIL_VERIFICATION = 'email_verification';
+
+    public const PURPOSE_PASSWORD_RESET = 'password_reset';
+
+    public const PURPOSE_PASSWORD_CHANGE = 'password_change';
+
     public const LENGTH = 6;
 
     public const TTL_MINUTES = 10;
@@ -36,12 +42,32 @@ class OtpService
     public const WINDOW_MINUTES = 15;
 
     /**
-     * Create a code, email it, and return the record.
+     * Create a code and email it on its own, and return the record.
+     */
+    public function issue(string $email, string $purpose, ?User $user = null, ?string $ip = null): OtpCode
+    {
+        ['code' => $code, 'record' => $record] = $this->mint($email, $purpose, $user, $ip);
+
+        // The plain code exists only here, in memory, on its way to the email.
+        Notification::route('mail', $record->email)->notify(new OtpCodeIssued($code, $purpose, $user?->name));
+
+        return $record;
+    }
+
+    /**
+     * Create a code and return it in plain text alongside its record, without
+     * sending anything.
+     *
+     * For the callers that carry the code in an email of their own — the
+     * verification message puts the code beside the link, so one email covers
+     * both ways of confirming an address.
      *
      * Any earlier unused code for the same address and purpose is spent
      * first, so only the newest code ever works.
+     *
+     * @return array{code: string, record: OtpCode}
      */
-    public function issue(string $email, string $purpose, ?User $user = null, ?string $ip = null): OtpCode
+    public function mint(string $email, string $purpose, ?User $user = null, ?string $ip = null): array
     {
         $email = Str::lower(trim($email));
 
@@ -62,10 +88,7 @@ class OtpService
             'ip_address' => $ip,
         ]);
 
-        // The plain code exists only here, in memory, on its way to the email.
-        Notification::route('mail', $email)->notify(new OtpCodeIssued($code, $purpose, $user?->name));
-
-        return $record;
+        return ['code' => $code, 'record' => $record];
     }
 
     /**

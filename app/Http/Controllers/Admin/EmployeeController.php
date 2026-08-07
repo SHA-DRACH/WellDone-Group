@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Spatie\Activitylog\Models\Activity;
 
 /**
@@ -132,7 +133,7 @@ class EmployeeController extends Controller
 
             // Optional portal login.
             if ($request->boolean('generate_login')) {
-                $this->createLoginFor($employee);
+                $this->createLoginFor($employee, $data['password'] ?? null);
             }
 
             return $employee;
@@ -179,7 +180,7 @@ class EmployeeController extends Controller
             $this->syncBankDetails($employee, $data, $request);
 
             if ($request->boolean('generate_login') && ! $employee->user_id) {
-                $this->createLoginFor($employee);
+                $this->createLoginFor($employee, $data['password'] ?? null);
             }
         });
 
@@ -208,7 +209,7 @@ class EmployeeController extends Controller
     }
 
     /** Create a portal login for an employee who does not have one. */
-    public function createLogin(Employee $employee): RedirectResponse
+    public function createLogin(Request $request, Employee $employee): RedirectResponse
     {
         $this->authorize('update', $employee);
 
@@ -220,10 +221,17 @@ class EmployeeController extends Controller
             return back()->with('error', 'Add a work email address to the record first.');
         }
 
-        $this->createLoginFor($employee);
+        $validated = $request->validate([
+            'password' => ['nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+        ]);
 
-        return back()->with('success',
-            'Sign-in account created. '.$employee->full_name.' has been emailed a link to set their password.');
+        $password = $validated['password'] ?? null;
+
+        $this->createLoginFor($employee, $password);
+
+        return back()->with('success', $password
+            ? 'Sign-in account created. Give '.$employee->first_name.' the password you set — they will be asked to change it when they first sign in.'
+            : 'Sign-in account created. '.$employee->full_name.' has been emailed a link to set their password.');
     }
 
     // ------------------------------------------------------------------
@@ -231,15 +239,32 @@ class EmployeeController extends Controller
     // ------------------------------------------------------------------
 
     /**
-     * Creates the user account and emails a set-your-own-password link.
+     * Creates the user account for an employee.
      *
-     * No password is ever generated and emailed: a password in an inbox is a
-     * password in everyone's inbox forever. A signed, expiring link is safer
-     * and no less convenient.
+     * Two ways in, and the caller picks by passing a password or not:
+     *
+     *  - No password: the employee is emailed a signed, expiring link and
+     *    chooses their own. Preferred, because a password nobody else ever
+     *    knew cannot be leaked by anyone else.
+     *  - A password set by HR: for staff with no reliable email — a plant
+     *    operator with a shared inbox cannot follow a link that expires in an
+     *    hour. The account is flagged must_change_password, so the password HR
+     *    knows stops working the moment the employee signs in.
      */
-    protected function createLoginFor(Employee $employee): void
+    protected function createLoginFor(Employee $employee, ?string $password = null): void
     {
-        $user = User::query()->where('email', $employee->email)->first();
+        // Both paths below read these, and in the update() path the employee
+        // came from route binding with nothing eager loaded.
+        $employee->loadMissing(['position', 'department']);
+
+        /*
+         * withTrashed matters: accounts are retired, not removed (see
+         * UserController::destroy), so a deleted row — and the unique index on
+         * its address — outlives the deletion. Looking the address up without
+         * it misses a retired account and the insert below collides with the
+         * index instead.
+         */
+        $user = User::withTrashed()->where('email', $employee->email)->first();
 
         if (! $user) {
             $user = new User;
@@ -250,9 +275,39 @@ class EmployeeController extends Controller
                 'position' => $employee->position?->title,
                 'department' => $employee->department?->name,
                 'division_id' => $employee->division_id,
-                'password' => Str::random(48),
+                // Unusable by design when HR sets none: the account can only
+                // be entered through the emailed link.
+                'password' => $password ?? Str::random(48),
+                'must_change_password' => filled($password),
                 'is_active' => true,
             ])->save();
+        } else {
+            /*
+             * Re-hiring, or a visitor who already had a client account. Bring
+             * the row back and point it at the current employment record —
+             * a restored account left deactivated or showing a former posting
+             * is worse than no account at all.
+             */
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            $attributes = [
+                'phone' => $employee->phone,
+                'position' => $employee->position?->title,
+                'department' => $employee->department?->name,
+                'division_id' => $employee->division_id,
+                'is_active' => true,
+            ];
+
+            // The account's own name is left alone: the person chose it, and
+            // for a returning employee it is already right.
+            if (filled($password)) {
+                $attributes['password'] = $password;
+                $attributes['must_change_password'] = true;
+            }
+
+            $user->forceFill($attributes)->save();
         }
 
         // Employee role only — a portal login grants no administrative rights.
@@ -263,7 +318,7 @@ class EmployeeController extends Controller
         $employee->forceFill(['user_id' => $user->id])->save();
 
         $user->sendEmailVerificationNotification();
-        $user->notify(new EmployeeWelcome($employee->fresh(['department', 'position'])));
+        $user->notify(new EmployeeWelcome($employee->fresh(['department', 'position']), passwordSetByHr: filled($password)));
     }
 
     protected function employeeAttributes(array $data): array
@@ -382,6 +437,12 @@ class EmployeeController extends Controller
         if ($request->boolean('generate_login')) {
             $rules['email'] = ['required', 'email:rfc', 'max:190',
                 Rule::unique('employees', 'email')->ignore($employee?->id)];
+
+            // Optional: left blank, the employee sets their own through the
+            // emailed link. Held to the same strength as any other password —
+            // being chosen by HR is no reason for it to be weak.
+            $rules['password'] = ['nullable', 'confirmed',
+                Password::min(8)->mixedCase()->numbers()];
         }
 
         return $rules;
@@ -408,11 +469,19 @@ class EmployeeController extends Controller
         ];
     }
 
-    /** Narrowed to what this user may see. */
+    /**
+     * Narrowed to what this user may see.
+     *
+     * Both confinements are applied, and they compose: a division head who is
+     * also a department manager sees the intersection. Each uses `?? 0` for
+     * the missing case so an incomplete account matches nothing rather than
+     * everything — the same fail-closed rule as DivisionScope.
+     */
     protected function scopedQuery(): Builder
     {
-        $query = Employee::query();
         $user = auth()->user();
+
+        $query = Employee::query()->withinDivisionOf($user);
 
         if ($user->hasRole(Roles::DEPARTMENT_MANAGER) && ! $user->hasAnyRole(Navigation::GROUP_ROLES)) {
             $query->where('department_id', $user->employee?->department_id ?? 0);

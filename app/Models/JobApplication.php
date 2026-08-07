@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToDivision;
+use App\Support\DivisionScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +21,35 @@ use Illuminate\Support\Str;
 class JobApplication extends Model
 {
     use HasFactory;
+    use ScopedToDivision;
+
+    /**
+     * An application carries no division of its own — it inherits the one on
+     * the vacancy applied for. Both halves of the trait are therefore
+     * overridden to reach through the relation.
+     */
+    public function scopeWithinDivisionOf(Builder $query, ?User $user): Builder
+    {
+        $id = DivisionScope::idFor($user);
+
+        if ($id === null) {
+            return $query;
+        }
+
+        // A speculative application against no vacancy belongs to nobody
+        // until recruitment routes it, so it is not shown to any division.
+        return $query->whereHas('career', fn (Builder $q) => $q->where('division_id', $id));
+    }
+
+    public function divisionScopeId(): ?int
+    {
+        return $this->career?->division_id;
+    }
+
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
+    }
 
     /** The recruitment pipeline, in the order a candidate moves through it. */
     public const STATUSES = [

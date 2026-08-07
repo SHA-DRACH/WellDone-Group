@@ -44,6 +44,16 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('downloads', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         /*
+         * The site assistant. A real conversation is a handful of questions a
+         * minute at most; the hourly ceiling is what stops a script from
+         * running up a language-model bill on our account.
+         */
+        RateLimiter::for('assistant', fn (Request $request) => [
+            Limit::perMinute(10)->by($request->ip()),
+            Limit::perHour(80)->by($request->ip()),
+        ]);
+
+        /*
          * One-time codes. OtpService already caps how many codes an address
          * may receive; this is the per-IP ceiling that stops one machine
          * cycling through many addresses, and limits guessing attempts.

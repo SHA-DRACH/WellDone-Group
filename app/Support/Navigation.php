@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Decides where a user lands after signing in.
@@ -56,6 +57,15 @@ final class Navigation
             return route('admin.division.dashboard', $user->division->slug);
         }
 
+        /*
+         * Confined to a division, but the division is missing or switched
+         * off. The group dashboard is not a safe fallback for them — it is
+         * the whole company — so send them somewhere that says so.
+         */
+        if (DivisionScope::restricts($user)) {
+            return route('admin.division.missing');
+        }
+
         return route('admin.dashboard');
     }
 
@@ -68,7 +78,7 @@ final class Navigation
      */
     public static function hrSignInAddress(): ?string
     {
-        return \Illuminate\Support\Facades\Cache::remember('auth.hr_signin_address', now()->addHour(), function () {
+        return Cache::remember('auth.hr_signin_address', now()->addHour(), function () {
             return User::query()
                 ->whereHas('roles', fn ($q) => $q->whereIn('name', [
                     Roles::HR_DIRECTOR, Roles::HR_MANAGER, Roles::HR_OFFICER,
@@ -81,11 +91,14 @@ final class Navigation
         });
     }
 
-    /** True when this user is scoped to a single division. */
+    /**
+     * True when this user is scoped to a single division.
+     *
+     * One definition, in DivisionScope. Two would eventually disagree, and
+     * the disagreement would show up as one screen filtering and another not.
+     */
     public static function isDivisionScoped(?User $user): bool
     {
-        return $user
-            && $user->division_id !== null
-            && ! $user->hasAnyRole(self::GROUP_ROLES);
+        return DivisionScope::restricts($user);
     }
 }

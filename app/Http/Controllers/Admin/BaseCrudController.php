@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Concerns\ScopedToDivision;
 use App\Services\MediaUploader;
+use App\Support\DivisionScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -139,7 +141,7 @@ abstract class BaseCrudController extends Controller
     {
         $this->authorize('viewAny', $this->model);
 
-        $query = $this->model::query()
+        $query = $this->scopedQuery()
             ->with($this->indexWith)
             ->withCount($this->indexWithCount);
 
@@ -216,6 +218,7 @@ abstract class BaseCrudController extends Controller
         $record = $this->findForEdit($id);
 
         $this->authorize('update', $record);
+        $this->assertWritableWithinDivision($record);
 
         $data = $request->validate($this->rules($request, $record));
         $data = $this->prepareData($data, $request, $record);
@@ -234,6 +237,7 @@ abstract class BaseCrudController extends Controller
         $record = $this->findForEdit($id);
 
         $this->authorize('delete', $record);
+        $this->assertWritableWithinDivision($record);
 
         $this->beforeDelete($record);
 
@@ -273,10 +277,71 @@ abstract class BaseCrudController extends Controller
         // Numeric ids stay usable even on slugged models, so links built by
         // hand or held in an old bookmark keep working.
         if ($routeKey !== $instance->getKeyName() && is_numeric($id)) {
-            return $query->where($instance->getKeyName(), $id)->firstOrFail();
+            $record = $query->where($instance->getKeyName(), $id)->firstOrFail();
+        } else {
+            $record = $query->where($routeKey, $id)->firstOrFail();
         }
 
-        return $query->where($routeKey, $id)->firstOrFail();
+        /*
+         * Looked up without the division filter, then refused — deliberately.
+         * Filtering the lookup instead would answer "404, no such record",
+         * which tells a division head that the slug they guessed does not
+         * exist. It does; it is simply not theirs. 403 is the honest answer
+         * and the one that will not send somebody hunting for a bug.
+         */
+        $this->assertWithinDivision($record);
+
+        return $record;
+    }
+
+    /**
+     * The base query for this module, already narrowed to the records the
+     * signed-in user is allowed to see.
+     *
+     * Modules whose model carries the ScopedToDivision trait are confined
+     * automatically. That is the point of doing it here: a new division-owned
+     * module inherits the restriction instead of relying on somebody
+     * remembering to add a `where` to its controller.
+     */
+    protected function scopedQuery(): Builder
+    {
+        $query = $this->model::query();
+
+        if (in_array(ScopedToDivision::class, class_uses_recursive($this->model), true)) {
+            $query->withinDivisionOf(auth()->user());
+        }
+
+        return $query;
+    }
+
+    /** Refuse a record from another division before anything is shown or changed. */
+    protected function assertWithinDivision(Model $record): void
+    {
+        if (! method_exists($record, 'isVisibleTo')) {
+            return;
+        }
+
+        abort_unless($record->isVisibleTo(auth()->user()), 403,
+            'This '.Str::lower($this->label).' belongs to another division.');
+    }
+
+    /**
+     * Changing a record is stricter than opening one.
+     *
+     * A division head can read the group's own records — a company-wide
+     * service, a corporate brochure — but must not rewrite them, because the
+     * other three divisions would silently inherit the change.
+     */
+    protected function assertWritableWithinDivision(Model $record): void
+    {
+        if (! method_exists($record, 'isWritableBy')) {
+            return;
+        }
+
+        abort_unless($record->isWritableBy(auth()->user()), 403,
+            $record->divisionScopeId() === null
+                ? 'This '.Str::lower($this->label).' belongs to the group and can only be changed centrally.'
+                : 'This '.Str::lower($this->label).' belongs to another division.');
     }
 
     /**
@@ -307,6 +372,25 @@ abstract class BaseCrudController extends Controller
      */
     protected function prepareData(array $data, Request $request, ?Model $record): array
     {
+        /*
+         * A division user does not get to choose the division.
+         *
+         * The form only offers their own, but the form is not the boundary —
+         * a hand-made POST could name any division, and on a model where the
+         * field is fillable that would file the record under somebody else.
+         * Overwriting the submitted value here closes that, and does so for
+         * every module at once.
+         */
+        $scopedTo = DivisionScope::idFor(auth()->user());
+
+        if ($scopedTo !== null && in_array(ScopedToDivision::class, class_uses_recursive($this->model), true)) {
+            $column = (new $this->model)->divisionColumn();
+
+            if (array_key_exists($column, $data) || $record === null) {
+                $data[$column] = $scopedTo;
+            }
+        }
+
         foreach ($this->imageFields as $field => $directory) {
             unset($data[$field]);
 

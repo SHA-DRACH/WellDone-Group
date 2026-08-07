@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Career extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
     use HasSlug;
     use LogsActivity;

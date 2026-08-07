@@ -21,42 +21,51 @@ return new class extends Migration
          * `interview` becomes the more precise `interview_scheduled` and
          * `interview_completed`, and `under_review` replaces `reviewing`.
          * Existing rows are migrated below.
+         *
+         * MODIFY COLUMN is MySQL's; SQLite has no such statement and stores an
+         * enum as a plain string, so it needs no widening at all. Guarding by
+         * driver rather than assuming MySQL is what lets the test suite run on
+         * an in-memory SQLite database.
          */
-        DB::statement("
-            ALTER TABLE job_applications
-            MODIFY COLUMN status ENUM(
-                'new',
-                'reviewing',
-                'under_review',
-                'shortlisted',
-                'interview',
-                'interview_scheduled',
-                'interview_completed',
-                'offered',
-                'hired',
-                'rejected',
-                'withdrawn'
-            ) NOT NULL DEFAULT 'new'
-        ");
+        if ($this->supportsEnumModification()) {
+            DB::statement("
+                ALTER TABLE job_applications
+                MODIFY COLUMN status ENUM(
+                    'new',
+                    'reviewing',
+                    'under_review',
+                    'shortlisted',
+                    'interview',
+                    'interview_scheduled',
+                    'interview_completed',
+                    'offered',
+                    'hired',
+                    'rejected',
+                    'withdrawn'
+                ) NOT NULL DEFAULT 'new'
+            ");
+        }
 
         DB::table('job_applications')->where('status', 'reviewing')->update(['status' => 'under_review']);
         DB::table('job_applications')->where('status', 'interview')->update(['status' => 'interview_scheduled']);
 
         // Drop the two superseded values now that no row uses them.
-        DB::statement("
-            ALTER TABLE job_applications
-            MODIFY COLUMN status ENUM(
-                'new',
-                'under_review',
-                'shortlisted',
-                'interview_scheduled',
-                'interview_completed',
-                'offered',
-                'hired',
-                'rejected',
-                'withdrawn'
-            ) NOT NULL DEFAULT 'new'
-        ");
+        if ($this->supportsEnumModification()) {
+            DB::statement("
+                ALTER TABLE job_applications
+                MODIFY COLUMN status ENUM(
+                    'new',
+                    'under_review',
+                    'shortlisted',
+                    'interview_scheduled',
+                    'interview_completed',
+                    'offered',
+                    'hired',
+                    'rejected',
+                    'withdrawn'
+                ) NOT NULL DEFAULT 'new'
+            ");
+        }
 
         Schema::table('job_applications', function (Blueprint $table) {
             $table->timestamp('interview_at')->nullable()->after('reviewed_at');
@@ -106,10 +115,18 @@ return new class extends Migration
             ]);
         });
 
-        DB::statement("
-            ALTER TABLE job_applications
-            MODIFY COLUMN status ENUM('new','reviewing','shortlisted','interview','offered','hired','rejected')
-            NOT NULL DEFAULT 'new'
-        ");
+        if ($this->supportsEnumModification()) {
+            DB::statement("
+                ALTER TABLE job_applications
+                MODIFY COLUMN status ENUM('new','reviewing','shortlisted','interview','offered','hired','rejected')
+                NOT NULL DEFAULT 'new'
+            ");
+        }
+    }
+
+    /** MySQL and MariaDB only; every other driver stores an enum as a string. */
+    protected function supportsEnumModification(): bool
+    {
+        return in_array(DB::getDriverName(), ['mysql', 'mariadb'], true);
     }
 };

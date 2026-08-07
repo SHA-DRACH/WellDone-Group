@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ContactMessage extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
 
     public const STATUSES = ['new', 'read', 'replied', 'archived', 'spam'];
@@ -85,5 +87,14 @@ class ContactMessage extends Model
             'spam' => 'danger',
             default => 'secondary',
         };
+    }
+
+    /**
+     * An enquiry that has not been routed yet belongs to nobody. Showing it
+     * to all four divisions would be noise, not access.
+     */
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
     }
 }

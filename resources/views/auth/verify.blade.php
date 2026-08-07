@@ -7,19 +7,22 @@
 
     @if(session('resent'))
         <div class="alert alert-success small" role="status">
-            A fresh verification link has been sent to your email address.
+            A fresh verification email has been sent to your address, with a new code and link.
+            Any earlier code has stopped working.
         </div>
     @endif
 
     <p class="text-muted small mb-4">
-        Before you can use the control panel, please follow the link we emailed to
-        <strong>{{ auth()->user()->email }}</strong>. If it has not arrived, we can send another.
+        Before you can use the control panel, please confirm the address we emailed:
+        <strong>{{ auth()->user()->email }}</strong>. That message holds both a link
+        and a six-digit code — either one confirms the address, so use whichever suits you.
     </p>
 
-    <form method="POST" action="{{ route('verification.resend') }}">
-        @csrf
-        <button type="submit" class="btn btn-primary w-100">Resend verification email</button>
-    </form>
+    {{-- The code is easier on a phone, where the emailed link often opens in a
+         browser with no session and the verification quietly fails. --}}
+    <a href="{{ route('otp.verify') }}" class="btn btn-primary w-100">
+        <i class="fa-solid fa-hashtag me-2"></i>Enter the code from the email
+    </a>
 
     <div class="d-flex align-items-center gap-3 my-4">
         <hr class="flex-grow-1 m-0">
@@ -27,11 +30,10 @@
         <hr class="flex-grow-1 m-0">
     </div>
 
-    {{-- A code is easier on a phone, where the emailed link often opens in a
-         browser with no session and the verification quietly fails. --}}
-    <a href="{{ route('otp.verify') }}" class="btn btn-outline-primary w-100">
-        <i class="fa-solid fa-hashtag me-2"></i>Verify with a code instead
-    </a>
+    <form method="POST" action="{{ route('verification.resend') }}">
+        @csrf
+        <button type="submit" class="btn btn-outline-primary w-100">Send the email again</button>
+    </form>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
         @csrf

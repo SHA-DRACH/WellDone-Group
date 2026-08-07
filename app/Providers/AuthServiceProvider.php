@@ -91,6 +91,8 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Department::class => \App\Policies\DepartmentPolicy::class,
         \App\Models\Position::class => \App\Policies\PositionPolicy::class,
         \App\Models\Announcement::class => \App\Policies\AnnouncementPolicy::class,
+        \App\Models\LeaveRequest::class => \App\Policies\LeaveRequestPolicy::class,
+        \App\Models\LeaveType::class => \App\Policies\LeaveTypePolicy::class,
     ];
 
     public function boot(): void

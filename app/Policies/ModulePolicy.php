@@ -31,7 +31,8 @@ abstract class ModulePolicy
 
     public function view(User $user, Model $model): bool
     {
-        return $user->can($this->permission('view'));
+        return $user->can($this->permission('view'))
+            && $this->readableAcrossDivisions($user, $model);
     }
 
     public function create(User $user): bool
@@ -41,17 +42,20 @@ abstract class ModulePolicy
 
     public function update(User $user, Model $model): bool
     {
-        return $user->can($this->permission('update'));
+        return $user->can($this->permission('update'))
+            && $this->writableAcrossDivisions($user, $model);
     }
 
     public function delete(User $user, Model $model): bool
     {
-        return $user->can($this->permission('delete'));
+        return $user->can($this->permission('delete'))
+            && $this->writableAcrossDivisions($user, $model);
     }
 
     public function restore(User $user, Model $model): bool
     {
-        return $user->can($this->permission('delete'));
+        return $user->can($this->permission('delete'))
+            && $this->writableAcrossDivisions($user, $model);
     }
 
     public function forceDelete(User $user, Model $model): bool
@@ -64,5 +68,24 @@ abstract class ModulePolicy
     protected function permission(string $ability): string
     {
         return $this->module().'.'.$ability;
+    }
+
+    /**
+     * A permission says what a role may do; the division says to whose
+     * records. Both have to hold, and this is where they meet — so every
+     * caller of `authorize()`, not only the shared CRUD controller, gets the
+     * confinement.
+     *
+     * Models with no division are unaffected: the trait supplies these
+     * methods, and a model without it answers neither.
+     */
+    protected function readableAcrossDivisions(User $user, Model $model): bool
+    {
+        return ! method_exists($model, 'isVisibleTo') || $model->isVisibleTo($user);
+    }
+
+    protected function writableAcrossDivisions(User $user, Model $model): bool
+    {
+        return ! method_exists($model, 'isWritableBy') || $model->isWritableBy($user);
     }
 }

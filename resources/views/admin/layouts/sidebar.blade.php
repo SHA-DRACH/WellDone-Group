@@ -1,15 +1,27 @@
 @php
-    // Counts for the "needs attention" badges. Cheap COUNT queries, cached
-    // briefly so they do not run on every single admin page load.
-    $badges = \Illuminate\Support\Facades\Cache::remember('admin.sidebar.badges', now()->addMinutes(2), fn () => [
-        'quotes' => \App\Models\QuoteRequest::query()->where('status', 'new')->count(),
-        'messages' => \App\Models\ContactMessage::query()->where('status', 'new')->count(),
-        'applications' => \App\Models\JobApplication::query()->where('status', 'new')->count(),
+    $me = auth()->user();
+    $scopedToDivision = \App\Support\Navigation::isDivisionScoped($me);
+
+    /*
+     * Counts for the "needs attention" badges. Cheap COUNT queries, cached
+     * briefly so they do not run on every admin page load.
+     *
+     * Cached per division, not globally: a badge reading "12 new requests"
+     * when only three are yours still discloses how busy the other divisions
+     * are, and one shared cache key would serve whichever count happened to
+     * be computed first to everybody.
+     */
+    $badgeKey = 'admin.sidebar.badges.'.($scopedToDivision ? 'division.'.$me->division_id : 'group');
+
+    $badges = \Illuminate\Support\Facades\Cache::remember($badgeKey, now()->addMinutes(2), fn () => [
+        'quotes' => \App\Models\QuoteRequest::query()->withinDivisionOf($me)->where('status', 'new')->count(),
+        'messages' => \App\Models\ContactMessage::query()->withinDivisionOf($me)->where('status', 'new')->count(),
+        'applications' => \App\Models\JobApplication::query()->withinDivisionOf($me)->where('status', 'new')->count(),
         'comments' => \App\Models\BlogComment::query()->where('is_approved', false)->count(),
     ]);
 
-    $myDivision = auth()->user()->division;
-    $allDivisions = \App\Support\Navigation::isDivisionScoped(auth()->user())
+    $myDivision = $me->division;
+    $allDivisions = $scopedToDivision
         ? collect()
         : \App\Models\Division::query()->active()->ordered()->get(['id', 'name', 'slug', 'icon']);
     /*
@@ -22,7 +34,7 @@
 @endphp
 
 <aside class="admin-sidebar">
-    <a href="{{ route('admin.dashboard') }}" class="admin-brand">
+    <a href="{{ \App\Support\Navigation::homeRouteFor($me) }}" class="admin-brand">
         @if(\App\Support\Brand::hasLogo())
             <img src="{{ brand('logo_light') }}" alt="" width="58" height="40"
                  style="border-radius:.5rem; object-fit:contain; background:#fff; padding:3px;">
@@ -36,12 +48,17 @@
     </a>
 
     <nav class="admin-nav" aria-label="Admin navigation">
-        <a class="nav-link {{ active_when('admin.dashboard') }}" href="{{ route('admin.dashboard') }}">
-            <i class="fa-solid fa-gauge-high"></i> Group Dashboard
-        </a>
+        {{-- The group dashboard counts the whole company, so it is not a
+             division head's to open. The controller redirects them anyway;
+             this stops the link appearing at all. --}}
+        @unless($scopedToDivision)
+            <a class="nav-link {{ active_when('admin.dashboard') }}" href="{{ route('admin.dashboard') }}">
+                <i class="fa-solid fa-gauge-high"></i> Group Dashboard
+            </a>
+        @endunless
 
         {{-- ------------------------------------------------ Division dashboards --}}
-        <div class="nav-section">Division Dashboards</div>
+        <div class="nav-section">{{ $scopedToDivision ? 'My Division' : 'Division Dashboards' }}</div>
 
         @if($myDivision)
             <a class="nav-link {{ $currentDivisionId === $myDivision->id ? 'active' : '' }}"

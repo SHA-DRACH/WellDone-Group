@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\ClientAccountCreated;
+use App\Support\PendingVerification;
 use App\Support\Roles;
 use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
@@ -71,11 +73,25 @@ class RegisterController extends Controller
     /**
      * Laravel's Registered event already triggers the verification email
      * (User implements MustVerifyEmail); this adds the welcome message.
+     *
+     * RegistersUsers signs the new account in for us. We undo that: an address
+     * nobody has confirmed yet is not a signed-in account, it is a claim. The
+     * account is parked as pending instead, which reaches the code screen and
+     * nothing else, and becomes a session once the code or the link proves the
+     * address is really theirs.
      */
-    protected function registered(\Illuminate\Http\Request $request, $user)
+    protected function registered(Request $request, $user)
     {
         $user->notify(new ClientAccountCreated($user));
 
-        return null;
+        $this->guard()->logout();
+
+        PendingVerification::remember($user);
+
+        return redirect()->route('otp.verify')->with(
+            'status',
+            'Almost there. We have emailed '.$user->email.' a six-digit code and a link — '
+            .'use either one to confirm the address, then you can sign in.'
+        );
     }
 }

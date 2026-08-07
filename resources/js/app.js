@@ -14,6 +14,7 @@ window.bootstrap = bootstrap;
 window.$ = window.jQuery = $;
 window.Swiper = Swiper;
 
+import { initAssistant } from './modules/assistant';
 import { initHeader } from './modules/header';
 import { initHeroSlider, initContentSliders } from './modules/sliders';
 import { initCounters } from './modules/counters';
@@ -39,4 +40,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initAdmin();
     initEditor();
     initMisc();
+    initAssistant();
 });

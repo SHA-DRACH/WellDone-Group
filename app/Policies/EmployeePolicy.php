@@ -66,11 +66,18 @@ class EmployeePolicy extends ModulePolicy
     }
 
     /**
-     * A department manager is confined to their own department; HR and group
-     * roles see everyone.
+     * Two confinements, and a record has to satisfy both.
+     *
+     * A department manager sees their own department. A division head sees
+     * their own division. HR and the group roles see everyone, which is the
+     * point of their being group roles.
      */
     protected function withinScope(User $user, Employee $employee): bool
     {
+        if (! $employee->isVisibleTo($user)) {
+            return false;
+        }
+
         if (! $user->hasRole(Roles::DEPARTMENT_MANAGER)) {
             return true;
         }

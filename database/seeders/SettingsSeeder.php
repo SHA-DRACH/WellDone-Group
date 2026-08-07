@@ -91,7 +91,7 @@ class SettingsSeeder extends Seeder
             ['key' => 'contact.phone_secondary', 'label' => 'Secondary Phone', 'value' => '+231 88 000 0000'],
             ['key' => 'contact.whatsapp', 'label' => 'WhatsApp Number', 'value' => '231770000000',
                 'description' => 'Digits only, including country code — used to build the wa.me quick-chat link.'],
-            ['key' => 'contact.email_general', 'label' => 'General Email', 'value' => 'info@welldonegroup.com'],
+            ['key' => 'contact.email_general', 'label' => 'General Email', 'value' => 'welldonegroupinc@gmail.com'],
             ['key' => 'contact.email_sales', 'label' => 'Sales Email', 'value' => 'sales@welldonegroup.com'],
             ['key' => 'contact.email_hr', 'label' => 'Careers Email', 'value' => 'careers@welldonegroup.com'],
             ['key' => 'contact.office_hours', 'label' => 'Office Hours', 'type' => 'text',
@@ -148,8 +148,19 @@ class SettingsSeeder extends Seeder
             ['key' => 'system.enable_careers', 'label' => 'Enable Careers Portal', 'type' => 'boolean', 'value' => '1'],
             ['key' => 'system.items_per_page', 'label' => 'Items Per Page', 'type' => 'integer', 'value' => '9'],
             ['key' => 'system.notify_quotes_to', 'label' => 'Quote Notification Recipient', 'value' => 'sales@welldonegroup.com', 'is_public' => false],
-            ['key' => 'system.notify_contact_to', 'label' => 'Contact Notification Recipient', 'value' => 'info@welldonegroup.com', 'is_public' => false],
+            ['key' => 'system.notify_contact_to', 'label' => 'Contact Notification Recipient', 'value' => 'welldonegroupinc@gmail.com', 'is_public' => false],
             ['key' => 'system.notify_applications_to', 'label' => 'Application Notification Recipient', 'value' => 'careers@welldonegroup.com', 'is_public' => false],
+
+            // ---------------------------------------------------- Assistant
+            ['key' => 'assistant.enabled', 'label' => 'Enable the Site Assistant', 'type' => 'boolean', 'value' => '1',
+                'description' => 'The chat helper in the corner of every public page. It answers from published site content only.'],
+            ['key' => 'assistant.name', 'label' => 'Assistant Name', 'value' => 'WellDone Assistant',
+                'description' => 'Shown on the chat window and used when it introduces itself.'],
+            ['key' => 'assistant.greeting', 'label' => 'Opening Message', 'type' => 'text',
+                'value' => 'Hello. I can help you find your way around the site — request a quotation, apply for a job, or reach the right team. What are you looking for?'],
+            ['key' => 'assistant.suggestions', 'label' => 'Suggested Questions', 'type' => 'json',
+                'value' => '["How do I request a quotation?","What services do you offer?","Are you hiring?","How do I contact you?"]',
+                'description' => 'Up to four starter questions offered as buttons. A JSON array of strings.'],
         ];
     }
 }

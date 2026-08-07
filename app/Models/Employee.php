@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasMediaPaths;
+use App\Models\Concerns\ScopedToDivision;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  */
 class Employee extends Model
 {
+    use ScopedToDivision;
     use HasFactory;
     use HasMediaPaths;
     use LogsActivity;
@@ -246,5 +248,14 @@ class Employee extends Model
         return $this->contract_expiry !== null
             && $this->contract_expiry->isFuture()
             && $this->contract_expiry->diffInDays(now()) <= $days;
+    }
+
+    /**
+     * An absent division means central staff — finance, HR, the executive —
+     * who are not any one division's people.
+     */
+    public function unassignedBelongsToGroup(): bool
+    {
+        return false;
     }
 }

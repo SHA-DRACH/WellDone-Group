@@ -55,6 +55,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Where a division account lands when it has no division on it, or its
+    // division has been switched off. Declared before the {division} route so
+    // the literal segment is not swallowed by the wildcard.
+    Route::view('division/none', 'admin.division-missing')->name('division.missing');
+
     // Per-division dashboard. One sign-in form leads here for division staff;
     // group-level staff can open any division from the switcher.
     Route::get('division/{division:slug}', [DivisionDashboardController::class, 'index'])

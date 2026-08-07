@@ -63,12 +63,19 @@
                     </dl>
                 @else
                     <p class="small text-muted mb-3">
-                        No sign-in account. Creating one emails them a link to set their own password.
+                        No sign-in account. Leave the password blank and they are emailed an expiring
+                        link to choose their own.
                     </p>
                     @can('update', $employee)
-                        <form method="POST" action="{{ route('admin.employees.login', $employee) }}"
-                              data-confirm="Create a portal sign-in and email {{ $employee->email ?: 'this employee' }}?">
+                        <form method="POST" action="{{ route('admin.employees.login', $employee) }}">
                             @csrf
+
+                            <x-form.input name="password" type="password" label="Set a password (optional)"
+                                          autocomplete="new-password"
+                                          help="8+ characters, mixed case, a number. They must change it at first sign-in." />
+                            <x-form.input name="password_confirmation" type="password" label="Confirm password"
+                                          autocomplete="new-password" />
+
                             <button type="submit" class="btn btn-sm btn-outline-primary w-100"
                                     @disabled(blank($employee->email))>
                                 <i class="fa-solid fa-key me-2"></i>Create sign-in account

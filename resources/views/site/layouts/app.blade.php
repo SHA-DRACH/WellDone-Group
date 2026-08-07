@@ -48,6 +48,10 @@
     @include('site.partials.footer')
 
     <div class="floating-actions">
+        @if(config('assistant.enabled') && setting('assistant.enabled', true))
+            @include('site.partials.assistant')
+        @endif
+
         @if($whatsapp = setting('contact.whatsapp'))
             <a href="https://wa.me/{{ preg_replace('/\D+/', '', $whatsapp) }}"
                class="float-btn float-btn--whatsapp"
