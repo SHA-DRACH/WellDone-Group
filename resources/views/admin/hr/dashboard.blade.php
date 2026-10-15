@@ -16,6 +16,8 @@
 
 @section('content')
 
+    @include('admin.hr._tabs')
+
     {{-- ------------------------------------------ Headline tiles --}}
     <div class="row g-3 mb-4">
         @php
@@ -53,6 +55,39 @@
             </div>
         @endforeach
     </div>
+
+    {{-- ------------------------------------------ Compliance: what is lapsing --}}
+    @if($expiring->isNotEmpty())
+        <div class="card-soft p-4 mb-4 border-start border-4 border-warning">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h2 class="h6 mb-0"><i class="fa-solid fa-bell text-warning me-2"></i>Certificates & documents needing attention</h2>
+                    <small class="text-muted">Expired, or expiring within 60 days.</small>
+                </div>
+                <div class="d-flex gap-2">
+                    @can('training.view')
+                        <a href="{{ route('admin.training.index', ['expiry' => 'expiring']) }}" class="btn btn-sm btn-outline-secondary">Training</a>
+                    @endcan
+                    @can('employee_documents.view')
+                        <a href="{{ route('admin.employee-documents.index', ['expiry' => 'expiring']) }}" class="btn btn-sm btn-outline-secondary">Documents</a>
+                    @endcan
+                </div>
+            </div>
+            <div class="row g-2">
+                @foreach($expiring as $item)
+                    <div class="col-md-6 col-xl-4">
+                        <div class="d-flex justify-content-between align-items-center border rounded-3 px-3 py-2 h-100">
+                            <div class="small">
+                                <div class="fw-semibold">{{ $item['employee'] }}</div>
+                                <div class="text-muted">{{ $item['what'] }}</div>
+                            </div>
+                            <span class="badge bg-{{ $item['color'] }}-subtle text-{{ $item['color'] }} text-wrap text-end">{{ $item['label'] }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
     <div class="row g-4">
         <div class="col-xl-8">

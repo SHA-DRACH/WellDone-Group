@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Career;
 use App\Models\Division;
+use App\Models\DivisionRecord;
 use App\Models\JobApplication;
+use App\Support\DivisionRecords\RecordSchema;
 use App\Models\Project;
 use App\Models\QuoteRequest;
 use App\Models\Service;
@@ -85,7 +87,36 @@ class DivisionDashboardController extends Controller
                 ->get(),
             'switchable' => $this->switchableDivisions(),
             'quickLinks' => $this->quickLinks(),
-        ]);
+        ] + $this->operationsLog($request, $division));
+    }
+
+    /**
+     * The division's own log, shown at the top of its dashboard: the schema
+     * that shapes the entry form, the latest entries, and this month's
+     * running totals.
+     */
+    protected function operationsLog(Request $request, Division $division): array
+    {
+        if (! $request->user()->can('viewAny', DivisionRecord::class)) {
+            return ['recordSchema' => null];
+        }
+
+        $schema = RecordSchema::for($division);
+
+        $thisMonth = DivisionRecord::query()
+            ->where('division_id', $division->id)
+            ->whereDate('record_date', '>=', now()->startOfMonth()->toDateString());
+
+        return [
+            'recordSchema' => $schema,
+            'recentRecords' => DivisionRecord::query()
+                ->where('division_id', $division->id)
+                ->ordered()
+                ->limit(8)
+                ->get(),
+            'monthCount' => (clone $thisMonth)->count(),
+            'monthTotals' => DivisionRecordController::sumFields($thisMonth, array_slice(RecordSchema::totals($schema), 0, 4)),
+        ];
     }
 
     /**
@@ -99,6 +130,8 @@ class DivisionDashboardController extends Controller
     {
         $candidates = [
             ['route' => 'admin.quotes.index', 'can' => 'quotes.view', 'icon' => 'fa-file-invoice-dollar', 'label' => 'All requests for this division'],
+            ['route' => 'admin.expenses.index', 'can' => 'expenses.view', 'icon' => 'fa-receipt', 'label' => 'Division expenses'],
+            ['route' => 'admin.invoices.index', 'can' => 'invoices.view', 'icon' => 'fa-file-invoice', 'label' => 'Division invoices'],
             ['route' => 'admin.projects.index', 'can' => 'projects.view', 'icon' => 'fa-diagram-project', 'label' => 'Projects'],
             ['route' => 'admin.services.index', 'can' => 'services.view', 'icon' => 'fa-list-check', 'label' => 'Services'],
             ['route' => 'admin.careers.index', 'can' => 'careers.view', 'icon' => 'fa-briefcase', 'label' => 'Vacancies'],

@@ -218,6 +218,18 @@
                             <x-form.input name="social_security_number" label="Social security number"
                                           :value="$bank?->social_security_number" />
                         </div>
+                        <div class="col-md-6">
+                            <x-form.textarea name="allowances_text" label="Recurring monthly allowances" :rows="3"
+                                             :value="collect($bank?->allowances ?? [])->map(fn ($a) => ($a['label'] ?? '').': '.($a['amount'] ?? 0))->implode(PHP_EOL)"
+                                             placeholder="Housing: 150"
+                                             help="One per line, as Label: amount. Added to every payslip." />
+                        </div>
+                        <div class="col-md-6">
+                            <x-form.textarea name="deductions_text" label="Recurring monthly deductions" :rows="3"
+                                             :value="collect($bank?->deductions ?? [])->map(fn ($a) => ($a['label'] ?? '').': '.($a['amount'] ?? 0))->implode(PHP_EOL)"
+                                             placeholder="Staff loan: 50"
+                                             help="Besides income tax and social security, which payroll works out." />
+                        </div>
                     </div>
                 </div>
             @endif

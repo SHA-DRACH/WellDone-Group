@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\EmployeeDocumentController;
+use App\Http\Controllers\Admin\TrainingController;
 use App\Http\Controllers\Admin\HrDashboardController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\BlogCategoryController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Admin\CsrInitiativeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DivisionController;
 use App\Http\Controllers\Admin\DivisionDashboardController;
+use App\Http\Controllers\Admin\DivisionRecordController;
 use App\Http\Controllers\Admin\DownloadController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GalleryController;
@@ -65,12 +68,29 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('division/{division:slug}', [DivisionDashboardController::class, 'index'])
         ->name('division.dashboard');
 
+    // The division's operations log, kept from its dashboard and exported to
+    // Excel. Scoped bindings: a record id from another division is a 404.
+    Route::prefix('division/{division:slug}/records')
+        ->name('division.records.')
+        ->scopeBindings()
+        ->controller(DivisionRecordController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::get('export', 'export')->name('export');
+            Route::post('/', 'store')->name('store');
+            Route::get('{record}/edit', 'edit')->name('edit');
+            Route::put('{record}', 'update')->name('update');
+            Route::delete('{record}', 'destroy')->name('destroy');
+        });
+
     // ------------------------------------------------ Own profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     // ------------------------------------------------ Access control
+    Route::get('users/export', [UserController::class, 'export'])->name('users.export');
     Route::resource('users', UserController::class);
     Route::patch('users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
     Route::resource('roles', RoleController::class)->except(['show']);
@@ -113,7 +133,18 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('hr', [HrDashboardController::class, 'index'])->name('hr.dashboard');
 
     Route::post('employees/{employee}/login', [EmployeeController::class, 'createLogin'])->name('employees.login');
+    Route::get('employees/export', [EmployeeController::class, 'export'])->name('employees.export');
     Route::resource('employees', EmployeeController::class);
+
+    Route::get('training/export', [TrainingController::class, 'export'])->name('training.export');
+    Route::get('training/{training}/certificate', [TrainingController::class, 'certificate'])->name('training.certificate');
+    Route::resource('training', TrainingController::class)->except(['show']);
+
+    Route::get('employee-documents/export', [EmployeeDocumentController::class, 'export'])->name('employee-documents.export');
+    Route::get('employee-documents/{document}/download', [EmployeeDocumentController::class, 'download'])->name('employee-documents.download');
+    Route::resource('employee-documents', EmployeeDocumentController::class)
+        ->except(['show'])
+        ->parameters(['employee-documents' => 'document']);
 
     Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('positions', PositionController::class)->except(['show']);

@@ -80,6 +80,25 @@ class MediaUploader
     }
 
     /**
+     * Store a video for the website. MP4 only: it is the one format every
+     * browser plays, which matters more here than squeezing the file size.
+     * A QuickTime upload is kept as .mov — renaming it would not convert it.
+     */
+    public function video(UploadedFile $file, string $directory, ?string $replacing = null): string
+    {
+        $extension = $this->safeExtension($file, ['mp4', 'm4v', 'mov', 'qt']);
+        $extension = $extension === 'qt' ? 'mov' : $extension;
+
+        $path = trim($directory, '/').'/'.$this->filename($file, $extension);
+
+        Storage::disk('public')->putFileAs(dirname($path), $file, basename($path));
+
+        $this->deleteFrom('public', $replacing);
+
+        return $path;
+    }
+
+    /**
      * Store a private upload — résumés and quote attachments. These live
      * outside the web root and are streamed by an authorised controller.
      */

@@ -7,6 +7,8 @@ use App\Models\Announcement;
 use App\Models\Career;
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\EmployeeDocument;
+use App\Models\EmployeeTraining;
 use App\Models\JobApplication;
 use App\Support\Permissions;
 use Illuminate\Contracts\View\View;
@@ -98,7 +100,54 @@ class HrDashboardController extends Controller
                 : collect(),
 
             'announcements' => Announcement::query()->withinDivisionOf($user)->live()->ordered()->limit(4)->get(),
+
+            'expiring' => $this->expiring($user),
         ]);
+    }
+
+    /**
+     * Certificates and documents that have lapsed or will within 60 days,
+     * soonest first — the list someone in HR should work through this week.
+     */
+    protected function expiring(\App\Models\User $user)
+    {
+        $items = collect();
+        $window = fn (Builder $q, string $column) => $q
+            ->whereNotNull($column)
+            ->whereDate($column, '<=', today()->addDays(60)->toDateString())
+            ->whereDate($column, '>=', today()->subDays(90)->toDateString());
+
+        if ($user->can(Permissions::TRAINING_VIEW)) {
+            $items = $items->concat(EmployeeTraining::query()
+                ->visibleTo($user)
+                ->where(fn (Builder $q) => $window($q, 'certificate_expiry'))
+                ->with('employee:id,first_name,middle_name,last_name')
+                ->get()
+                ->map(fn (EmployeeTraining $t) => [
+                    'date' => $t->certificate_expiry,
+                    'employee' => $t->employee?->full_name,
+                    'what' => $t->title.' certificate',
+                    'label' => $t->expiry_label,
+                    'color' => $t->expiry_color,
+                ]));
+        }
+
+        if ($user->can(Permissions::EMPLOYEE_DOCUMENTS_VIEW)) {
+            $items = $items->concat(EmployeeDocument::query()
+                ->visibleTo($user)
+                ->where(fn (Builder $q) => $window($q, 'expiry_date'))
+                ->with('employee:id,first_name,middle_name,last_name')
+                ->get()
+                ->map(fn (EmployeeDocument $d) => [
+                    'date' => $d->expiry_date,
+                    'employee' => $d->employee?->full_name,
+                    'what' => $d->type_label,
+                    'label' => $d->expiry_label,
+                    'color' => $d->expiry_color,
+                ]));
+        }
+
+        return $items->sortBy('date')->take(9)->values();
     }
 
     protected function birthdaysToday(\App\Models\User $user): int

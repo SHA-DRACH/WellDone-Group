@@ -25,10 +25,24 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
+            /*
+             * The staff area lives under /staff. Route names keep their
+             * `admin.` prefix — they are internal, and every link is built
+             * from them — so moving the address is this one line.
+             */
             Route::middleware('web')
-                ->prefix('admin')
+                ->prefix('staff')
                 ->name('admin.')
                 ->group(base_path('routes/admin.php'));
+
+            // It used to be /admin. Old bookmarks and links in sent emails
+            // follow on to the same page rather than landing on a 404.
+            Route::middleware('web')
+                ->get('admin/{path?}', fn (?string $path = null) => redirect(
+                    '/staff'.($path ? '/'.$path : '').(request()->getQueryString() ? '?'.request()->getQueryString() : ''),
+                    301,
+                ))
+                ->where('path', '.*');
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {

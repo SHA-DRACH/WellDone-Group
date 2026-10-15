@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Rules\VideoLength;
 use App\Services\MediaUploader;
 use App\Support\Settings;
+use App\Support\Video\VideoEmbed;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +30,9 @@ class SettingController extends Controller
     {
         abort_unless(auth()->user()->can('settings.view'), 403);
 
+        // Finance figures are edited from the finance module, by finance.
         $groups = Setting::query()
+            ->where('group', '!=', 'finance')
             ->orderBy('sort_order')
             ->get()
             ->groupBy('group');
@@ -45,6 +49,7 @@ class SettingController extends Controller
     public function update(Request $request, string $group): RedirectResponse
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_if($group === 'finance', 404);
 
         $rows = Setting::query()->where('group', $group)->get();
 
@@ -54,6 +59,8 @@ class SettingController extends Controller
             match ($row->type) {
                 'image' => $this->storeFile($request, $row, 'settings/images', true),
                 'file' => $this->storeFile($request, $row, 'settings/files', false),
+                'video' => $this->storeVideo($request, $row),
+                'video_url' => $this->storeVideoUrl($request, $row),
                 'boolean' => $row->update(['value' => $request->boolean($field) ? '1' : '0']),
                 'json' => $row->update(['value' => $this->normaliseJson($request->input($field), $row->value)]),
                 default => $request->exists($field)
@@ -100,6 +107,49 @@ class SettingController extends Controller
         }
 
         $row->update(['value' => $path]);
+    }
+
+    /** An uploaded MP4, held to the 30-second to one-minute limit. */
+    protected function storeVideo(Request $request, Setting $row): void
+    {
+        $field = $row->key;
+
+        if ($request->boolean('remove_'.$field)) {
+            $this->uploader->deleteFrom('public', $row->value);
+            $row->update(['value' => null]);
+
+            return;
+        }
+
+        if (! $request->hasFile($field)) {
+            return;
+        }
+
+        $request->validate([$field => VideoLength::rules()], [], [$field => strtolower($row->label)]);
+
+        $row->update([
+            'value' => $this->uploader->video($request->file($field), 'settings/videos', replacing: $row->value),
+        ]);
+    }
+
+    /** A YouTube or Vimeo link; anything else is refused rather than stored. */
+    protected function storeVideoUrl(Request $request, Setting $row): void
+    {
+        $field = $row->key;
+
+        if (! $request->exists($field)) {
+            return;
+        }
+
+        $request->validate([
+            $field => ['nullable', 'url', 'max:500', function (string $attribute, mixed $value, \Closure $fail) {
+                if (filled($value) && VideoEmbed::from($value) === null) {
+                    $fail('Paste a YouTube or Vimeo link, e.g. https://www.youtube.com/watch?v=…');
+                }
+            }],
+        ]);
+
+        $row->update(['value' => $request->input($field)]);
     }
 
     /** Keep JSON settings valid — reject malformed input rather than storing it. */

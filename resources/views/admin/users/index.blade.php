@@ -4,6 +4,11 @@
 @section('page-subtitle', 'Staff accounts, roles and division assignment.')
 
 @section('page-actions')
+    @can('viewAny', App\Models\User::class)
+        <a href="{{ route('admin.users.export', request()->only(['q', 'role', 'division', 'status'])) }}" class="btn btn-success">
+            <i class="fa-solid fa-file-excel me-2"></i>Download Excel
+        </a>
+    @endcan
     @can('create', App\Models\User::class)
         <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
             <i class="fa-solid fa-user-plus me-2"></i>New account

@@ -24,19 +24,22 @@ class DashboardController extends Controller
 {
     public function index(): View|RedirectResponse
     {
-        // The dashboard is its own capability — it must not be tied to any
-        // one module's permissions, or a sales officer would be locked out.
-        abort_unless(auth()->user()->can(\App\Support\Permissions::DASHBOARD_VIEW), 403);
-
         /*
          * This screen counts the whole group: every division's requests,
          * projects and staff. Somebody confined to one division has no
          * business reading it, and the sign-in redirect alone is not enough —
          * /admin can be typed, bookmarked, or reached by a stale link.
+         *
+         * Checked before the permission, so a division user without the
+         * dashboard permission is sent home rather than shown a 403.
          */
         if (Navigation::isDivisionScoped(auth()->user())) {
             return redirect()->to(Navigation::homeRouteFor(auth()->user()));
         }
+
+        // The dashboard is its own capability — it must not be tied to any
+        // one module's permissions, or a sales officer would be locked out.
+        abort_unless(auth()->user()->can(\App\Support\Permissions::DASHBOARD_VIEW), 403);
 
         return view('admin.dashboard', [
             'stats' => $this->statistics(),

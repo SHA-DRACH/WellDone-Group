@@ -186,6 +186,73 @@ final class Permissions
     public const LEAVE_TYPES_DELETE = 'leave_types.delete';
     public const LEAVE_BALANCES_ADJUST = 'leave_types.adjust_balances';
 
+    /** Courses, certifications and their expiry dates. */
+    public const TRAINING_VIEW = 'training.view';
+    public const TRAINING_CREATE = 'training.create';
+    public const TRAINING_UPDATE = 'training.update';
+    public const TRAINING_DELETE = 'training.delete';
+
+    /**
+     * Contracts, ID copies, permits. Kept on the private disk and streamed
+     * through a controller, so the permission is the only way in.
+     */
+    public const EMPLOYEE_DOCUMENTS_VIEW = 'employee_documents.view';
+    public const EMPLOYEE_DOCUMENTS_CREATE = 'employee_documents.create';
+    public const EMPLOYEE_DOCUMENTS_UPDATE = 'employee_documents.update';
+    public const EMPLOYEE_DOCUMENTS_DELETE = 'employee_documents.delete';
+
+    // ------------------------------------------------------------------
+    // Division operations
+    // ------------------------------------------------------------------
+
+    /**
+     * The day-to-day log each division keeps on its dashboard — production
+     * for the quarry, shipments for logistics, and so on. Confined to the
+     * user's own division by DivisionScope, like everything else they see.
+     */
+    public const DIVISION_RECORDS_VIEW = 'division_records.view';
+    public const DIVISION_RECORDS_CREATE = 'division_records.create';
+    public const DIVISION_RECORDS_UPDATE = 'division_records.update';
+    public const DIVISION_RECORDS_DELETE = 'division_records.delete';
+    public const DIVISION_RECORDS_EXPORT = 'division_records.export';
+
+    // ------------------------------------------------------------------
+    // Finance
+    // ------------------------------------------------------------------
+
+    /*
+     * Preparing a payroll and approving it are separate rights, and the
+     * policy also refuses to let the person who prepared a run approve it.
+     * Two people have to agree before anybody is paid.
+     */
+    public const PAYROLL_VIEW = 'payroll.view';
+    public const PAYROLL_PROCESS = 'payroll.process';
+    public const PAYROLL_APPROVE = 'payroll.approve';
+
+    /** Submitting an expense and approving it are, likewise, two rights. */
+    public const EXPENSES_VIEW = 'expenses.view';
+    public const EXPENSES_CREATE = 'expenses.create';
+    public const EXPENSES_UPDATE = 'expenses.update';
+    public const EXPENSES_DELETE = 'expenses.delete';
+    public const EXPENSES_APPROVE = 'expenses.approve';
+
+    public const INVOICES_VIEW = 'invoices.view';
+    public const INVOICES_CREATE = 'invoices.create';
+    public const INVOICES_UPDATE = 'invoices.update';
+    public const INVOICES_DELETE = 'invoices.delete';
+    public const INVOICES_PAYMENTS = 'invoices.payments';
+
+    public const BUDGETS_VIEW = 'budgets.view';
+    public const BUDGETS_CREATE = 'budgets.create';
+    public const BUDGETS_UPDATE = 'budgets.update';
+    public const BUDGETS_DELETE = 'budgets.delete';
+
+    /** The finance dashboard, profit & loss and budget-versus-actual. */
+    public const FINANCE_REPORTS_VIEW = 'finance_reports.view';
+
+    /** Tax bands, social security rates, invoice terms. */
+    public const FINANCE_SETTINGS = 'finance_reports.settings';
+
     /**
      * Every permission, grouped by module. The keys drive the grouped
      * checkbox layout on the role edit screen.
@@ -249,6 +316,33 @@ final class Permissions
                 self::LEAVE_TYPES_VIEW, self::LEAVE_TYPES_CREATE, self::LEAVE_TYPES_UPDATE,
                 self::LEAVE_TYPES_DELETE, self::LEAVE_BALANCES_ADJUST,
             ],
+            'training' => [
+                self::TRAINING_VIEW, self::TRAINING_CREATE,
+                self::TRAINING_UPDATE, self::TRAINING_DELETE,
+            ],
+            'employee_documents' => [
+                self::EMPLOYEE_DOCUMENTS_VIEW, self::EMPLOYEE_DOCUMENTS_CREATE,
+                self::EMPLOYEE_DOCUMENTS_UPDATE, self::EMPLOYEE_DOCUMENTS_DELETE,
+            ],
+
+            // ---------------------------------------------- Division operations
+            'division_records' => [
+                self::DIVISION_RECORDS_VIEW, self::DIVISION_RECORDS_CREATE, self::DIVISION_RECORDS_UPDATE,
+                self::DIVISION_RECORDS_DELETE, self::DIVISION_RECORDS_EXPORT,
+            ],
+
+            // ---------------------------------------------- Finance
+            'payroll' => [self::PAYROLL_VIEW, self::PAYROLL_PROCESS, self::PAYROLL_APPROVE],
+            'expenses' => [
+                self::EXPENSES_VIEW, self::EXPENSES_CREATE, self::EXPENSES_UPDATE,
+                self::EXPENSES_DELETE, self::EXPENSES_APPROVE,
+            ],
+            'invoices' => [
+                self::INVOICES_VIEW, self::INVOICES_CREATE, self::INVOICES_UPDATE,
+                self::INVOICES_DELETE, self::INVOICES_PAYMENTS,
+            ],
+            'budgets' => [self::BUDGETS_VIEW, self::BUDGETS_CREATE, self::BUDGETS_UPDATE, self::BUDGETS_DELETE],
+            'finance_reports' => [self::FINANCE_REPORTS_VIEW, self::FINANCE_SETTINGS],
         ];
     }
 
@@ -290,6 +384,10 @@ final class Permissions
             'leave' => 'Leave Requests',
             'leave_types' => 'Leave Entitlement',
             'announcements' => 'Internal Announcements',
+            'training' => 'Training & Certification',
+            'employee_documents' => 'Employee Documents',
+            'division_records' => 'Division Operations Log',
+            'finance_reports' => 'Finance Reports',
             default => str($module)->replace('_', ' ')->title()->toString(),
         };
     }

@@ -1,0 +1,328 @@
+// =============================================================
+// Video, division operations log, finance and HR additions.
+// Imported after the theme so it can use its tokens.
+// =============================================================
+
+// ------------------------------------------------------------- Video
+
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  background: #0f1b33 center / cover no-repeat;
+  box-shadow: $box-shadow-lg;
+
+  video,
+  iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+    background: #000;
+  }
+
+  &--embed::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8, 43, 105, .15), rgba(8, 43, 105, .55));
+  }
+
+  &.is-playing::before { display: none; }
+}
+
+.video-frame__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 84px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  background: $wd-gold;
+  color: $wd-royal-blue-dark;
+  font-size: 1.75rem;
+  box-shadow: 0 0 0 12px rgba($wd-gold, .28);
+  transition: transform .2s ease, box-shadow .2s ease;
+
+  i { margin-left: 6px; }
+
+  &:hover,
+  &:focus-visible {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 0 0 18px rgba($wd-gold, .22);
+    outline: none;
+  }
+}
+
+.video-frame__provider {
+  position: absolute;
+  right: 1rem;
+  bottom: .85rem;
+  z-index: 1;
+  padding: .2rem .65rem;
+  border-radius: $border-radius-pill;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  font-size: .75rem;
+}
+
+.welcome-video {
+  position: relative;
+  background: linear-gradient(135deg, $wd-royal-blue-dark, $wd-royal-blue);
+  color: #fff;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -120px;
+    bottom: -160px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba($wd-gold, .28), transparent 70%);
+    pointer-events: none;
+  }
+
+  .eyebrow { color: $wd-gold-light; }
+  h2 { color: #fff; }
+  p { color: rgba(255, 255, 255, .82); }
+}
+
+.video-length {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .25rem .75rem;
+  border-radius: $border-radius-pill;
+  background: rgba(255, 255, 255, .12);
+  font-size: .8rem;
+}
+
+// ------------------------------------------------------------- Admin: shared
+
+.metric-card {
+  position: relative;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid $wd-border;
+  border-radius: $border-radius-lg;
+  background: #fff;
+  box-shadow: $box-shadow-sm;
+  height: 100%;
+
+  .metric-card__label {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: $wd-muted;
+  }
+
+  .metric-card__value {
+    margin-top: .35rem;
+    font-family: $headings-font-family;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: $headings-color;
+    line-height: 1.2;
+  }
+
+  .metric-card__hint {
+    margin-top: .25rem;
+    font-size: .8rem;
+    color: $wd-muted;
+  }
+
+  .metric-card__icon {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.1rem;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: .65rem;
+  }
+
+  &--accent {
+    border: 0;
+    background: linear-gradient(135deg, $wd-royal-blue-dark, $wd-royal-blue);
+    .metric-card__label, .metric-card__hint { color: rgba(255, 255, 255, .75); }
+    .metric-card__value { color: #fff; }
+  }
+}
+
+.module-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-bottom: 1.25rem;
+  padding: .35rem;
+  border: 1px solid $wd-border;
+  border-radius: $border-radius-lg;
+  background: #fff;
+
+  a {
+    padding: .45rem .9rem;
+    border-radius: $border-radius;
+    color: $wd-ink;
+    font-size: .9rem;
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover { background: $wd-surface; }
+
+    &.active {
+      background: $wd-royal-blue;
+      color: #fff;
+    }
+  }
+}
+
+// Simple CSS bar chart — no charting library for a dozen bars.
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: .6rem;
+  height: 220px;
+  padding-top: 1rem;
+
+  .bar-chart__group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .bar-chart__bars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .bar-chart__bar {
+    width: 42%;
+    max-width: 18px;
+    min-height: 2px;
+    border-radius: 4px 4px 0 0;
+    background: $wd-royal-blue;
+
+    &--alt { background: $wd-gold; }
+  }
+
+  .bar-chart__label {
+    margin-top: .4rem;
+    font-size: .7rem;
+    color: $wd-muted;
+    white-space: nowrap;
+  }
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: .35rem;
+  border-radius: 3px;
+  background: $wd-royal-blue;
+
+  &--alt { background: $wd-gold; }
+}
+
+// Quick-entry form on the division dashboard.
+.quick-entry {
+  border: 1px solid rgba($wd-royal-blue, .18);
+  border-radius: $border-radius-lg;
+  background: linear-gradient(180deg, rgba($wd-royal-blue, .045), #fff 140px);
+
+  .quick-entry__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid $wd-border;
+  }
+
+  .quick-entry__body { padding: 1.25rem; }
+}
+
+// Invoice / payroll line editor.
+.line-items {
+  td { vertical-align: middle; }
+  .form-control, .form-select { min-width: 90px; }
+}
+
+// ------------------------------------------------------------- Printable documents
+
+.print-document {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2.5rem;
+  border: 1px solid $wd-border;
+  border-radius: $border-radius-lg;
+  background: #fff;
+  box-shadow: $box-shadow-sm;
+
+  .print-document__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid $wd-gold;
+  }
+
+  .print-document__title {
+    font-family: $headings-font-family;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: $wd-royal-blue;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  table thead th {
+    background: $wd-royal-blue;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .print-document__total {
+    background: rgba($wd-royal-blue, .06);
+    font-weight: 700;
+  }
+}
+
+.status-stamp {
+  display: inline-block;
+  padding: .3rem .9rem;
+  border: 2px solid currentColor;
+  border-radius: .4rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+@media print {
+  .print-hide { display: none !important; }
+  .admin-content { padding: 0 !important; }
+  .print-document { border: 0; box-shadow: none; padding: 0; max-width: none; }
+  .print-document table thead th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

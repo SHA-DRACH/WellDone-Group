@@ -28,6 +28,7 @@ class Division extends Model
     protected $fillable = [
         'name', 'slug', 'tagline', 'icon', 'accent_color', 'summary', 'description',
         'capabilities', 'hero_image', 'thumbnail', 'brochure_path', 'highlights',
+        'video_path', 'video_url', 'video_poster', 'video_duration',
         'sort_order', 'is_active', 'is_featured',
     ];
 
@@ -38,6 +39,7 @@ class Division extends Model
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
+            'video_duration' => 'integer',
         ];
     }
 
@@ -97,6 +99,12 @@ class Division extends Model
         return $this->hasMany(QuoteRequest::class);
     }
 
+    /** The operations log. Named `records` for the route's scoped binding. */
+    public function records(): HasMany
+    {
+        return $this->hasMany(DivisionRecord::class);
+    }
+
     public function seo(): MorphOne
     {
         return $this->morphOne(Seo::class, 'seoable');
@@ -139,5 +147,26 @@ class Division extends Model
     public function getUrlAttribute(): string
     {
         return route('site.divisions.show', $this->slug);
+    }
+
+    public function getVideoFileUrlAttribute(): ?string
+    {
+        return $this->mediaUrl($this->video_path);
+    }
+
+    public function getVideoPosterUrlAttribute(): ?string
+    {
+        return $this->mediaUrl($this->video_poster) ?? $this->mediaUrl($this->hero_image);
+    }
+
+    /** The YouTube/Vimeo player for `video_url`, when one is set and recognised. */
+    public function getVideoEmbedAttribute(): ?array
+    {
+        return \App\Support\Video\VideoEmbed::from($this->video_url);
+    }
+
+    public function hasVideo(): bool
+    {
+        return filled($this->video_path) || $this->video_embed !== null;
     }
 }

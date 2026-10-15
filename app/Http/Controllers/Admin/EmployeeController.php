@@ -11,8 +11,11 @@ use App\Models\Position;
 use App\Models\User;
 use App\Notifications\EmployeeWelcome;
 use App\Services\MediaUploader;
+use App\Support\Excel\Workbook;
 use App\Support\Navigation;
+use App\Support\Permissions;
 use App\Support\Roles;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -70,6 +73,115 @@ class EmployeeController extends Controller
         ]);
     }
 
+    /**
+     * The staff directory as a spreadsheet, honouring the list's filters.
+     *
+     * Columns follow the same rights as the screens: pay and bank details
+     * only for those who may see salary, date of birth and ID numbers only
+     * for those who may see sensitive data. An export is a copy of the
+     * record, so it is held to the record's rules.
+     */
+    public function export(Request $request): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Employee::class);
+        abort_unless($request->user()->can(Permissions::HR_REPORTS_VIEW), 403);
+
+        $user = $request->user();
+        $salary = $user->can('viewSalary', Employee::class);
+        $sensitive = $user->can('viewSensitive', Employee::class);
+
+        $columns = [
+            ['key' => 'number', 'label' => 'Staff no.'],
+            ['key' => 'name', 'label' => 'Full name', 'width' => 26],
+            ['key' => 'gender', 'label' => 'Gender'],
+            ['key' => 'department', 'label' => 'Department', 'width' => 22],
+            ['key' => 'division', 'label' => 'Division', 'width' => 22],
+            ['key' => 'position', 'label' => 'Position', 'width' => 24],
+            ['key' => 'type', 'label' => 'Employment type'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'hired', 'label' => 'Date hired', 'type' => 'date'],
+            ['key' => 'confirmed', 'label' => 'Confirmed', 'type' => 'date'],
+            ['key' => 'contract_expiry', 'label' => 'Contract expiry', 'type' => 'date'],
+            ['key' => 'service', 'label' => 'Years of service', 'type' => 'integer'],
+            ['key' => 'manager', 'label' => 'Reports to', 'width' => 22],
+            ['key' => 'email', 'label' => 'Work email', 'width' => 28],
+            ['key' => 'phone', 'label' => 'Phone'],
+            ['key' => 'location', 'label' => 'Work location'],
+            ['key' => 'city', 'label' => 'City'],
+        ];
+
+        if ($sensitive) {
+            array_push($columns,
+                ['key' => 'dob', 'label' => 'Date of birth', 'type' => 'date'],
+                ['key' => 'nationality', 'label' => 'Nationality'],
+                ['key' => 'national_id', 'label' => 'National ID'],
+                ['key' => 'passport', 'label' => 'Passport no.'],
+            );
+        }
+
+        if ($salary) {
+            array_push($columns,
+                ['key' => 'salary', 'label' => 'Basic salary', 'type' => 'money', 'total' => true],
+                ['key' => 'currency', 'label' => 'Currency'],
+                ['key' => 'frequency', 'label' => 'Pay frequency'],
+                ['key' => 'bank', 'label' => 'Bank', 'width' => 20],
+                ['key' => 'account', 'label' => 'Account no.', 'width' => 20],
+                ['key' => 'tin', 'label' => 'TIN'],
+                ['key' => 'ssn', 'label' => 'Social security no.'],
+            );
+        }
+
+        $rows = $this->scopedQuery()
+            ->with(array_filter([
+                'department:id,name', 'division:id,name', 'position:id,title', 'employmentType:id,name',
+                'manager:id,first_name,middle_name,last_name',
+                $salary ? 'bankDetails' : null,
+            ]))
+            ->search($request->query('q'))
+            ->inDepartment($request->query('department'))
+            ->when($request->query('status'), fn (Builder $q, $s) => $q->where('employment_status', $s))
+            ->when($request->query('division'), fn (Builder $q, $id) => $q->where('division_id', $id))
+            ->ordered()
+            ->lazy(500)
+            ->map(fn (Employee $e) => [
+                'number' => $e->employee_number,
+                'name' => $e->full_name,
+                'gender' => ucfirst($e->gender),
+                'department' => $e->department?->name,
+                'division' => $e->division?->name,
+                'position' => $e->position?->title,
+                'type' => $e->employmentType?->name,
+                'status' => $e->status_label,
+                'hired' => $e->date_hired,
+                'confirmed' => $e->confirmation_date,
+                'contract_expiry' => $e->contract_expiry,
+                'service' => $e->years_of_service,
+                'manager' => $e->manager?->full_name,
+                'email' => $e->email,
+                'phone' => $e->phone,
+                'location' => $e->work_location,
+                'city' => $e->city,
+                'dob' => $sensitive ? $e->date_of_birth : null,
+                'nationality' => $e->nationality,
+                'national_id' => $sensitive ? $e->national_id : null,
+                'passport' => $sensitive ? $e->passport_number : null,
+                'salary' => $salary ? $e->bankDetails?->basic_salary : null,
+                'currency' => $salary ? $e->bankDetails?->currency : null,
+                'frequency' => $salary ? ucfirst((string) $e->bankDetails?->pay_frequency) : null,
+                'bank' => $salary ? $e->bankDetails?->bank_name : null,
+                'account' => $salary ? $e->bankDetails?->account_number : null,
+                'tin' => $salary ? $e->bankDetails?->tax_identification_number : null,
+                'ssn' => $salary ? $e->bankDetails?->social_security_number : null,
+            ]);
+
+        return Workbook::make('staff-directory', 'Staff Directory')
+            ->sheet('Employees', $columns, $rows, subtitle: collect([
+                $salary ? null : 'Pay columns withheld',
+                $sensitive ? null : 'Identity columns withheld',
+            ])->filter()->implode(' · ') ?: null)
+            ->download();
+    }
+
     // ------------------------------------------------------------------
     // Profile
     // ------------------------------------------------------------------
@@ -89,8 +201,19 @@ class EmployeeController extends Controller
             $employee->load('bankDetails');
         }
 
+        $user = auth()->user();
+
         return view('admin.employees.show', [
             'employee' => $employee,
+            'trainings' => $user->can(Permissions::TRAINING_VIEW)
+                ? $employee->trainings()->orderByRaw('start_date IS NULL, start_date DESC')->get()
+                : null,
+            'documents' => $user->can(Permissions::EMPLOYEE_DOCUMENTS_VIEW)
+                ? $employee->documents()->with('uploader:id,name')->latest()->get()
+                : null,
+            'payslips' => $user->can(Permissions::PAYROLL_VIEW)
+                ? $employee->payslips()->with('run:id,reference,period,status,currency')->latest('id')->limit(12)->get()
+                : null,
             'activities' => Activity::query()
                 ->where('subject_type', 'employee')
                 ->where('subject_id', $employee->id)
@@ -364,11 +487,42 @@ class EmployeeController extends Controller
             'social_security_number',
         ])->filter(fn ($value) => $value !== null && $value !== '');
 
+        // Recurring pay items. Submitted (even empty) means "this is the list".
+        foreach (['allowances' => 'allowances_text', 'deductions' => 'deductions_text'] as $column => $input) {
+            if (array_key_exists($input, $data)) {
+                $fields->put($column, self::payLines($data[$input]));
+            }
+        }
+
         if ($fields->isEmpty()) {
             return;
         }
 
         $employee->bankDetails()->updateOrCreate(['employee_id' => $employee->id], $fields->all());
+    }
+
+    /**
+     * "Housing: 150" per line → [['label' => 'Housing', 'amount' => 150.0]].
+     * Lines without a usable amount are dropped rather than stored as zero.
+     *
+     * @return array<int, array{label: string, amount: float}>
+     */
+    public static function payLines(?string $text): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', (string) $text))
+            ->map(function (string $line) {
+                if (! str_contains($line, ':')) {
+                    return null;
+                }
+
+                [$label, $amount] = array_map('trim', explode(':', $line, 2));
+                $amount = (float) str_replace([',', '$'], '', $amount);
+
+                return $label !== '' && $amount > 0 ? ['label' => mb_substr($label, 0, 60), 'amount' => round($amount, 2)] : null;
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     protected function rules(Request $request, ?Employee $employee): array
@@ -430,6 +584,8 @@ class EmployeeController extends Controller
                 'account_number' => ['nullable', 'string', 'max:80'],
                 'tax_identification_number' => ['nullable', 'string', 'max:80'],
                 'social_security_number' => ['nullable', 'string', 'max:80'],
+                'allowances_text' => ['nullable', 'string', 'max:2000'],
+                'deductions_text' => ['nullable', 'string', 'max:2000'],
             ];
         }
 

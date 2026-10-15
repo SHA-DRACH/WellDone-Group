@@ -190,6 +190,39 @@ class Employee extends Model
         return $query->orderBy('last_name')->orderBy('first_name');
     }
 
+    /**
+     * The staff this user may see in HR screens: their division's, and for a
+     * department manager only their own department's. The same rule as the
+     * employee list, so training and document screens cannot be used to
+     * read people the employee list would hide.
+     */
+    public function scopeVisibleToStaff(Builder $query, User $user): Builder
+    {
+        $query->withinDivisionOf($user);
+
+        if ($user->hasRole(\App\Support\Roles::DEPARTMENT_MANAGER)
+            && ! $user->hasAnyRole(\App\Support\Navigation::GROUP_ROLES)) {
+            $query->where('department_id', $user->employee?->department_id ?? 0);
+        }
+
+        return $query;
+    }
+
+    public function trainings(): HasMany
+    {
+        return $this->hasMany(EmployeeTraining::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(EmployeeDocument::class);
+    }
+
+    public function payslips(): HasMany
+    {
+        return $this->hasMany(Payslip::class);
+    }
+
     // -------------------------------------------------- Accessors
 
     public function getFullNameAttribute(): string

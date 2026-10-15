@@ -55,6 +55,14 @@
                   :current="data_get($record, $field['preview'] ?? $name.'_url')"
                   :help="$field['help'] ?? 'JPG, PNG, WebP, GIF or SVG. Large images are resized automatically.'" />
 
+@elseif($type === 'video')
+    <x-form.video :name="$name" :label="$label"
+                  :current="data_get($record, $field['preview'] ?? $name.'_url')"
+                  :poster="data_get($record, $field['poster'] ?? 'video_poster_url')"
+                  :duration="data_get($record, $field['duration'] ?? 'video_duration')"
+                  :min="$field['min'] ?? 30" :max="$field['max'] ?? 60"
+                  :help="$field['help'] ?? null" />
+
 @elseif($type === 'file')
     <div class="mb-3">
         <label class="form-label" for="field-{{ $name }}">{{ $label }}</label>

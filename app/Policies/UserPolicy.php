@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Support\DivisionScope;
 use App\Support\Roles;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,7 +27,8 @@ class UserPolicy extends ModulePolicy
         }
 
         /** @var User $model */
-        return ! $model->hasRole(Roles::SUPER_ADMIN);
+        return ! $model->hasRole(Roles::SUPER_ADMIN)
+            && $this->writableAcrossDivisions($user, $model);
     }
 
     public function delete(User $user, Model $model): bool
@@ -36,8 +38,11 @@ class UserPolicy extends ModulePolicy
         }
 
         /** @var User $model */
-        // No self-deletion, and no deleting a super administrator.
-        return $model->id !== $user->id && ! $model->hasRole(Roles::SUPER_ADMIN);
+        // No self-deletion, no deleting a super administrator, and nobody
+        // outside your own division if you are confined to one.
+        return $model->id !== $user->id
+            && ! $model->hasRole(Roles::SUPER_ADMIN)
+            && $this->writableAcrossDivisions($user, $model);
     }
 
     /** Assigning roles is a narrower right than editing a profile. */
@@ -47,7 +52,15 @@ class UserPolicy extends ModulePolicy
             return false;
         }
 
-        return $model === null || ! $model->hasRole(Roles::SUPER_ADMIN);
+        if ($model === null) {
+            return true;
+        }
+
+        return ! $model->hasRole(Roles::SUPER_ADMIN)
+            && $this->writableAcrossDivisions($user, $model)
+            // Changing your own roles is how a division account would make
+            // itself group-wide; that is somebody else's decision.
+            && ($model->id !== $user->id || ! DivisionScope::restricts($user));
     }
 
     /** Anyone signed in may edit their own profile. */

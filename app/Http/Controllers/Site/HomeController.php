@@ -10,8 +10,11 @@ use App\Models\Partner;
 use App\Models\Project;
 use App\Models\Slider;
 use App\Models\Testimonial;
+use App\Support\Video\Mp4Duration;
+use App\Support\Video\VideoEmbed;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class HomeController extends Controller
 {
@@ -60,7 +63,37 @@ class HomeController extends Controller
             'schema' => $this->organisationSchema(),
         ]);
 
-        return view('site.home', $data);
+        return view('site.home', $data + ['welcomeVideo' => $this->welcomeVideo()]);
+    }
+
+    /**
+     * The welcome film, if one has been added in Website Settings → Home.
+     * An uploaded file takes precedence over a YouTube/Vimeo link.
+     *
+     * @return array<string, mixed>|null
+     */
+    protected function welcomeVideo(): ?array
+    {
+        $file = setting('home.welcome_video');
+        $embed = VideoEmbed::from(setting('home.welcome_video_url'));
+
+        if (blank($file) && $embed === null) {
+            return null;
+        }
+
+        $poster = setting('home.welcome_video_poster');
+
+        return [
+            'src' => filled($file) ? Storage::disk('public')->url($file) : null,
+            'embed' => filled($file) ? null : $embed,
+            'poster' => filled($poster) ? Storage::disk('public')->url($poster) : null,
+            'heading' => setting('home.welcome_video_heading', 'Welcome to WellDone Group'),
+            'body' => setting('home.welcome_video_body'),
+            // Read from the file's own header once, then remembered by path.
+            'duration' => filled($file)
+                ? Cache::rememberForever('welldone.video.length.'.md5($file), fn () => ($s = Mp4Duration::seconds(Storage::disk('public')->path($file))) === null ? null : (int) round($s))
+                : null,
+        ];
     }
 
     /** schema.org Organization markup for the homepage. */

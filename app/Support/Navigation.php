@@ -25,6 +25,8 @@ final class Navigation
         Roles::HR_DIRECTOR,
         Roles::HR_MANAGER,
         Roles::HR_OFFICER,
+        Roles::FINANCE_MANAGER,
+        Roles::FINANCE_OFFICER,
     ];
 
     public static function homeRouteFor(?User $user): string
@@ -43,8 +45,9 @@ final class Navigation
             return route('portal.dashboard');
         }
 
-        // Group-level staff see everything.
-        if ($user->hasAnyRole(self::GROUP_ROLES)) {
+        // Group-level staff see everything — unless their account is attached
+        // to a division, in which case that division is all they see.
+        if ($user->hasAnyRole(self::GROUP_ROLES) && ! DivisionScope::restricts($user)) {
             return route('admin.dashboard');
         }
 

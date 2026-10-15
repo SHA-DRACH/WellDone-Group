@@ -7,6 +7,8 @@ use App\Models\Division;
 use App\Models\User;
 use App\Notifications\StaffAccountCreated;
 use App\Services\MediaUploader;
+use App\Support\DivisionScope;
+use App\Support\Excel\Workbook;
 use App\Support\Roles;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +18,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Role;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UserController extends Controller
 {
@@ -26,6 +29,7 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $users = User::query()
+            ->withinDivisionOf($request->user())
             ->with(['roles:id,name', 'division:id,name'])
             ->search($request->query('q'))
             ->when($request->query('role'), fn ($q, $role) => $q->role($role))
@@ -42,6 +46,64 @@ class UserController extends Controller
             'roles' => Role::query()->orderBy('name')->pluck('name', 'name'),
             'divisions' => Division::query()->ordered()->pluck('name', 'id'),
         ]);
+    }
+
+    /**
+     * Every account in the system as a spreadsheet — staff and registered
+     * clients alike — with the list screen's filters applied when any are set.
+     * Passwords, tokens and two-factor secrets are never part of it.
+     */
+    public function export(Request $request): BinaryFileResponse
+    {
+        $this->authorize('viewAny', User::class);
+
+        $rows = User::query()
+            ->withinDivisionOf($request->user())
+            ->with(['roles:id,name', 'division:id,name'])
+            ->search($request->query('q'))
+            ->when($request->query('role'), fn ($q, $role) => $q->role($role))
+            ->when($request->query('division'), fn ($q, $id) => $q->where('division_id', $id))
+            ->when($request->query('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->query('status') === 'active', fn ($q) => $q->where('is_active', true))
+            ->orderBy('name')
+            ->lazy(500)
+            ->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'roles' => $user->roles->pluck('name')->implode(', ') ?: 'No role',
+                'division' => $user->division?->name,
+                'position' => $user->position,
+                'department' => $user->department,
+                'status' => $user->is_active ? 'Active' : 'Inactive',
+                'verified' => $user->email_verified_at ? 'Yes' : 'No',
+                'verified_at' => $user->email_verified_at,
+                'sign_in' => $user->usesSocialLogin() ? 'Google' : 'Password',
+                'last_login' => $user->last_login_at,
+                'created' => $user->created_at,
+            ]);
+
+        $filtered = collect($request->only(['q', 'role', 'division', 'status']))->filter()->isNotEmpty();
+
+        return Workbook::make('user-accounts', 'User Accounts')
+            ->sheet('Users', [
+                ['key' => 'id', 'label' => 'ID', 'type' => 'integer', 'width' => 8],
+                ['key' => 'name', 'label' => 'Name', 'width' => 28],
+                ['key' => 'email', 'label' => 'Email', 'width' => 32],
+                ['key' => 'phone', 'label' => 'Phone', 'width' => 16],
+                ['key' => 'roles', 'label' => 'Role(s)', 'width' => 26],
+                ['key' => 'division', 'label' => 'Division', 'width' => 22],
+                ['key' => 'position', 'label' => 'Position', 'width' => 22],
+                ['key' => 'department', 'label' => 'Department', 'width' => 20],
+                ['key' => 'status', 'label' => 'Status'],
+                ['key' => 'verified', 'label' => 'Email verified'],
+                ['key' => 'verified_at', 'label' => 'Verified on', 'type' => 'datetime'],
+                ['key' => 'sign_in', 'label' => 'Signs in with'],
+                ['key' => 'last_login', 'label' => 'Last sign-in', 'type' => 'datetime'],
+                ['key' => 'created', 'label' => 'Account created', 'type' => 'datetime'],
+            ], $rows, subtitle: $filtered ? 'Filtered as on the Users screen' : 'All accounts')
+            ->download();
     }
 
     public function create(): View
@@ -61,6 +123,11 @@ class UserController extends Controller
             $user = new User;
 
             $user->fill(collect($data)->except(['roles', 'avatar', 'send_welcome'])->all());
+
+            // A division account files new people under its own division only.
+            if (($scope = DivisionScope::idFor($this->user())) !== null) {
+                $user->division_id = $scope;
+            }
 
             // The account is created without a usable password: the welcome
             // email carries a signed link for the user to set their own.
@@ -110,6 +177,10 @@ class UserController extends Controller
 
         DB::transaction(function () use ($request, $user, $data) {
             $user->fill(collect($data)->except(['roles', 'avatar', 'password', 'send_welcome'])->all());
+
+            if (($scope = DivisionScope::idFor($this->user())) !== null) {
+                $user->division_id = $scope;
+            }
 
             if (filled($data['password'] ?? null)) {
                 $user->password = $data['password'];
@@ -194,7 +265,10 @@ class UserController extends Controller
         return [
             'record' => $user,
             'roles' => $this->selectableRoles(),
-            'divisions' => Division::query()->ordered()->pluck('name', 'id'),
+            'divisions' => Division::query()
+                ->when(DivisionScope::idFor($this->user()), fn ($q, $id) => $q->whereKey($id))
+                ->ordered()
+                ->pluck('name', 'id'),
             'currentRoles' => $user->exists ? $user->getRoleNames()->all() : [],
         ];
     }
@@ -209,6 +283,11 @@ class UserController extends Controller
             ->orderBy('name')
             ->pluck('name', 'name')
             ->reject(fn ($name) => $name === Roles::SUPER_ADMIN && ! $this->user()->isSuperAdmin())
+            // Someone confined to a division can staff it, but cannot hand
+            // out a role that reaches beyond it.
+            ->when(DivisionScope::restricts($this->user()), fn ($roles) => $roles->only([
+                Roles::DIVISION_MANAGER, Roles::DIVISION_OFFICER, Roles::EMPLOYEE,
+            ]))
             ->all();
     }
 

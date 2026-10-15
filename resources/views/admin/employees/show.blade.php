@@ -99,13 +99,15 @@
                         $tabs = [
                             ['id' => 'overview',   'label' => 'Overview',    'icon' => 'fa-circle-info', 'phase' => 1],
                             ['id' => 'team',       'label' => 'Team',        'icon' => 'fa-sitemap',     'phase' => 1],
+                            ['id' => 'training',   'label' => 'Training',    'icon' => 'fa-graduation-cap', 'phase' => 1, 'show' => $trainings !== null],
+                            ['id' => 'documents',  'label' => 'Documents',   'icon' => 'fa-folder-open', 'phase' => 1, 'show' => $documents !== null],
+                            ['id' => 'payroll',    'label' => 'Payroll',     'icon' => 'fa-money-bill',  'phase' => 1, 'show' => $payslips !== null],
                             ['id' => 'activities', 'label' => 'Activity',    'icon' => 'fa-clock-rotate-left', 'phase' => 1],
                             ['id' => 'attendance', 'label' => 'Attendance',  'icon' => 'fa-calendar-check', 'phase' => 2],
                             ['id' => 'leave',      'label' => 'Leave',       'icon' => 'fa-plane-departure', 'phase' => 2],
-                            ['id' => 'documents',  'label' => 'Documents',   'icon' => 'fa-folder-open', 'phase' => 2],
                             ['id' => 'performance','label' => 'Performance', 'icon' => 'fa-chart-line',  'phase' => 2],
-                            ['id' => 'payroll',    'label' => 'Payroll',     'icon' => 'fa-money-bill',  'phase' => 3],
                         ];
+                        $tabs = array_filter($tabs, fn ($tab) => $tab['show'] ?? true);
                     @endphp
 
                     @foreach($tabs as $tab)
@@ -351,8 +353,132 @@
                         @endforelse
                     </div>
 
+                    {{-- ---------------------------------------- Training --}}
+                    @if($trainings !== null)
+                        <div class="tab-pane fade" id="tab-training" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="h6 mb-0">Training & certification ({{ $trainings->count() }})</h3>
+                                @can('create', App\Models\EmployeeTraining::class)
+                                    <a href="{{ route('admin.training.create', ['employee' => $employee->id]) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fa-solid fa-plus me-1"></i>Add training
+                                    </a>
+                                @endcan
+                            </div>
+                            @forelse($trainings as $training)
+                                <div class="d-flex justify-content-between gap-3 {{ $loop->last ? '' : 'mb-3 pb-3 border-bottom' }}">
+                                    <div>
+                                        <div class="small fw-semibold">{{ $training->title }}</div>
+                                        <div class="text-muted" style="font-size:.78rem;">
+                                            {{ $training->category_label }}
+                                            @if($training->provider) · {{ $training->provider }} @endif
+                                            @if($training->start_date) · {{ $training->start_date->format('j M Y') }} @endif
+                                            @if($training->hours) · {{ number_format($training->hours, 1) }} h @endif
+                                        </div>
+                                        @if($training->certificate_expiry)
+                                            <span class="badge bg-{{ $training->expiry_color }}-subtle text-{{ $training->expiry_color }} mt-1">{{ $training->expiry_label }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{{ $training->status_color }}-subtle text-{{ $training->status_color }}">{{ $training->status_label }}</span>
+                                        <div class="btn-group btn-group-sm mt-1">
+                                            @if($training->certificate_path)
+                                                <a class="btn btn-outline-secondary" href="{{ route('admin.training.certificate', $training) }}" title="Certificate"><i class="fa-solid fa-download"></i></a>
+                                            @endif
+                                            @can('update', $training)
+                                                <a class="btn btn-outline-secondary" href="{{ route('admin.training.edit', [$training, 'return' => 'employee']) }}" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="empty-state py-4">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                    <p class="mb-0">No training recorded for {{ $employee->first_name }} yet.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    @endif
+
+                    {{-- ---------------------------------------- Documents --}}
+                    @if($documents !== null)
+                        <div class="tab-pane fade" id="tab-documents" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h3 class="h6 mb-0">Documents on file ({{ $documents->count() }})</h3>
+                                @can('create', App\Models\EmployeeDocument::class)
+                                    <a href="{{ route('admin.employee-documents.create', ['employee' => $employee->id]) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fa-solid fa-upload me-1"></i>Upload
+                                    </a>
+                                @endcan
+                            </div>
+                            @unless($documents->contains('type', 'contract'))
+                                <div class="alert alert-warning small py-2"><i class="fa-solid fa-triangle-exclamation me-1"></i>No employment contract is on file.</div>
+                            @endunless
+                            @forelse($documents as $document)
+                                <div class="d-flex justify-content-between align-items-center gap-3 {{ $loop->last ? '' : 'mb-3 pb-3 border-bottom' }}">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="icon-badge"><i class="fa-solid fa-file-lines"></i></span>
+                                        <div>
+                                            <div class="small fw-semibold">{{ $document->title }}</div>
+                                            <div class="text-muted" style="font-size:.78rem;">
+                                                {{ $document->type_label }} · uploaded {{ $document->created_at->format('j M Y') }}
+                                                @if($document->uploader) by {{ $document->uploader->name }} @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-{{ $document->expiry_color }}-subtle text-{{ $document->expiry_color }}">{{ $document->expiry_label }}</span>
+                                        <div class="btn-group btn-group-sm mt-1">
+                                            @if($document->file_path)
+                                                <a class="btn btn-outline-secondary" href="{{ route('admin.employee-documents.download', $document) }}" title="Download"><i class="fa-solid fa-download"></i></a>
+                                            @endif
+                                            @can('update', $document)
+                                                <a class="btn btn-outline-secondary" href="{{ route('admin.employee-documents.edit', [$document, 'return' => 'employee']) }}" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="empty-state py-4">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                    <p class="mb-0">No documents uploaded yet.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    @endif
+
+                    {{-- ---------------------------------------- Payroll --}}
+                    @if($payslips !== null)
+                        <div class="tab-pane fade" id="tab-payroll" role="tabpanel">
+                            <h3 class="h6 mb-3">Recent payslips</h3>
+                            @if($payslips->isEmpty())
+                                <div class="empty-state py-4">
+                                    <i class="fa-solid fa-money-bill"></i>
+                                    <p class="mb-0">No payslips yet. They appear here once {{ $employee->first_name }} is included in a payroll run.</p>
+                                </div>
+                            @else
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead><tr><th>Period</th><th class="text-end">Gross</th><th class="text-end">Deductions</th><th class="text-end">Net pay</th><th>Status</th><th></th></tr></thead>
+                                        <tbody>
+                                            @foreach($payslips as $payslip)
+                                                <tr>
+                                                    <td class="small">{{ $payslip->run->period->format('F Y') }}</td>
+                                                    <td class="small text-end">@money($payslip->gross_pay, $payslip->run->currency)</td>
+                                                    <td class="small text-end">@money($payslip->total_deductions, $payslip->run->currency)</td>
+                                                    <td class="small text-end fw-semibold">@money($payslip->net_pay, $payslip->run->currency)</td>
+                                                    <td><span class="badge bg-{{ $payslip->run->status_color }}-subtle text-{{ $payslip->run->status_color }}">{{ $payslip->run->status_label }}</span></td>
+                                                    <td class="text-end"><a href="{{ route('admin.payroll.payslip', [$payslip->run, $payslip]) }}" class="btn btn-sm btn-outline-secondary">Payslip</a></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     {{-- ---------------------------------------- Not yet built --}}
-                    @foreach(['attendance' => 2, 'leave' => 2, 'documents' => 2, 'performance' => 2, 'payroll' => 3] as $pane => $phase)
+                    @foreach(['attendance' => 2, 'leave' => 2, 'performance' => 2] as $pane => $phase)
                         <div class="tab-pane fade" id="tab-{{ $pane }}" role="tabpanel">
                             <div class="empty-state py-5">
                                 <i class="fa-solid fa-hammer"></i>

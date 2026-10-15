@@ -80,6 +80,11 @@
         @endforeach
     </div>
 
+    {{-- ---------------------------------------------- Operations log --}}
+    @if($recordSchema)
+        @include('admin.division-records._dashboard')
+    @endif
+
     <div class="row g-4">
         {{-- ------------------------------------------ Requests / orders --}}
         <div class="col-xl-8">

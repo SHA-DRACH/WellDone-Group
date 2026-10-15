@@ -161,6 +161,53 @@ class SettingsSeeder extends Seeder
             ['key' => 'assistant.suggestions', 'label' => 'Suggested Questions', 'type' => 'json',
                 'value' => '["How do I request a quotation?","What services do you offer?","Are you hiring?","How do I contact you?"]',
                 'description' => 'Up to four starter questions offered as buttons. A JSON array of strings.'],
+
+            // ---------------------------------------------------- Homepage welcome video
+            ['key' => 'home.welcome_video_heading', 'label' => 'Welcome Video — Heading',
+                'value' => 'Welcome to WellDone Group'],
+            ['key' => 'home.welcome_video_body', 'label' => 'Welcome Video — Introduction', 'type' => 'text',
+                'value' => 'A minute with the people behind our four divisions — the quarry crews, logistics teams, biomedical engineers and ICT specialists who deliver for our clients across Liberia.'],
+            ['key' => 'home.welcome_video', 'label' => 'Welcome Video (upload)', 'type' => 'video', 'value' => null,
+                'description' => 'MP4, between 30 seconds and 1 minute. The section is hidden until a video or link is added.'],
+            ['key' => 'home.welcome_video_url', 'label' => 'Welcome Video (YouTube or Vimeo link)', 'type' => 'video_url', 'value' => null,
+                'description' => 'Used when no file is uploaded. Keep the clip between 30 seconds and 1 minute.'],
+            ['key' => 'home.welcome_video_poster', 'label' => 'Welcome Video — Cover Image', 'type' => 'image', 'value' => null,
+                'description' => 'Shown before the video plays.'],
+
+            /*
+             * ---------------------------------------------------- Finance
+             *
+             * Statutory figures are starting points, not advice. The income
+             * tax bands are the Liberia Revenue Code's annual bands in
+             * Liberian dollars; payroll converts salaries at the exchange
+             * rate entered on each run. Finance should confirm every figure
+             * against current LRA and NASSCORP rules before the first run.
+             */
+            ['key' => 'finance.currency', 'label' => 'Base Currency', 'value' => 'USD', 'is_public' => false,
+                'description' => 'ISO code used for invoices, expenses, budgets and reports.'],
+            ['key' => 'finance.tax_bands', 'label' => 'Income Tax Bands (annual)', 'type' => 'json', 'is_public' => false,
+                'value' => json_encode([
+                    ['from' => 0, 'rate' => 0],
+                    ['from' => 70000, 'rate' => 5],
+                    ['from' => 200000, 'rate' => 15],
+                    ['from' => 800000, 'rate' => 25],
+                ]),
+                'description' => 'Progressive bands on annual taxable income: each rate applies to the income above "from". Confirm against current LRA rules.'],
+            ['key' => 'finance.tax_band_currency', 'label' => 'Currency of the Tax Bands', 'value' => 'LRD', 'is_public' => false,
+                'description' => 'When it differs from an employee\'s pay currency, payroll converts at the exchange rate entered on the run.'],
+            ['key' => 'finance.exchange_rate', 'label' => 'Default Exchange Rate (tax band currency per 1 base currency)', 'value' => '', 'is_public' => false,
+                'description' => 'e.g. how many LRD to one USD. Pre-fills each payroll run, where it can be changed.'],
+            ['key' => 'finance.social_security_employee_rate', 'label' => 'Social Security — Employee Contribution (%)', 'value' => '4', 'is_public' => false,
+                'description' => 'Deducted from gross pay. Confirm the current NASSCORP rate.'],
+            ['key' => 'finance.social_security_employer_rate', 'label' => 'Social Security — Employer Contribution (%)', 'value' => '6', 'is_public' => false,
+                'description' => 'Paid by the company on top of gross pay; counted in payroll cost.'],
+            ['key' => 'finance.invoice_tax_rate', 'label' => 'Default Invoice Tax Rate (%)', 'value' => '0', 'is_public' => false,
+                'description' => 'Pre-filled on new invoices; can be changed per invoice.'],
+            ['key' => 'finance.invoice_due_days', 'label' => 'Invoice Payment Terms (days)', 'type' => 'integer', 'value' => '30', 'is_public' => false],
+            ['key' => 'finance.invoice_payment_details', 'label' => 'Payment Instructions on Invoices', 'type' => 'text', 'value' => '', 'is_public' => false,
+                'description' => 'Bank name, account name and number, mobile money — printed at the foot of every invoice.'],
+            ['key' => 'finance.invoice_footer', 'label' => 'Invoice Footer Note', 'type' => 'text', 'is_public' => false,
+                'value' => 'Thank you for your business. Please quote the invoice number with your payment.'],
         ];
     }
 }

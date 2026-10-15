@@ -68,6 +68,38 @@
         </div>
     </section>
 
+    {{-- Division video --}}
+    @if($division->hasVideo())
+        <section class="section welcome-video" aria-labelledby="division-video-heading">
+            <div class="container position-relative" style="z-index: 1;">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-7 order-lg-2" data-aos="fade-left">
+                        <x-video-player :src="$division->video_file_url"
+                                        :embed="$division->video_path ? null : $division->video_embed"
+                                        :poster="$division->video_poster_url"
+                                        :title="$division->name.' — introduction'" />
+                    </div>
+                    <div class="col-lg-5 order-lg-1" data-aos="fade-right">
+                        <span class="eyebrow"><i class="{{ $division->icon }} me-2"></i>{{ $division->name }}</span>
+                        <h2 id="division-video-heading" class="mb-3">See the division at work</h2>
+                        <p class="mb-4">{{ $division->summary ?: $division->tagline }}</p>
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <a href="{{ route('site.quote.create', ['division' => $division->id]) }}" class="btn btn-gold">
+                                Request a quote <i class="fa-solid fa-arrow-right-long ms-2"></i>
+                            </a>
+                            @if($division->video_path && $division->video_duration)
+                                <span class="video-length">
+                                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                                    {{ \App\Rules\VideoLength::human($division->video_duration) }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- Services --}}
     @if($division->activeServices->isNotEmpty())
         <section class="section section--surface">

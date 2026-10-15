@@ -93,6 +93,18 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Announcement::class => \App\Policies\AnnouncementPolicy::class,
         \App\Models\LeaveRequest::class => \App\Policies\LeaveRequestPolicy::class,
         \App\Models\LeaveType::class => \App\Policies\LeaveTypePolicy::class,
+        \App\Models\EmployeeTraining::class => \App\Policies\EmployeeTrainingPolicy::class,
+        \App\Models\EmployeeDocument::class => \App\Policies\EmployeeDocumentPolicy::class,
+
+        // Division operations
+        \App\Models\DivisionRecord::class => \App\Policies\DivisionRecordPolicy::class,
+
+        // Finance
+        \App\Models\PayrollRun::class => \App\Policies\PayrollRunPolicy::class,
+        \App\Models\Expense::class => \App\Policies\ExpensePolicy::class,
+        \App\Models\ExpenseCategory::class => \App\Policies\ExpenseCategoryPolicy::class,
+        \App\Models\Invoice::class => \App\Policies\InvoicePolicy::class,
+        \App\Models\Budget::class => \App\Policies\BudgetPolicy::class,
     ];
 
     public function boot(): void

@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Division;
+use App\Rules\VideoLength;
+use App\Support\DivisionScope;
+use Illuminate\Database\Eloquent\Builder;
+use App\Support\Video\Mp4Duration;
+use App\Support\Video\VideoEmbed;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -28,6 +33,7 @@ class DivisionController extends BaseCrudController
     protected array $imageFields = [
         'hero_image' => 'divisions/hero',
         'thumbnail' => 'divisions/thumbnails',
+        'video_poster' => 'divisions/video-posters',
     ];
 
     protected array $documentFields = ['brochure_path' => 'divisions/brochures'];
@@ -49,6 +55,13 @@ class DivisionController extends BaseCrudController
             'hero_image' => ['nullable', 'image', 'max:4096'],
             'thumbnail' => ['nullable', 'image', 'max:4096'],
             'brochure_path' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'video_path' => VideoLength::rules(),
+            'video_url' => ['nullable', 'url', 'max:500', function (string $attribute, mixed $value, \Closure $fail) {
+                if (filled($value) && VideoEmbed::from($value) === null) {
+                    $fail('Paste a YouTube or Vimeo link, e.g. https://www.youtube.com/watch?v=…');
+                }
+            }],
+            'video_poster' => ['nullable', 'image', 'max:4096'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:9999'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
@@ -86,12 +99,21 @@ class DivisionController extends BaseCrudController
             'highlights' => ['type' => 'lines', 'label' => 'Key highlights',
                 'help' => 'One per line. Shown as a bulleted list on the division page.'],
 
+            'video_path' => ['type' => 'video', 'label' => 'Division video (30 seconds to 1 minute)',
+                'preview' => 'video_file_url', 'col' => 7],
+            'video_url' => ['label' => '…or a YouTube / Vimeo link', 'input' => 'url', 'col' => 5,
+                'placeholder' => 'https://www.youtube.com/watch?v=…',
+                'help' => 'Used when no file is uploaded. Keep the clip between 30 seconds and 1 minute.'],
+
             'hero_image' => ['type' => 'image', 'label' => 'Banner image', 'panel' => 'side',
                 'preview' => 'hero_url'],
             'thumbnail' => ['type' => 'image', 'label' => 'Card thumbnail', 'panel' => 'side',
                 'preview' => 'thumbnail_url'],
             'brochure_path' => ['type' => 'file', 'label' => 'Capability statement', 'panel' => 'side',
                 'accept' => '.pdf,.doc,.docx', 'help' => 'PDF or Word, up to 10 MB.'],
+            'video_poster' => ['type' => 'image', 'label' => 'Video cover image', 'panel' => 'side',
+                'preview' => 'video_poster_url',
+                'help' => 'Shown before the video plays. Falls back to the banner image.'],
             'accent_color' => ['label' => 'Accent colour', 'input' => 'color', 'panel' => 'side'],
             'is_featured' => ['type' => 'checkbox', 'label' => 'Feature on the homepage', 'panel' => 'side'],
             'is_active' => ['type' => 'checkbox', 'label' => 'Published', 'panel' => 'side',
@@ -99,11 +121,57 @@ class DivisionController extends BaseCrudController
         ];
     }
 
+    /**
+     * A division is its own scope: someone attached to one division sees
+     * that division's entry here and not the others'.
+     */
+    protected function scopedQuery(): Builder
+    {
+        return parent::scopedQuery()
+            ->when(DivisionScope::idFor(auth()->user()), fn (Builder $q, int $id) => $q->whereKey($id))
+            ->when(DivisionScope::idFor(auth()->user()) === 0, fn (Builder $q) => $q->whereRaw('1 = 0'));
+    }
+
+    protected function findForEdit(string|int $id): Model
+    {
+        $division = parent::findForEdit($id);
+
+        DivisionScope::assertVisible(auth()->user(), $division->id, 'division');
+
+        return $division;
+    }
+
     protected function prepareData(array $data, Request $request, ?Model $record): array
     {
         $data = parent::prepareData($data, $request, $record);
 
         $data['highlights'] = $this->linesToArray($data['highlights'] ?? null);
+
+        return $this->prepareVideo($data, $request, $record);
+    }
+
+    /**
+     * The upload is handled here rather than through $documentFields: it
+     * needs its length recorded, and it is stored as a video, not a
+     * document.
+     */
+    protected function prepareVideo(array $data, Request $request, ?Model $record): array
+    {
+        unset($data['video_path']);
+
+        if ($request->boolean('remove_video_path') && $record?->video_path) {
+            $this->uploader->deleteFrom('public', $record->video_path);
+            $data['video_path'] = null;
+            $data['video_duration'] = null;
+        }
+
+        if ($request->hasFile('video_path')) {
+            $file = $request->file('video_path');
+            $seconds = Mp4Duration::seconds($file->getRealPath());
+
+            $data['video_path'] = $this->uploader->video($file, 'divisions/videos', replacing: $record?->video_path);
+            $data['video_duration'] = $seconds === null ? null : (int) round($seconds);
+        }
 
         return $data;
     }

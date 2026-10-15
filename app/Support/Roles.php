@@ -58,6 +58,16 @@ final class Roles
     /** A member of staff with portal access but no administrative rights. */
     public const EMPLOYEE = 'Employee';
 
+    // ------------------------------------------------------------------
+    // Finance
+    // ------------------------------------------------------------------
+
+    /** Runs the books: payroll, invoicing, expenses and budgets. */
+    public const FINANCE_MANAGER = 'Finance Manager';
+
+    /** Prepares and records; approval stays with the manager and the CEO. */
+    public const FINANCE_OFFICER = 'Finance Officer';
+
     /** @return array<int, string> */
     public static function all(): array
     {
@@ -70,6 +80,8 @@ final class Roles
             self::HR_MANAGER,
             self::HR_OFFICER,
             self::DEPARTMENT_MANAGER,
+            self::FINANCE_MANAGER,
+            self::FINANCE_OFFICER,
             self::MARKETING_OFFICER,
             self::SALES_OFFICER,
             self::ICT_MANAGER,
@@ -146,7 +158,9 @@ final class Roles
                 Permissions::forModule('applications'),
                 Permissions::forModule('leave'),
                 Permissions::forModule('leave_types'),
-                [$p::DASHBOARD_VIEW, $p::CONTACT_VIEW, $p::MEDIA_VIEW, $p::USERS_VIEW],
+                Permissions::forModule('training'),
+                Permissions::forModule('employee_documents'),
+                [$p::DASHBOARD_VIEW, $p::CONTACT_VIEW, $p::MEDIA_VIEW, $p::USERS_VIEW, $p::PAYROLL_VIEW],
             ),
 
             /*
@@ -160,6 +174,8 @@ final class Roles
                 Permissions::forModule('recruitment'),
                 Permissions::forModule('announcements'),
                 Permissions::forModule('hr_reports'),
+                Permissions::forModule('training'),
+                Permissions::forModule('employee_documents'),
                 [
                     $p::EMPLOYEES_VIEW, $p::EMPLOYEES_CREATE, $p::EMPLOYEES_UPDATE,
                     $p::EMPLOYEES_VIEW_SALARY, $p::EMPLOYEES_VIEW_SENSITIVE,
@@ -187,6 +203,8 @@ final class Roles
                     // Keys in the paper forms; granting them is not theirs.
                     $p::LEAVE_VIEW, $p::LEAVE_CREATE, $p::LEAVE_UPDATE,
                     $p::LEAVE_TYPES_VIEW,
+                    $p::TRAINING_VIEW, $p::TRAINING_CREATE, $p::TRAINING_UPDATE,
+                    $p::EMPLOYEE_DOCUMENTS_VIEW, $p::EMPLOYEE_DOCUMENTS_CREATE, $p::EMPLOYEE_DOCUMENTS_UPDATE,
                 ],
             ),
 
@@ -209,6 +227,7 @@ final class Roles
                 // Approves their own department's leave; the policy scopes it.
                 $p::LEAVE_VIEW,
                 $p::LEAVE_APPROVE,
+                $p::TRAINING_VIEW,
             ],
 
             /*
@@ -227,6 +246,45 @@ final class Roles
                 $p::QUOTES_VIEW, $p::PROJECTS_VIEW, $p::DIVISIONS_VIEW,
                 $p::ACTIVITY_VIEW,
                 $p::LEAVE_VIEW, $p::LEAVE_TYPES_VIEW,
+                $p::TRAINING_VIEW, $p::EMPLOYEE_DOCUMENTS_VIEW,
+                $p::DIVISION_RECORDS_VIEW, $p::DIVISION_RECORDS_EXPORT,
+                // Final sign-off on money, without keeping the books.
+                $p::PAYROLL_VIEW, $p::PAYROLL_APPROVE,
+                $p::EXPENSES_VIEW, $p::EXPENSES_APPROVE,
+                $p::INVOICES_VIEW, $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+            ],
+
+            /*
+             * Finance Manager — the whole finance module, plus read access to
+             * what invoices and payroll are built from: clients, quotations,
+             * projects and employee pay.
+             */
+            self::FINANCE_MANAGER => array_merge(
+                Permissions::forModule('payroll'),
+                Permissions::forModule('expenses'),
+                Permissions::forModule('invoices'),
+                Permissions::forModule('budgets'),
+                Permissions::forModule('finance_reports'),
+                [
+                    $p::DASHBOARD_VIEW, $p::MEDIA_VIEW,
+                    $p::CLIENTS_VIEW, $p::QUOTES_VIEW, $p::PROJECTS_VIEW, $p::DIVISIONS_VIEW,
+                    $p::EMPLOYEES_VIEW, $p::EMPLOYEES_VIEW_SALARY,
+                    $p::DIVISION_RECORDS_VIEW, $p::DIVISION_RECORDS_EXPORT,
+                ],
+            ),
+
+            /*
+             * Finance Officer — prepares payroll, raises invoices, records
+             * payments and expenses. Approving any of it is not theirs.
+             */
+            self::FINANCE_OFFICER => [
+                $p::DASHBOARD_VIEW, $p::MEDIA_VIEW,
+                $p::PAYROLL_VIEW, $p::PAYROLL_PROCESS,
+                $p::EXPENSES_VIEW, $p::EXPENSES_CREATE, $p::EXPENSES_UPDATE,
+                $p::INVOICES_VIEW, $p::INVOICES_CREATE, $p::INVOICES_UPDATE, $p::INVOICES_PAYMENTS,
+                $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+                $p::CLIENTS_VIEW, $p::QUOTES_VIEW, $p::PROJECTS_VIEW,
+                $p::EMPLOYEES_VIEW, $p::EMPLOYEES_VIEW_SALARY,
             ],
 
             /*
@@ -256,9 +314,14 @@ final class Roles
                 Permissions::forModule('applications'),
                 Permissions::forModule('clients'),
                 Permissions::forModule('downloads'),
+                Permissions::forModule('division_records'),
                 [
                     $p::DASHBOARD_VIEW,
                     $p::DIVISIONS_VIEW,
+                    // Their own division's spending and billing, scoped by
+                    // DivisionScope. They submit expenses; finance approves.
+                    $p::EXPENSES_VIEW, $p::EXPENSES_CREATE,
+                    $p::INVOICES_VIEW, $p::BUDGETS_VIEW,
                     $p::CONTACT_VIEW, $p::CONTACT_REPLY,
                     $p::TESTIMONIALS_VIEW, $p::TESTIMONIALS_CREATE, $p::TESTIMONIALS_UPDATE,
                     // Team, FAQs and certificates are group content; a
@@ -292,6 +355,9 @@ final class Roles
                 $p::CONTACT_VIEW, $p::CONTACT_REPLY,
                 $p::MEDIA_VIEW, $p::MEDIA_CREATE,
                 $p::ANNOUNCEMENTS_VIEW,
+                $p::DIVISION_RECORDS_VIEW, $p::DIVISION_RECORDS_CREATE,
+                $p::DIVISION_RECORDS_UPDATE, $p::DIVISION_RECORDS_EXPORT,
+                $p::EXPENSES_VIEW, $p::EXPENSES_CREATE,
             ],
 
             self::MARKETING_OFFICER => array_merge(

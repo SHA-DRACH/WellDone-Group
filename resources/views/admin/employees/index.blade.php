@@ -4,6 +4,11 @@
 @section('page-subtitle', 'Every person employed across the group.')
 
 @section('page-actions')
+    @can('hr_reports.view')
+        <a href="{{ route('admin.employees.export', request()->only(['q', 'status', 'department', 'division'])) }}" class="btn btn-success">
+            <i class="fa-solid fa-file-excel me-2"></i>Download Excel
+        </a>
+    @endcan
     @can('create', App\Models\Employee::class)
         <a href="{{ route('admin.employees.create') }}" class="btn btn-primary">
             <i class="fa-solid fa-user-plus me-2"></i>Add employee
@@ -12,6 +17,8 @@
 @endsection
 
 @section('content')
+
+    @include('admin.hr._tabs')
 
     <div class="d-flex flex-wrap gap-2 mb-3">
         <a href="{{ route('admin.employees.index') }}"

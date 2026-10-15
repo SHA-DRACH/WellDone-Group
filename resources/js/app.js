@@ -22,6 +22,7 @@ import { initQuoteWizard } from './modules/quote-wizard';
 import { initAdmin } from './modules/admin';
 import { initEditor } from './modules/editor';
 import { initMisc } from './modules/misc';
+import { initVideo } from './modules/video';
 
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init({
@@ -40,5 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initAdmin();
     initEditor();
     initMisc();
+    initVideo();
     initAssistant();
 });

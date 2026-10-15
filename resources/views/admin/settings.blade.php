@@ -94,6 +94,18 @@
                                 </div>
                                 @break
 
+                            @case('video')
+                                <x-form.video :name="$name" :label="$setting->label"
+                                              :current="$setting->value ? \Illuminate\Support\Facades\Storage::disk('public')->url($setting->value) : null"
+                                              :help="$setting->description" />
+                                @break
+
+                            @case('video_url')
+                                <x-form.input :name="$name" :label="$setting->label" type="url"
+                                              :value="$setting->value" :help="$setting->description"
+                                              placeholder="https://www.youtube.com/watch?v=…" />
+                                @break
+
                             @case('integer')
                                 <x-form.input :name="$name" :label="$setting->label" type="number"
                                               :value="$setting->value" :help="$setting->description" />

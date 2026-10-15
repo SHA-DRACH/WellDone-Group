@@ -39,7 +39,27 @@ final class DivisionScope
         Roles::DIVISION_OFFICER,
     ];
 
-    /** True when this user may only see one division's records. */
+    /**
+     * The only roles that see every division even when their account names
+     * one. Everybody else who is attached to a division — an ICT manager
+     * based in ICT Services, an HR officer posted to the quarry — works
+     * inside that division and sees that division.
+     */
+    public const UNCONFINED_ROLES = [
+        Roles::SUPER_ADMIN,
+        Roles::ADMIN,
+        Roles::CEO,
+    ];
+
+    /**
+     * True when this user may only see one division's records.
+     *
+     * Attaching an account to a division is what confines it. A group-level
+     * role (HR, finance, ICT…) held by someone with no division is still
+     * group-wide; the same role on an account that names a division is not.
+     * Earlier the role won, which let a division-based ICT manager open
+     * every other division's dashboard.
+     */
     public static function restricts(?User $user): bool
     {
         if (! $user) {
@@ -47,7 +67,7 @@ final class DivisionScope
             return false;
         }
 
-        if ($user->hasAnyRole(Navigation::GROUP_ROLES)) {
+        if ($user->hasAnyRole(self::UNCONFINED_ROLES)) {
             return false;
         }
 

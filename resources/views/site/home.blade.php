@@ -83,6 +83,40 @@
         </section>
     @endif
 
+    {{-- ============================================ Welcome video --}}
+    @if($welcomeVideo)
+        <section class="section welcome-video" aria-labelledby="welcome-video-heading">
+            <div class="container position-relative" style="z-index: 1;">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-5" data-aos="fade-right">
+                        <span class="eyebrow">Welcome</span>
+                        <h2 id="welcome-video-heading" class="mb-3">{{ $welcomeVideo['heading'] }}</h2>
+                        @if($welcomeVideo['body'])
+                            <p class="lead mb-4">{{ $welcomeVideo['body'] }}</p>
+                        @endif
+
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <a href="{{ route('site.about') }}" class="btn btn-gold">
+                                Discover our story <i class="fa-solid fa-arrow-right-long ms-2"></i>
+                            </a>
+                            @if($welcomeVideo['duration'])
+                                <span class="video-length">
+                                    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                                    {{ \App\Rules\VideoLength::human($welcomeVideo['duration']) }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7" data-aos="fade-left">
+                        <x-video-player :src="$welcomeVideo['src']" :embed="$welcomeVideo['embed']"
+                                        :poster="$welcomeVideo['poster']" :title="$welcomeVideo['heading']" />
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- ============================================ About --}}
     <section class="section">
         <div class="container">
