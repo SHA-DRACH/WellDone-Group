@@ -41,12 +41,12 @@ class SettingsSeeder extends Seeder
             // ---------------------------------------------------- Company
             ['key' => 'company.name', 'label' => 'Company Name', 'value' => 'WellDone Group Inc.'],
             ['key' => 'company.legal_name', 'label' => 'Registered Legal Name', 'value' => 'WellDone Group Incorporated'],
-            ['key' => 'company.slogan', 'label' => 'Slogan', 'value' => 'Partnership · Trust · Excellence'],
-            ['key' => 'company.motto', 'label' => 'Motto', 'value' => 'Building a Better Tomorrow'],
-            ['key' => 'company.tagline', 'label' => 'Short Tagline', 'value' => 'A diversified Liberian corporation in mining, logistics, medical supply and technology.'],
+            ['key' => 'company.slogan', 'label' => 'Slogan', 'value' => 'Well Done. Every Time. Anywhere.'],
+            ['key' => 'company.motto', 'label' => 'Motto', 'value' => 'Partnership · Trust · Excellence'],
+            ['key' => 'company.tagline', 'label' => 'Short Tagline', 'value' => 'A diversified Liberian business corporation delivering innovative, reliable and sustainable solutions across ICT, logistics, mining, healthcare and trade.'],
             ['key' => 'company.registration_number', 'label' => 'Business Registration Number', 'value' => ''],
             ['key' => 'company.tin', 'label' => 'Tax Identification Number', 'value' => ''],
-            ['key' => 'company.founded_year', 'label' => 'Year Founded', 'value' => '2014', 'type' => 'integer'],
+            ['key' => 'company.founded_year', 'label' => 'Year Founded', 'value' => '2025', 'type' => 'integer'],
             /*
              * These default to the files shipped in public/images/brand.
              * Uploading a replacement from the CMS stores a public-disk path
@@ -62,34 +62,72 @@ class SettingsSeeder extends Seeder
             ['key' => 'company.profile_pdf', 'label' => 'Company Profile (PDF)', 'value' => null, 'type' => 'file'],
 
             ['key' => 'company.about_short', 'label' => 'About — Short Introduction', 'type' => 'text',
-                'value' => 'WellDone Group Inc. is a registered Liberian corporation delivering integrated solutions across mining and quarry operations, procurement and logistics, medical equipment supply, and information and communications technology.'],
+                'value' => 'Founded in 2025, WellDone Group Inc. is a diversified business corporation established under the laws of the Republic of Liberia, committed to delivering innovative, reliable, and sustainable business solutions across multiple sectors of the economy.'],
             ['key' => 'company.history', 'label' => 'Company History', 'type' => 'richtext',
-                'value' => '<p>WellDone Group Inc. was established to bring dependable, standards-driven delivery to sectors that underpin Liberia\'s growth. What began as a focused supply and logistics operation has grown into a diversified group serving government agencies, concession holders, health institutions and private enterprise across the country.</p><p>Today the group operates four complementary divisions, sharing one commitment: work that is done well, the first time.</p>'],
+                'value' => '<p>Founded in 2025, WellDone Group Inc. ("WDG" or "the Group") is a diversified business corporation established under the laws of the Republic of Liberia, committed to delivering innovative, reliable, and sustainable business solutions across multiple sectors of the economy. The Group was founded to contribute to national development by providing high-quality products and services, creating employment opportunities, and supporting economic growth through strategic investments and partnerships.</p>'
+                    .'<p>Driven by professionalism, partnership, excellence, trust, integrity, innovation, and customer satisfaction, WellDone Group Inc. seeks to build long-term relationships with clients, partners, and stakeholders while maintaining high standards of operational excellence. Through its diversified portfolio and commitment to sustainable business practices, the Group aims to become a trusted leader in Liberia and the wider West African region, delivering value to customers and contributing meaningfully to economic and social development.</p>'
+                    .'<h3>Our Philosophy</h3>'
+                    .'<p>We believe that sustainable growth is built on partnership, trust, excellence, quality and people. Every solution we deliver is guided by a commitment to doing things the right way — with honesty, accountability, and a genuine investment in the success of our clients, partners, employees and the communities we serve.</p>'
+                    .'<h3>Corporate Purpose and Scope of Business</h3>'
+                    .'<p>The general nature of business undertaken by the corporation, and the purposes for which it is formed, are as follows:</p>'
+                    .'<ol>'
+                    .'<li>To engage in general mining and quarry activities</li>'
+                    .'<li>To engage in general supplies, transport, procurement, and logistics</li>'
+                    .'<li>To engage in vehicle sales and rental services</li>'
+                    .'<li>To engage in information and communication technology services and systems operation</li>'
+                    .'<li>To engage in general agriculture</li>'
+                    .'<li>To engage in medical equipment importation and supplies</li>'
+                    .'<li>To engage in and operate pharmaceuticals and laboratories</li>'
+                    .'<li>To engage in financial services</li>'
+                    .'<li>To engage in general consultancy services</li>'
+                    .'<li>To engage in entertainment and catering services</li>'
+                    .'<li>To engage in general import-export of all commodities</li>'
+                    .'<li>To engage in real estate development, general construction, and maintenance</li>'
+                    .'<li>To engage in general engineering and consultancy services</li>'
+                    .'<li>To engage in concessions and participate in bids</li>'
+                    .'<li>To engage in petroleum and other petroleum product importation, distribution, supplies, and sales</li>'
+                    .'<li>To engage in pit-sawing and woodwork activities</li>'
+                    .'<li>To engage in hotel management and tourism</li>'
+                    .'<li>To engage in business or investment of any kind or nature, including but not limited to trading and investment in the debt and equity securities of other corporations and business enterprises</li>'
+                    .'<li>To do any such other acts and activities, engage in any business, and perform any other function that a corporation in Liberia may lawfully do and perform</li>'
+                    .'</ol>'
+                    .'<p>Of the nineteen (19) permitted activities listed above, WellDone Group Inc. is currently implementing the following five (5) business divisions:</p>'
+                    .'<ul>'
+                    .'<li>WellDone Information and Communication Technology (ICT)</li>'
+                    .'<li>WellDone Logistics and Procurement Services</li>'
+                    .'<li>WellDone Mining Services</li>'
+                    .'<li>WellDone Medical Supply Services</li>'
+                    .'<li>WellDone General Trading and Investment</li>'
+                    .'</ul>'],
             ['key' => 'company.mission', 'label' => 'Mission Statement', 'type' => 'text',
-                'value' => 'To deliver dependable, standards-compliant solutions that create measurable value for our clients, opportunity for our people, and lasting benefit for the communities we serve.'],
+                'value' => 'To provide reliable, high-quality products and services across information technology, logistics, mining, healthcare, and trade — creating employment, empowering local communities, and building lasting partnerships through professionalism, innovation, and integrity.'],
             ['key' => 'company.vision', 'label' => 'Vision Statement', 'type' => 'text',
-                'value' => 'To be West Africa\'s most trusted diversified enterprise — the partner of choice wherever quality, integrity and delivery matter.'],
+                'value' => 'To become one of the most trusted and diversified business groups in Liberia and the wider West African region, delivering innovative solutions that improve lives, strengthen industries, and drive sustainable national development.'],
+            ['key' => 'company.philosophy', 'label' => 'Philosophy', 'type' => 'text',
+                'value' => 'We believe that sustainable growth is built on partnership, trust, excellence, quality and people. Every solution we deliver is guided by a commitment to doing things the right way — with honesty, accountability, and a genuine investment in the success of our clients, partners, employees and the communities we serve.'],
             ['key' => 'company.core_values', 'label' => 'Core Values', 'type' => 'json',
                 'value' => json_encode([
-                    ['title' => 'Integrity', 'icon' => 'fa-solid fa-shield-halved', 'description' => 'We do what we say, and we account for what we do.'],
-                    ['title' => 'Excellence', 'icon' => 'fa-solid fa-award', 'description' => 'Standards are met before a job is called finished.'],
-                    ['title' => 'Safety', 'icon' => 'fa-solid fa-helmet-safety', 'description' => 'Every operation is planned so people go home unharmed.'],
-                    ['title' => 'Partnership', 'icon' => 'fa-solid fa-handshake', 'description' => 'We succeed when our clients and communities succeed.'],
-                    ['title' => 'Accountability', 'icon' => 'fa-solid fa-clipboard-check', 'description' => 'Clear ownership, transparent reporting, no surprises.'],
-                    ['title' => 'Innovation', 'icon' => 'fa-solid fa-lightbulb', 'description' => 'We adopt better methods and technology as they prove themselves.'],
+                    ['title' => 'Integrity', 'icon' => 'fa-solid fa-shield-halved', 'description' => 'We conduct business honestly, transparently, and ethically in everything we do.'],
+                    ['title' => 'Excellence', 'icon' => 'fa-solid fa-award', 'description' => 'We hold ourselves to high standards of quality and operational performance.'],
+                    ['title' => 'Innovation', 'icon' => 'fa-solid fa-lightbulb', 'description' => 'We embrace modern solutions and technology to solve real business challenges.'],
+                    ['title' => 'Reliability', 'icon' => 'fa-solid fa-clock', 'description' => 'We deliver on our promises, consistently and on time.'],
+                    ['title' => 'Trust', 'icon' => 'fa-solid fa-hand-holding-heart', 'description' => 'We earn and honor the confidence placed in us by clients, partners, employees and communities.'],
+                    ['title' => 'Partnership', 'icon' => 'fa-solid fa-handshake', 'description' => 'We build long-term relationships rooted in mutual respect and shared success.'],
+                    ['title' => 'Sustainability', 'icon' => 'fa-solid fa-leaf', 'description' => 'We invest in practices that support economic growth and community development for the long term.'],
                 ])],
             ['key' => 'company.csr_statement', 'label' => 'CSR Statement', 'type' => 'text',
                 'value' => 'We reinvest in the communities that host our operations through education support, health outreach, local employment and environmental stewardship.'],
 
             // ---------------------------------------------------- Contact
-            ['key' => 'contact.address_line1', 'label' => 'Street Address', 'value' => 'Tubman Boulevard, Sinkor'],
-            ['key' => 'contact.address_line2', 'label' => 'Address Line 2', 'value' => '12th Street'],
+            ['key' => 'contact.address_line1', 'label' => 'Street Address', 'value' => '1140 Thinkers Village'],
+            ['key' => 'contact.address_line2', 'label' => 'Address Line 2', 'value' => 'Paynesville'],
             ['key' => 'contact.city', 'label' => 'City', 'value' => 'Monrovia'],
             ['key' => 'contact.country', 'label' => 'Country', 'value' => 'Liberia'],
-            ['key' => 'contact.postal_code', 'label' => 'Postal Code', 'value' => '1000'],
-            ['key' => 'contact.phone_primary', 'label' => 'Primary Phone', 'value' => '+231 77 000 0000'],
-            ['key' => 'contact.phone_secondary', 'label' => 'Secondary Phone', 'value' => '+231 88 000 0000'],
-            ['key' => 'contact.whatsapp', 'label' => 'WhatsApp Number', 'value' => '231770000000',
+            ['key' => 'contact.postal_code', 'label' => 'Postal Code', 'value' => ''],
+            ['key' => 'contact.website', 'label' => 'Website', 'value' => 'https://www.welldonegroupinc.com'],
+            ['key' => 'contact.phone_primary', 'label' => 'Primary Phone', 'value' => '+231 77 305 3897'],
+            ['key' => 'contact.phone_secondary', 'label' => 'Secondary Phone (WhatsApp)', 'value' => '+231 88 959 8596'],
+            ['key' => 'contact.whatsapp', 'label' => 'WhatsApp Number', 'value' => '231889598596',
                 'description' => 'Digits only, including country code — used to build the wa.me quick-chat link.'],
             ['key' => 'contact.email_general', 'label' => 'General Email', 'value' => 'welldonegroupinc@gmail.com'],
             ['key' => 'contact.email_sales', 'label' => 'Sales Email', 'value' => 'sales@welldonegroup.com'],
@@ -109,9 +147,9 @@ class SettingsSeeder extends Seeder
             ['key' => 'social.youtube', 'label' => 'YouTube URL', 'value' => ''],
 
             // ---------------------------------------------------- Homepage
-            ['key' => 'home.about_heading', 'label' => 'About Section Heading', 'value' => 'One group. Four divisions. A single standard of delivery.'],
+            ['key' => 'home.about_heading', 'label' => 'About Section Heading', 'value' => 'One group. Five divisions. Well Done. Every Time. Anywhere.'],
             ['key' => 'home.about_body', 'label' => 'About Section Body', 'type' => 'text',
-                'value' => 'From quarry face to hospital ward to server room, WellDone Group brings the same discipline to every contract: qualified people, compliant processes, and delivery you can plan around.'],
+                'value' => 'Driven by professionalism, partnership, excellence, trust, integrity, innovation, and customer satisfaction, WellDone Group Inc. builds long-term relationships with clients, partners, and stakeholders while maintaining high standards of operational excellence.'],
             ['key' => 'home.why_choose_us', 'label' => 'Why Choose Us Items', 'type' => 'json',
                 'value' => json_encode([
                     ['title' => 'Locally rooted, internationally sourced', 'icon' => 'fa-solid fa-globe', 'description' => 'Liberian teams on the ground, backed by vetted international supply lines.'],
@@ -121,21 +159,21 @@ class SettingsSeeder extends Seeder
                 ])],
             ['key' => 'home.stats', 'label' => 'Statistics Counters', 'type' => 'json',
                 'value' => json_encode([
-                    ['value' => 12, 'suffix' => '+', 'label' => 'Years of operation', 'icon' => 'fa-solid fa-calendar-check'],
-                    ['value' => 240, 'suffix' => '+', 'label' => 'Projects delivered', 'icon' => 'fa-solid fa-diagram-project'],
-                    ['value' => 85, 'suffix' => '+', 'label' => 'Institutional clients', 'icon' => 'fa-solid fa-building-columns'],
-                    ['value' => 310, 'suffix' => '+', 'label' => 'People employed', 'icon' => 'fa-solid fa-users'],
+                    ['value' => 5, 'suffix' => '', 'label' => 'Business divisions', 'icon' => 'fa-solid fa-layer-group'],
+                    ['value' => 19, 'suffix' => '', 'label' => 'Licensed fields of business', 'icon' => 'fa-solid fa-file-contract'],
+                    ['value' => 8, 'suffix' => '+', 'label' => 'ICT business solutions', 'icon' => 'fa-solid fa-microchip'],
+                    ['value' => 29, 'suffix' => '+', 'label' => 'Years of leadership experience', 'icon' => 'fa-solid fa-user-tie'],
                 ])],
             ['key' => 'home.cta_heading', 'label' => 'Call-to-action Heading', 'value' => 'Have a project in mind?'],
             ['key' => 'home.cta_body', 'label' => 'Call-to-action Body', 'type' => 'text',
                 'value' => 'Tell us what you need delivered. Our team will review the scope and return a written quotation.'],
 
             // ---------------------------------------------------- SEO
-            ['key' => 'seo.default_title', 'label' => 'Default Meta Title', 'value' => 'WellDone Group Inc. — Mining, Logistics, Medical Supply & ICT in Liberia'],
+            ['key' => 'seo.default_title', 'label' => 'Default Meta Title', 'value' => 'WellDone Group Inc. — ICT, Logistics, Mining, Medical Supply & Trading in Liberia'],
             ['key' => 'seo.default_description', 'label' => 'Default Meta Description', 'type' => 'text',
-                'value' => 'WellDone Group Inc. is a registered Liberian corporation delivering mining and quarry operations, procurement and logistics, medical equipment supply, and ICT solutions.'],
+                'value' => 'WellDone Group Inc. is a diversified Liberian business corporation delivering ICT services, logistics and procurement, mining services, medical supplies, and trading and investment.'],
             ['key' => 'seo.default_keywords', 'label' => 'Default Meta Keywords', 'type' => 'text',
-                'value' => 'Liberia mining, quarry Liberia, procurement Liberia, logistics Monrovia, medical equipment Liberia, ICT Liberia, WellDone Group'],
+                'value' => 'WellDone Group, ICT Liberia, HRMS Liberia, logistics Monrovia, procurement Liberia, mining services Liberia, medical supplies Liberia, trading and investment Liberia'],
             ['key' => 'seo.default_og_image', 'label' => 'Default Social Share Image', 'type' => 'image', 'value' => null],
             ['key' => 'seo.google_analytics_id', 'label' => 'Google Analytics Measurement ID', 'value' => '', 'is_public' => false],
             ['key' => 'seo.google_site_verification', 'label' => 'Google Site Verification', 'value' => '', 'is_public' => false],
@@ -166,7 +204,7 @@ class SettingsSeeder extends Seeder
             ['key' => 'home.welcome_video_heading', 'label' => 'Welcome Video — Heading',
                 'value' => 'Welcome to WellDone Group'],
             ['key' => 'home.welcome_video_body', 'label' => 'Welcome Video — Introduction', 'type' => 'text',
-                'value' => 'A minute with the people behind our four divisions — the quarry crews, logistics teams, biomedical engineers and ICT specialists who deliver for our clients across Liberia.'],
+                'value' => 'A minute with the people behind our five divisions — ICT, logistics and procurement, mining, medical supply, and trading and investment — who deliver for our clients across Liberia.'],
             ['key' => 'home.welcome_video', 'label' => 'Welcome Video (upload)', 'type' => 'video', 'value' => null,
                 'description' => 'MP4, between 30 seconds and 1 minute. The section is hidden until a video or link is added.'],
             ['key' => 'home.welcome_video_url', 'label' => 'Welcome Video (YouTube or Vimeo link)', 'type' => 'video_url', 'value' => null,

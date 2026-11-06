@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Group Dashboard')
-@section('page-subtitle', 'Activity across all four divisions.')
+@section('page-subtitle', 'Activity across all five divisions.')
 
 @section('content')
 

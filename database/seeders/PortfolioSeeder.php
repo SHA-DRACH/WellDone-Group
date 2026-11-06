@@ -235,18 +235,24 @@ class PortfolioSeeder extends Seeder
             );
         }
 
+        // Partners as listed in the Company Profile (October 2026). Logos and
+        // professional profiles are still to be supplied; Mr. Camara's
+        // company name was left blank in the profile.
         $partners = [
-            ['name' => 'Liberia Business Registry', 'type' => 'accreditation'],
-            ['name' => 'Environmental Protection Agency of Liberia', 'type' => 'accreditation'],
-            ['name' => 'Liberia Revenue Authority', 'type' => 'accreditation'],
-            ['name' => 'National Public Health Institute of Liberia', 'type' => 'affiliation'],
-            ['name' => 'Liberia Chamber of Commerce', 'type' => 'affiliation'],
-            ['name' => 'Freeport of Monrovia', 'type' => 'partner'],
-            ['name' => 'West Africa Logistics Alliance', 'type' => 'partner'],
-            ['name' => 'Global Medical Systems Ltd', 'type' => 'supplier'],
-            ['name' => 'Atlas Heavy Plant', 'type' => 'supplier'],
-            ['name' => 'Sahel Technologies', 'type' => 'supplier'],
+            ['name' => 'Mamadou Camara', 'type' => 'partner',
+                'description' => 'Mr. Mamadou Camara — Founder & Chief Executive Officer.'],
+            ['name' => 'QED Solutions', 'type' => 'partner',
+                'description' => 'Mr. Peter Otandeka — Chief Executive Officer, QED Solutions, Uganda.'],
+            ['name' => 'Sinco Medical Supplies', 'type' => 'partner',
+                'description' => 'Mr. Charles Achaye — Founder & Director, Sinco Medical Supplies, Juba, South Sudan.'],
+            ['name' => 'Vero Mining Company', 'type' => 'partner',
+                'description' => 'Mrs. Veronica Zulu — Founder & Chief Executive Officer, Vero Mining Company, Liberia.'],
         ];
+
+        // Hide placeholder partners that are not in the Company Profile.
+        Partner::query()
+            ->whereNotIn('name', array_column($partners, 'name'))
+            ->update(['is_active' => false]);
 
         foreach ($partners as $index => $partner) {
             Partner::query()->updateOrCreate(

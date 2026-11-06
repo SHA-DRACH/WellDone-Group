@@ -38,7 +38,7 @@ class PageController extends Controller
     {
         seo()->set([
             'title' => 'Leadership & Team — '.setting('company.name'),
-            'description' => 'Meet the leadership team directing WellDone Group\'s four business divisions.',
+            'description' => 'Meet the leadership team directing WellDone Group\'s five business divisions.',
         ]);
 
         return view('site.pages.leadership', [

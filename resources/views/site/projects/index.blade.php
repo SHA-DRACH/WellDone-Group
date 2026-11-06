@@ -4,7 +4,7 @@
 
     @include('site.partials.page-header', [
         'title' => 'Projects',
-        'subtitle' => 'Completed and ongoing work across our four divisions.',
+        'subtitle' => 'Completed and ongoing work across our five divisions.',
         'breadcrumbs' => ['Projects' => null],
     ])
 

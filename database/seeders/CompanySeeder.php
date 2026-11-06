@@ -21,74 +21,91 @@ class CompanySeeder extends Seeder
     {
         $divisions = Division::query()->pluck('id', 'slug');
 
+        // Leadership team as listed in the Company Profile (October 2026).
+        // Photos ship in public/images/team; uploading a new one from the CMS
+        // replaces the path.
         $leadership = [
             [
-                'name' => 'J. Wesley Kollie',
-                'position' => 'Group Chief Executive Officer',
+                'name' => 'Gbogbah Matthew Tarr',
+                'position' => 'Founder & Chief Executive Officer',
                 'department' => 'Executive',
-                'short_bio' => 'Founder of WellDone Group, with two decades across construction supply, logistics and public infrastructure delivery in Liberia.',
-                'bio' => '<p>Wesley founded WellDone Group and leads group strategy and governance. Their background spans construction materials supply, freight and clearance operations, and delivery of public infrastructure contracts across Liberia.</p>',
+                'photo' => '/images/team/gbogbah-matthew-tarr.jpg',
+                'short_bio' => 'Founder and CEO, with over 29 years of progressive leadership in finance, database development, ICT, logistics, procurement and programme management across Africa, Asia and Australia.',
+                'bio' => '<p><em>Building a Trusted African Enterprise Through Integrity, Strategic Leadership, and Sustainable Growth.</em></p>'
+                    .'<p>Gbogbah Matthew Tarr is the Founder and Chief Executive Officer of WellDone Group Inc., a diversified business corporation established in 2025 in Liberia.</p>'
+                    .'<p>He brings over 29 years of progressive leadership experience in finance, database development, ICT, logistics, procurement, partnership development, operations, administration, and programme management across Africa and Asia, complemented by professional experience in Australia in both private and public sectors. His expertise spans financial stewardship, database development, ICT, strategic resource allocation, operational oversight, risk management, and organizational leadership, including management of programmes with a large volume of budgets.</p>'
+                    .'<p>Gbogbah holds a Master of Commerce in Professional Accounting, a Master of Public Policy and Management, and a Bachelor of Commerce in Accounting from Australian universities, as well as a Diploma in Business &amp; Management and a Diploma in Bookkeeping &amp; Accounts from Cambridge International College, UK. He also holds a certificate in Computer Literacy from the then IRC Vocational School Systems, N\'Zerekore, Guinea. He is a member of the Institute of Public Accountants of Australia.</p>'
+                    .'<p>His career includes senior management and leadership roles with Malteser International, the International Rescue Committee, the Lutheran World Federation and Bayswater ECHO with responsibility for country-level financial management, compliance, human resources, procurement, ICT, database development and programme delivery.</p>'
+                    .'<p>As Founder and CEO, Gbogbah is leading WellDone Group to become a professionally managed, diversified African enterprise focused on creating commercial value, expanding market opportunities, generating employment, and contributing to sustainable economic development. The Group\'s focus sectors include information technology, logistics, mining, healthcare, and trade, with a vision to establish a strong presence in Liberia and expand across West Africa and the wider continent.</p>'
+                    .'<p>His leadership is defined by financial discipline, accountability, transparent decision-making, and responsible risk management. He believes investor confidence is built through sound governance, clear commitments, reliable delivery, and responsible management of capital.</p>'
+                    .'<p>Gbogbah\'s entrepreneurial vision is rooted in his personal journey — from the hardships of poverty and displacement as a refugee at age 18 in Conakry, Guinea, during Liberia\'s civil war to professional leadership, supported by humanitarian organizations including the International Rescue Committee. That experience forged his commitment to building businesses that create opportunities for others through sustainable enterprise.</p>'
+                    .'<p>He welcomes partnerships with investors, financial institutions, suppliers, development partners, and strategic collaborators who share his ambition to build competitive African businesses that deliver sustainable commercial returns while creating jobs and lasting social value.</p>',
                 'is_leadership' => true,
             ],
             [
-                'name' => 'Rebecca T. Nyanti',
-                'position' => 'Group Chief Operating Officer',
+                'name' => 'Garjay Jestin Tarr',
+                'position' => 'Co-Founder & Managing Director',
                 'department' => 'Executive',
-                'short_bio' => 'Responsible for operational performance across all four divisions, with a background in supply chain and programme management.',
-                'bio' => '<p>Rebecca oversees operational delivery across the group, holding each division to common standards for safety, compliance and client reporting.</p>',
+                'photo' => '/images/team/garjay-jestin-tarr.jpg',
+                'short_bio' => 'More than 16 years in public-sector administration, program support and project management with the U.S. Department of State and USAID.',
+                'bio' => '<p>Mr. Garjay Jestin Tarr is the Managing Director of WellDone Group Inc., bringing more than 16 years of experience in public-sector administration, program support, and project management. He spent eight years with the U.S. Department of State before joining the U.S. Agency for International Development (USAID), where he moved into executive support and project management roles.</p>'
+                    .'<p>At USAID Guinea and Sierra Leone, he supported senior leadership across the Front Office and the Democracy, Rights and Governance and Economic Growth offices, provided technical oversight of partner-implemented programs, including field monitoring in five regions of Guinea, and supported the Disaster Assistance Response Team during the Ebola outbreak. His expertise spans project coordination, compliance and performance monitoring, procurement and financial processes, logistics, stakeholder engagement, and reporting.</p>'
+                    .'<p>Mr. Tarr holds a Bachelor\'s Degree in Economic Management from the University International College, Republic of Guinea, Conakry. He has also completed several professional training programs in project management, administration, leadership, and contract oversight, further strengthening his technical and managerial competencies.</p>'
+                    .'<p>Mr. Tarr is bilingual in English and French and has worked effectively in multicultural, high-pressure environments, building strong relationships with clients, partners, and communities. Known for his reliability, sound judgment, and ability to manage multiple priorities, he understands how projects are planned, funded, monitored, and delivered to a high standard. At WellDone Group Inc., he leads with integrity, accountability, and a strong commitment to achieving measurable results.</p>',
                 'is_leadership' => true,
             ],
             [
-                'name' => 'Emmanuel S. Doe',
-                'position' => 'Director, ICT Services',
-                'department' => 'ICT',
-                'division' => 'ict-services',
-                'short_bio' => 'Leads software delivery, infrastructure and cybersecurity practice for public and private sector clients.',
-                'bio' => '<p>Emmanuel heads the ICT division, covering software engineering, network and security infrastructure, and managed services.</p>',
-                'is_leadership' => true,
-            ],
-            [
-                'name' => 'Dr. Fatu B. Massaquoi',
-                'position' => 'Director, Medical Equipment & Supplies',
-                'department' => 'Medical',
-                'division' => 'medical-equipment',
-                'short_bio' => 'Biomedical engineer leading equipment sourcing, commissioning and maintenance across the installed base.',
-                'bio' => '<p>Fatu leads the medical division, with responsibility for manufacturer selection, regulatory compliance, commissioning standards and the maintenance programme.</p>',
-                'is_leadership' => true,
-            ],
-            [
-                'name' => 'Prince G. Tarr',
-                'position' => 'Director, Mining & Quarry',
-                'department' => 'Mining',
-                'division' => 'mining-quarry',
-                'short_bio' => 'Mining engineer responsible for extraction planning, production and environmental compliance.',
-                'bio' => '<p>Prince directs quarry and mineral operations, covering extraction planning, plant productivity, blasting compliance and site rehabilitation.</p>',
-                'is_leadership' => true,
-            ],
-            [
-                'name' => 'Miatta G. Freeman',
-                'position' => 'Director, Procurement & Logistics',
+                'name' => 'Stephen V. Kollie',
+                'position' => 'Logistics, Procurement & General Trading Director',
                 'department' => 'Logistics',
                 'division' => 'procurement-logistics',
-                'short_bio' => 'Leads sourcing, freight, customs brokerage and distribution operations.',
-                'bio' => '<p>Miatta directs the procurement and logistics division, including supplier management, freight coordination, customs compliance and warehousing.</p>',
+                'photo' => '/images/team/stephen-v-kollie.jpg',
+                'short_bio' => 'Supply chain specialist leading procurement, logistics and bidding, with a Master\'s in Procurement and Supply Chain Management.',
+                'bio' => '<p>Mr. Stephen V. Kollie is the Procurement and Logistics Lead at WellDone Group Inc., where he oversees the end-to-end procurement lifecycle and ensures the efficient distribution of goods and services across the organization. A specialist in supply chain optimization, strategic sourcing, and operational efficiency, he leads the company\'s bidding efforts for goods and services and safeguards the timely continuity of business operations. He is recognized for building strong vendor relationships and negotiating high-value contracts that reduce operational costs while upholding the highest standards of quality and compliance. Believing a resilient supply chain is the backbone of any successful enterprise, he consistently works to mitigate risk and streamline logistics.</p>'
+                    .'<p>Before joining WellDone Group, Mr. Kollie held leadership roles in both the public and private sectors, building deep expertise in supply chain and logistics management, finance, and administration. He holds a Master\'s degree in Procurement and Supply Chain Management from the International University of East Africa (IUEA) in Kampala, Uganda, and a Bachelor of Business Administration in Accounting from the United Methodist University (UMU) in Monrovia, Liberia. Passionate about data-driven decision-making, he applies analytical insights to drive continuous improvement across procurement and logistics operations.</p>',
                 'is_leadership' => true,
             ],
             [
-                'name' => 'Musu K. Kollie',
-                'position' => 'Head of Human Resources',
-                'department' => 'Human Resources',
-                'short_bio' => 'Responsible for recruitment, learning and development, and workplace policy across the group.',
-                'is_leadership' => false,
+                'name' => 'Shadrach Jimice Jr.',
+                'position' => 'Senior Software Engineer & Director of ICT Services',
+                'department' => 'ICT',
+                'division' => 'ict-services',
+                'photo' => '/images/team/shadrach-jimice-jr.jpg',
+                'short_bio' => 'Software engineer providing technology leadership across software development, digital transformation and IT systems.',
+                'bio' => '<p>Mr. Shadrach Jimice Jr. is a Software Engineer and ICT professional with a BSc (Hons) in Software Engineering from UNILAK, Rwanda, and is currently a Master of Information Technology (MIT) Candidate at Starz University, Liberia.</p>'
+                    .'<p>As a Senior Software Engineer and Director of ICT Services at WellDone Group Inc., he provides technology leadership across software development, digital transformation, IT systems, and business technology solutions. He brings experience in web and mobile application development, database management, IT support, and ICT training, with a strong focus on using technology to improve organizational efficiency and growth.</p>',
+                'is_leadership' => true,
             ],
             [
-                'name' => 'Alfred N. Gbeh',
-                'position' => 'Group Health, Safety & Environment Manager',
-                'department' => 'HSE',
-                'short_bio' => 'Owns the group safety management system and environmental compliance programme.',
-                'is_leadership' => false,
+                'name' => 'Philip Saywray Gongar',
+                'position' => 'Director of Strategy, Business Development, Innovation & Research',
+                'department' => 'Strategy',
+                'photo' => '/images/team/philip-saywray-gongar.jpg',
+                'short_bio' => 'Management professional with 10 years in human resource management, administration, project coordination and executive support.',
+                'bio' => '<p>Mr. Philip Saywray Gongar is an accomplished management professional with 10 years of experience in human resource management, administration, project coordination, and executive management support. He serves as the Director of Strategy, Business Development, Innovation &amp; Research at WellDone Group Inc., where he contributes to the company\'s strategic direction, business expansion, innovation initiatives, and research-driven growth.</p>'
+                    .'<p>Prior to joining WellDone Group Inc., Mr. Gongar spent 10 years with CICO, serving as an HR Administrator and Management Assistant across various infrastructure development projects in Liberia. During his tenure, he played a key role in supporting several road construction projects, gaining valuable experience in workforce management, project administration, operational coordination, and organizational support. His contributions strengthened administrative processes, facilitated effective human resource operations, and supported the successful execution of project activities.</p>'
+                    .'<p>Mr. Gongar holds a Bachelor of Management Studies (BMS) and a Diploma in Human Resource Management. He also possesses a Certificate in Project Management and a Certificate of License in Christian Ministry. His academic and professional qualifications provide a solid foundation in management principles, organizational leadership, human resource administration, and project coordination.</p>'
+                    .'<p>His core competencies include human resource management, project administration, organizational development, policy formulation, strategic planning, and operational management. He combines practical experience in managing administrative and workforce functions with a strong interest in business development, innovation, institutional strengthening, and sustainable organizational performance.</p>'
+                    .'<p>At WellDone Group Inc., a diversified Liberian-owned corporation established in 2025, Mr. Gongar supports the company\'s vision of delivering innovative, reliable, and sustainable business solutions across multiple sectors. He is committed to identifying emerging business opportunities, fostering strategic partnerships, promoting research-informed decision-making, and advancing initiatives that strengthen organizational competitiveness, create employment opportunities, and contribute to sustainable economic growth in Liberia and the wider West African region.</p>',
+                'is_leadership' => true,
+            ],
+            [
+                'name' => 'William Lee Davis',
+                'position' => 'Director of Medical Supplies & Healthcare Services',
+                'department' => 'Medical',
+                'division' => 'medical-equipment',
+                'photo' => '/images/team/william-lee-davis.jpg',
+                'short_bio' => 'Chemical engineering and pharmaceutical research specialist with an MSc in Pharmaceutical Engineering from China Pharmaceutical University.',
+                'bio' => '<p>Chemical Engineering and Pharmaceutical Research Specialist with over five years of experience in biochemistry, process optimization, and research and development (R&amp;D). Demonstrated expertise in developing innovative biochemical processes, scaling up operations from laboratory research to industrial production, and conducting impactful scientific research.</p>'
+                    .'<p>Holds a Master of Science (MSc) in Pharmaceutical Engineering from China Pharmaceutical University, with specialized research in nitric oxide (NO)-releasing hydrogels and nanoparticle-based drug delivery systems for the treatment of peptic ulcers. Proven ability to lead cross-functional teams, oversee quality control systems, and advance sustainable green chemistry initiatives. Skilled at bridging academic research and industrial applications while working effectively in complex, multicultural, and international environments.</p>',
+                'is_leadership' => true,
             ],
         ];
+
+        // Hide placeholder team members who are not in the Company Profile.
+        TeamMember::query()
+            ->whereNotIn('name', array_column($leadership, 'name'))
+            ->update(['is_active' => false]);
 
         foreach ($leadership as $index => $member) {
             $divisionSlug = $member['division'] ?? null;
@@ -105,14 +122,14 @@ class CompanySeeder extends Seeder
         }
 
         $milestones = [
-            ['year' => '2014', 'title' => 'WellDone Group incorporated', 'icon' => 'fa-solid fa-flag', 'description' => 'The company is registered in Monrovia, beginning as a construction materials supply and haulage operation.'],
-            ['year' => '2016', 'title' => 'Procurement & Logistics division formed', 'icon' => 'fa-solid fa-truck-fast', 'description' => 'Freight forwarding and customs brokerage capability is established to support client import requirements end to end.'],
-            ['year' => '2018', 'title' => 'First licensed quarry site commissioned', 'icon' => 'fa-solid fa-mountain', 'description' => 'Aggregate production begins under a full environmental management plan, supplying road and building contractors.'],
-            ['year' => '2020', 'title' => 'Medical Equipment division launched', 'icon' => 'fa-solid fa-stethoscope', 'description' => 'The group begins supplying and commissioning hospital and laboratory equipment, with in-house biomedical technicians.'],
-            ['year' => '2022', 'title' => 'ICT Services division launched', 'icon' => 'fa-solid fa-microchip', 'description' => 'Software development, network and security engineering capability is brought in-house for public and private clients.'],
-            ['year' => '2024', 'title' => 'Bonded warehouse capacity commissioned', 'icon' => 'fa-solid fa-warehouse', 'description' => 'Expanded bonded and temperature-controlled storage shortens clearance-to-delivery times for client consignments.'],
-            ['year' => '2026', 'title' => 'Four divisions, nationwide delivery', 'icon' => 'fa-solid fa-globe', 'description' => 'The group now delivers across all fifteen counties with over 310 people employed.'],
+            ['year' => '2025', 'title' => 'WellDone Group Inc. established', 'icon' => 'fa-solid fa-flag', 'description' => 'WellDone Group Inc. is founded as a diversified business corporation under the laws of the Republic of Liberia, licensed for nineteen fields of business.'],
+            ['year' => '2026', 'title' => 'Five business divisions in operation', 'icon' => 'fa-solid fa-layer-group', 'description' => 'The Group implements five divisions: ICT Services, Logistics & Procurement, Mining Services, Medical Supply Services, and Trading & Investment.'],
         ];
+
+        // Hide placeholder milestones that predate the 2025 founding.
+        Milestone::query()
+            ->whereNotIn('title', array_column($milestones, 'title'))
+            ->update(['is_active' => false]);
 
         foreach ($milestones as $index => $milestone) {
             Milestone::query()->updateOrCreate(
@@ -218,7 +235,7 @@ class CompanySeeder extends Seeder
         // Download placeholders — an administrator uploads the real files from
         // the CMS; rows with no file are hidden from the public list.
         $downloads = [
-            ['title' => 'WellDone Group Company Profile', 'category' => 'profile', 'description' => 'Full corporate profile covering all four divisions, capabilities and track record.'],
+            ['title' => 'WellDone Group Company Profile', 'category' => 'profile', 'description' => 'Full corporate profile covering all five divisions, leadership, vision, mission and core values.'],
             ['title' => 'Mining & Quarry Capability Statement', 'category' => 'capability', 'division' => 'mining-quarry', 'description' => 'Aggregate products, plant, licensing and environmental management.'],
             ['title' => 'Procurement & Logistics Capability Statement', 'category' => 'capability', 'division' => 'procurement-logistics', 'description' => 'Sourcing, freight, clearance, warehousing and distribution services.'],
             ['title' => 'Medical Equipment Catalogue', 'category' => 'catalogue', 'division' => 'medical-equipment', 'description' => 'Hospital, laboratory and diagnostic equipment lines with supported manufacturers.'],

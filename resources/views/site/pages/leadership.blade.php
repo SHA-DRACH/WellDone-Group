@@ -4,7 +4,7 @@
 
     @include('site.partials.page-header', [
         'title' => 'Leadership & Team',
-        'subtitle' => 'The people accountable for delivery across our four divisions.',
+        'subtitle' => 'The people accountable for delivery across our five divisions.',
         'breadcrumbs' => ['About' => route('site.about'), 'Leadership' => null],
     ])
 
@@ -31,6 +31,13 @@
 
                             @if($member->short_bio)
                                 <p class="small text-muted">{{ $member->short_bio }}</p>
+                            @endif
+
+                            @if($member->bio)
+                                <details class="text-start mt-2">
+                                    <summary class="small fw-semibold text-primary" style="cursor:pointer;">Read full profile</summary>
+                                    <div class="prose small text-muted mt-2">{!! $member->bio !!}</div>
+                                </details>
                             @endif
 
                             <div class="d-flex justify-content-center gap-2 mt-3">
@@ -92,7 +99,7 @@
                 <div class="row align-items-center g-4">
                     <div class="col-lg-8">
                         <h2 class="h3">Want to join the team?</h2>
-                        <p>We recruit across all four divisions, and we promote from within.</p>
+                        <p>We recruit across all five divisions, and we promote from within.</p>
                     </div>
                     <div class="col-lg-4 text-lg-end">
                         <a href="{{ route('site.careers.index') }}" class="btn btn-gold btn-lg">View open roles</a>

@@ -180,13 +180,13 @@
         <div class="container">
             <div class="section-title text-center">
                 <span class="eyebrow">Business Divisions</span>
-                <h2>Four divisions, one standard of delivery</h2>
+                <h2>Five divisions, one standard of delivery</h2>
                 <p>Each division operates with its own specialists and licences, and reports to the same group standards for safety, compliance and client communication.</p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-4 justify-content-center">
                 @foreach($divisions as $division)
-                    <div class="col-md-6 col-xl-3" data-aos="fade-up" data-aos-delay="{{ $loop->index * 80 }}">
+                    <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 80 }}">
                         <article class="division-card h-100">
                             <div class="division-card__media">
                                 <img src="{{ $division->thumbnail_url }}" alt="" loading="lazy" decoding="async">

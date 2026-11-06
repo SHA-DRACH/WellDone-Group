@@ -16,7 +16,7 @@ class ServiceController extends Controller
 
         seo()->set([
             'title' => 'Our Services — '.setting('company.name'),
-            'description' => 'The full range of services delivered across WellDone Group\'s four business divisions.',
+            'description' => 'The full range of services delivered across WellDone Group\'s five business divisions.',
         ]);
 
         return view('site.services.index', [
