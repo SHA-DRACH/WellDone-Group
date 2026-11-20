@@ -48,6 +48,18 @@ still needed from the company. Then follow [DEPLOYMENT.md](DEPLOYMENT.md):
 New command: `php artisan staff:invite [email…]` re-sends the
 "choose your password" email.
 
+## Added in this pass
+
+- **Document reviews.** Each division dashboard can send a document (with a
+  note) to the CEO / Managing Director, who view it in the browser and
+  approve, reject or ask for changes; both sides are emailed. Checked end to
+  end as William Davis, the CEO and Stephen Kollie, including that another
+  division cannot open the document (403).
+- **Staff messages.** The CEO / Managing Director can message any member of
+  staff with an optional document from their dashboard; every staff member has
+  an Inbox and can reply. Messages are private to sender and recipient.
+- 10 automated tests cover both.
+
 ---
 
 ## Open items

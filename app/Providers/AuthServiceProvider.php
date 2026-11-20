@@ -98,6 +98,9 @@ class AuthServiceProvider extends ServiceProvider
 
         // Division operations
         \App\Models\DivisionRecord::class => \App\Policies\DivisionRecordPolicy::class,
+        // Documents sent up for review, and staff-to-staff messages
+        \App\Models\DocumentReview::class => \App\Policies\DocumentReviewPolicy::class,
+        \App\Models\StaffMessage::class => \App\Policies\StaffMessagePolicy::class,
 
         // Finance
         \App\Models\PayrollRun::class => \App\Policies\PayrollRunPolicy::class,

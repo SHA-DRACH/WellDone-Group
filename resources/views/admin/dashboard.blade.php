@@ -33,6 +33,67 @@
         @endforeach
     </div>
 
+    {{-- ---------------------------------------------- Executive desk --}}
+    @php
+        $canReview = auth()->user()->can(\App\Support\Permissions::DOCUMENT_REVIEWS_REVIEW);
+        $canSend = auth()->user()->can('create', \App\Models\StaffMessage::class);
+    @endphp
+    @if($canReview || $canSend)
+        <div class="row g-4 mb-4" id="executive-desk">
+            @if($canReview)
+                @php
+                    $awaiting = \App\Models\DocumentReview::query()->pending()
+                        ->with(['division:id,name', 'submitter:id,name'])
+                        ->oldest()->limit(6)->get();
+                    $awaitingCount = \App\Models\DocumentReview::query()->pending()->count();
+                @endphp
+                <div class="{{ $canSend ? 'col-xl-6' : 'col-12' }}">
+                    <div class="card-soft p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h6 mb-0">
+                                <i class="fa-solid fa-file-signature text-primary me-2"></i>Awaiting your review
+                                @if($awaitingCount)<span class="badge bg-danger ms-1">{{ $awaitingCount }}</span>@endif
+                            </h2>
+                            <a href="{{ route('admin.reviews.index') }}" class="small">All documents</a>
+                        </div>
+                        @forelse($awaiting as $review)
+                            <div class="d-flex justify-content-between align-items-center gap-2 border rounded-3 p-2 mb-2">
+                                <div class="flex-grow-1" style="min-width:0">
+                                    <div class="fw-semibold small text-truncate">{{ $review->title }}</div>
+                                    <div class="text-muted" style="font-size:.78rem;">
+                                        {{ $review->division?->name }} · {{ $review->submitter?->name }} · {{ $review->created_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-1 flex-shrink-0">
+                                    <a href="{{ route('admin.reviews.file', $review) }}" target="_blank" rel="noopener"
+                                       class="btn btn-sm btn-outline-secondary" title="View document"><i class="fa-solid fa-eye"></i></a>
+                                    <a href="{{ route('admin.reviews.show', $review) }}" class="btn btn-sm btn-primary">Review</a>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="small text-muted mb-0"><i class="fa-solid fa-circle-check text-success me-1"></i>Nothing waiting — every document has a decision.</p>
+                        @endforelse
+                    </div>
+                </div>
+            @endif
+
+            @if($canSend)
+                <div class="{{ $canReview ? 'col-xl-6' : 'col-12' }}">
+                    <div class="card-soft p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h6 mb-0"><i class="fa-solid fa-paper-plane text-primary me-2"></i>Send a message or document</h2>
+                            <a href="{{ route('admin.inbox.index', ['box' => 'sent']) }}" class="small">Sent messages</a>
+                        </div>
+                        @include('admin.inbox._compose', [
+                            'recipients' => \App\Http\Controllers\Admin\StaffMessageController::recipientOptions(auth()->user()),
+                            'compact' => true,
+                        ])
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
     <div class="row g-4">
         {{-- ------------------------------------------ Traffic --}}
         <div class="col-xl-8">

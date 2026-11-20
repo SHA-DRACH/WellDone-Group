@@ -216,6 +216,21 @@ final class Permissions
     public const DIVISION_RECORDS_DELETE = 'division_records.delete';
     public const DIVISION_RECORDS_EXPORT = 'division_records.export';
 
+    /**
+     * Documents a division sends up for the executive's decision. A division
+     * submits (and sees its own submissions); the CEO and Managing Director
+     * review — approve, reject or ask for changes.
+     */
+    public const DOCUMENT_REVIEWS_SUBMIT = 'document_reviews.submit';
+    public const DOCUMENT_REVIEWS_REVIEW = 'document_reviews.review';
+
+    /**
+     * Writing to a named member of staff, with an optional document. Every
+     * staff member has an inbox and can reply to what they receive; starting
+     * a new message is this permission.
+     */
+    public const STAFF_MESSAGES_SEND = 'staff_messages.send';
+
     // ------------------------------------------------------------------
     // Finance
     // ------------------------------------------------------------------
@@ -330,6 +345,8 @@ final class Permissions
                 self::DIVISION_RECORDS_VIEW, self::DIVISION_RECORDS_CREATE, self::DIVISION_RECORDS_UPDATE,
                 self::DIVISION_RECORDS_DELETE, self::DIVISION_RECORDS_EXPORT,
             ],
+            'document_reviews' => [self::DOCUMENT_REVIEWS_SUBMIT, self::DOCUMENT_REVIEWS_REVIEW],
+            'staff_messages' => [self::STAFF_MESSAGES_SEND],
 
             // ---------------------------------------------- Finance
             'payroll' => [self::PAYROLL_VIEW, self::PAYROLL_PROCESS, self::PAYROLL_APPROVE],
@@ -387,6 +404,8 @@ final class Permissions
             'training' => 'Training & Certification',
             'employee_documents' => 'Employee Documents',
             'division_records' => 'Division Operations Log',
+            'document_reviews' => 'Document Reviews',
+            'staff_messages' => 'Staff Messages',
             'finance_reports' => 'Finance Reports',
             default => str($module)->replace('_', ' ')->title()->toString(),
         };

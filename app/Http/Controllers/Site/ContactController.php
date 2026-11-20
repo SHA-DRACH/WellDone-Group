@@ -36,6 +36,9 @@ class ContactController extends Controller
         Notification::route('mail', setting('system.notify_contact_to', config('mail.from.address')))
             ->notify(new ContactMessageReceived($message));
 
+        // The Managing Director is copied on every division's new business.
+        Notification::send(\App\Models\User::managingDirectors(), new ContactMessageReceived($message));
+
         return redirect()
             ->route('site.contact')
             ->withFragment('contact-form')

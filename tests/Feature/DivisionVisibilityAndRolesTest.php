@@ -103,6 +103,41 @@ class DivisionVisibilityAndRolesTest extends TestCase
         }
     }
 
+    public function test_the_managing_director_opens_every_division_dashboard(): void
+    {
+        $md = $this->userWith(Roles::MANAGING_DIRECTOR);
+
+        foreach ([$this->mine, $this->theirs] as $division) {
+            $this->actingAs($md)
+                ->get(route('admin.division.dashboard', $division->slug))
+                ->assertOk();
+        }
+
+        $this->actingAs($md)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee(route('admin.division.dashboard', $this->mine->slug))
+            ->assertSee(route('admin.division.dashboard', $this->theirs->slug));
+    }
+
+    public function test_the_managing_director_is_copied_on_every_divisions_enquiries(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+
+        $md = $this->userWith(Roles::MANAGING_DIRECTOR);
+        $client = User::factory()->create(['email_verified_at' => now(), 'is_active' => true]);
+        $client->assignRole(Roles::CLIENT);
+
+        $this->actingAs($client)->post(route('site.contact.store'), [
+            'name' => 'Jane Client',
+            'email' => $client->email,
+            'subject' => 'Mining equipment rental',
+            'message' => 'We would like to rent an excavator for our mining site next month.',
+            'division_id' => $this->theirs->id,
+        ])->assertRedirect();
+
+        \Illuminate\Support\Facades\Notification::assertSentTo($md, \App\Notifications\ContactMessageReceived::class);
+    }
+
     public function test_only_the_super_administrator_edits_roles(): void
     {
         $this->actingAs($this->userWith(Roles::SYSTEM_ADMIN))

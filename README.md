@@ -179,6 +179,48 @@ The account area shows their quotation requests (with status and any quoted
 amount), their job applications and status, their enquiries with our replies,
 and their own details — which pre-fill the forms.
 
+## Document reviews and staff messages
+
+**Document reviews.** Every division dashboard has a *Documents for review*
+panel. A division head (or officer) gives the document a title, a type and a
+note, attaches the file (PDF, Word, Excel or image, up to 20 MB) and sends it.
+The CEO and Managing Director are emailed and see it under *Awaiting your
+review* on their dashboard and in **Reviews & Messages → Document Reviews**.
+They open the document in the browser, then **approve**, **reject** or **ask
+for changes** (a comment is required for the last two). The submitter is
+emailed the decision, and the status shows on the division dashboard.
+
+A division only ever sees its own submissions; reviewers see all of them.
+
+**Staff messages.** The CEO and Managing Director (and administrators) have a
+*Send a message or document* panel on their dashboard: choose a member of staff,
+write a subject and message, optionally attach a document. The recipient gets
+it in **Reviews & Messages → Inbox** (with an unread badge) and by email, and
+can reply — with a document if needed. A message is visible only to its sender
+and recipient.
+
+Files for both are kept on the private disk (`storage/app/private`) and are
+only served, after a permission check, through the staff panel. Emails link to
+them; they never attach them.
+
+| Permission | Who has it |
+|---|---|
+| `document_reviews.submit` | Division Manager, Division Officer |
+| `document_reviews.review` | CEO, Managing Director (and Administrator / Super Administrator) |
+| `staff_messages.send` | CEO, Managing Director (and Administrator / Super Administrator) |
+
+Everyone with a staff account has an inbox and can reply to what they receive.
+
+**Managing Director.** The MD is group-wide: the sidebar lists every
+division's dashboard, and the MD is copied on each division's new quotation
+requests, contact enquiries and job applications (alongside the sales, info and
+HR inboxes), as well as being asked to review every submitted document.
+
+**Sidebar.** Each section heading (Division Dashboards, Reviews & Messages,
+Leads & Enquiries, …) is a dropdown. The section holding the current page opens
+by itself; the others remember whether you left them open or closed. A closed
+section with something waiting shows a red dot.
+
 ## Email
 
 Three mailers are available. Switch with `MAIL_MAILER` in `.env` — nothing

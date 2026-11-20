@@ -84,6 +84,9 @@ class QuoteRequestController extends Controller
         Notification::route('mail', setting('system.notify_quotes_to', config('mail.from.address')))
             ->notify(new QuoteRequestReceived($quote));
 
+        // The Managing Director is copied on every division's new business.
+        Notification::send(\App\Models\User::managingDirectors(), new QuoteRequestReceived($quote));
+
         return redirect()->route('site.quote.thanks', $quote->reference);
     }
 

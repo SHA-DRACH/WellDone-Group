@@ -64,7 +64,7 @@
             <a class="nav-link {{ $currentDivisionId === $myDivision->id ? 'active' : '' }}"
                href="{{ route('admin.division.dashboard', $myDivision->slug) }}">
                 <i class="{{ $myDivision->icon }}"></i> {{ $myDivision->name }}
-                <span class="badge bg-warning text-dark rounded-pill">Mine</span>
+                <span class="badge bg-warning text-dark rounded-pill nav-label">Mine</span>
             </a>
         @endif
 
@@ -75,6 +75,28 @@
                 <i class="{{ $division->icon }}"></i> {{ $division->name }}
             </a>
         @endforeach
+
+        {{-- ------------------------------------------------ Reviews & messages --}}
+        @php
+            // Per user, so not in the shared badge cache: each person has their own inbox.
+            $unreadInbox = \App\Models\StaffMessage::query()->unreadFor($me)->count();
+            $awaitingReview = $me->can(\App\Support\Permissions::DOCUMENT_REVIEWS_REVIEW)
+                ? \App\Models\DocumentReview::query()->pending()->count()
+                : 0;
+        @endphp
+        <div class="nav-section">Reviews &amp; Messages</div>
+
+        @can('viewAny', App\Models\DocumentReview::class)
+            <a class="nav-link {{ active_when('admin.reviews.*') }}" href="{{ route('admin.reviews.index') }}">
+                <i class="fa-solid fa-file-signature"></i> Document Reviews
+                @if($awaitingReview) <span class="badge bg-danger rounded-pill">{{ $awaitingReview }}</span> @endif
+            </a>
+        @endcan
+
+        <a class="nav-link {{ active_when('admin.inbox.*') }}" href="{{ route('admin.inbox.index') }}">
+            <i class="fa-solid fa-inbox"></i> Inbox
+            @if($unreadInbox) <span class="badge bg-danger rounded-pill">{{ $unreadInbox }}</span> @endif
+        </a>
 
         {{-- ------------------------------------------------ Leads --}}
         @canany(['quotes.view', 'contact.view', 'applications.view', 'newsletters.view'])

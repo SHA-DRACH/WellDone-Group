@@ -80,6 +80,11 @@
         @endforeach
     </div>
 
+    {{-- ---------------------------------------------- Documents for review --}}
+    @can('viewAny', App\Models\DocumentReview::class)
+        @include('admin.reviews._dashboard')
+    @endcan
+
     {{-- ---------------------------------------------- Operations log --}}
     @if($recordSchema)
         @include('admin.division-records._dashboard')

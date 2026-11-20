@@ -211,6 +211,7 @@ final class Roles
                     $p::PAYROLL_VIEW,
                     $p::EXPENSES_VIEW, $p::EXPENSES_APPROVE,
                     $p::INVOICES_VIEW, $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+                    $p::DOCUMENT_REVIEWS_REVIEW, $p::STAFF_MESSAGES_SEND,
                 ],
             ),
 
@@ -363,6 +364,8 @@ final class Roles
                 $p::PAYROLL_VIEW, $p::PAYROLL_APPROVE,
                 $p::EXPENSES_VIEW, $p::EXPENSES_APPROVE,
                 $p::INVOICES_VIEW, $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+                // Reviews what the divisions send up; writes to any staff member.
+                $p::DOCUMENT_REVIEWS_REVIEW, $p::STAFF_MESSAGES_SEND,
             ],
 
             /*
@@ -445,6 +448,8 @@ final class Roles
                     $p::DEPARTMENTS_VIEW, $p::POSITIONS_VIEW,
                     $p::ANNOUNCEMENTS_VIEW,
                     $p::LEAVE_VIEW, $p::LEAVE_APPROVE,
+                    // Sends documents up to the CEO / Managing Director.
+                    $p::DOCUMENT_REVIEWS_SUBMIT,
                 ],
             ),
 
@@ -469,6 +474,7 @@ final class Roles
                 $p::DIVISION_RECORDS_VIEW, $p::DIVISION_RECORDS_CREATE,
                 $p::DIVISION_RECORDS_UPDATE, $p::DIVISION_RECORDS_EXPORT,
                 $p::EXPENSES_VIEW, $p::EXPENSES_CREATE,
+                $p::DOCUMENT_REVIEWS_SUBMIT,
             ],
 
             self::MARKETING_OFFICER => array_merge(

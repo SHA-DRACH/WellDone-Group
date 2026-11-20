@@ -100,6 +100,9 @@ class CareerController extends Controller
         Notification::route('mail', setting('system.notify_applications_to', config('mail.from.address')))
             ->notify(new JobApplicationReceived($application));
 
+        // The Managing Director is copied on every division's new business.
+        Notification::send(\App\Models\User::managingDirectors(), new JobApplicationReceived($application));
+
         return redirect()
             ->route('site.careers.show', $career->slug)
             ->with('application_reference', $application->reference)

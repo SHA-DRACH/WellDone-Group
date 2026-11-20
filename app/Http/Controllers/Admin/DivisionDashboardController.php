@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Career;
 use App\Models\Division;
 use App\Models\DivisionRecord;
+use App\Models\DocumentReview;
 use App\Models\JobApplication;
 use App\Support\DivisionRecords\RecordSchema;
 use App\Models\Project;
@@ -87,6 +88,13 @@ class DivisionDashboardController extends Controller
                 ->get(),
             'switchable' => $this->switchableDivisions(),
             'quickLinks' => $this->quickLinks(),
+            // Documents this division has sent up for the CEO / MD's decision.
+            'recentReviews' => DocumentReview::query()
+                ->where('division_id', $division->id)
+                ->with('submitter:id,name')
+                ->latest()
+                ->limit(5)
+                ->get(),
         ] + $this->operationsLog($request, $division));
     }
 

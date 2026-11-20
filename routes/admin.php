@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DivisionController;
 use App\Http\Controllers\Admin\DivisionDashboardController;
 use App\Http\Controllers\Admin\DivisionRecordController;
+use App\Http\Controllers\Admin\DocumentReviewController;
 use App\Http\Controllers\Admin\DownloadController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GalleryController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\Admin\StaffMessageController;
 use App\Http\Controllers\Admin\TeamMemberController;
 use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\UserController;
@@ -83,6 +85,25 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
             Route::put('{record}', 'update')->name('update');
             Route::delete('{record}', 'destroy')->name('destroy');
         });
+
+    // ------------------------------------------------ Document reviews
+    // A division sends a document up from its dashboard; the CEO / Managing
+    // Director open it here and approve, reject or ask for changes.
+    Route::post('division/{division:slug}/reviews', [DocumentReviewController::class, 'store'])
+        ->name('division.reviews.store');
+    Route::get('reviews', [DocumentReviewController::class, 'index'])->name('reviews.index');
+    Route::get('reviews/{review}', [DocumentReviewController::class, 'show'])->name('reviews.show');
+    Route::get('reviews/{review}/file', [DocumentReviewController::class, 'file'])->name('reviews.file');
+    Route::post('reviews/{review}/decision', [DocumentReviewController::class, 'decide'])->name('reviews.decide');
+
+    // ------------------------------------------------ Staff messages (inbox)
+    // Fixed segments before {message}.
+    Route::get('inbox', [StaffMessageController::class, 'index'])->name('inbox.index');
+    Route::get('inbox/compose', [StaffMessageController::class, 'create'])->name('inbox.create');
+    Route::post('inbox', [StaffMessageController::class, 'store'])->name('inbox.store');
+    Route::get('inbox/{message}', [StaffMessageController::class, 'show'])->name('inbox.show');
+    Route::get('inbox/{message}/file', [StaffMessageController::class, 'file'])->name('inbox.file');
+    Route::post('inbox/{message}/reply', [StaffMessageController::class, 'reply'])->name('inbox.reply');
 
     // ------------------------------------------------ Own profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');

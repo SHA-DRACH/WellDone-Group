@@ -4,6 +4,7 @@
  */
 export function initAdmin() {
     initSidebar();
+    initSidebarSections();
     initConfirmations();
     initBulkSelect();
     initSlugFrom();
@@ -33,6 +34,103 @@ function initSidebar() {
 
     backdrop?.addEventListener('click', close);
     document.addEventListener('keydown', (e) => e.key === 'Escape' && close());
+}
+
+/**
+ * Turns each sidebar section heading ("Division Dashboards", "Reviews &
+ * Messages", …) into a dropdown that opens and closes its links.
+ *
+ * The template keeps its flat markup — every section sits inside its own
+ * permission check, so grouping is done here rather than in Blade: each
+ * heading collects the links that follow it, up to the next heading.
+ *
+ * Opening state: what the person last chose is remembered per section.
+ * Without a remembered choice a section starts open only when it holds the
+ * page being viewed. A closed section that has something waiting (a red
+ * badge) shows a dot on its heading, so nothing needing attention is hidden.
+ */
+function initSidebarSections() {
+    const nav = document.querySelector('.admin-nav');
+
+    if (!nav) {
+        return;
+    }
+
+    const storageKey = 'welldone.admin.nav.sections';
+    let saved = {};
+    try {
+        saved = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+    } catch {
+        saved = {};
+    }
+    const remember = (key, open) => {
+        saved[key] = open;
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(saved));
+        } catch {
+            // Private browsing or blocked storage: the menu still works, it just forgets.
+        }
+    };
+
+    nav.querySelectorAll(':scope > .nav-section').forEach((heading, index) => {
+        const title = heading.textContent.trim();
+        const key = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+        // Gather this section's links: everything up to the next heading.
+        const group = document.createElement('div');
+        group.className = 'nav-group';
+        group.id = `nav-group-${index}`;
+        const inner = document.createElement('div');
+        inner.className = 'nav-group__inner';
+        group.appendChild(inner);
+
+        let next = heading.nextElementSibling;
+        while (next && !next.classList.contains('nav-section')) {
+            const current = next;
+            next = next.nextElementSibling;
+            inner.appendChild(current);
+        }
+
+        if (!inner.children.length) {
+            heading.remove();
+            return;
+        }
+
+        heading.after(group);
+
+        // The heading becomes a button.
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'nav-section nav-section--toggle';
+        button.setAttribute('aria-controls', group.id);
+        button.innerHTML = `<span class="nav-section__label"></span><span class="nav-section__dot" aria-hidden="true"></span><i class="fa-solid fa-chevron-down nav-section__chevron" aria-hidden="true"></i>`;
+        button.querySelector('.nav-section__label').textContent = title;
+        heading.replaceWith(button);
+
+        const hasActive = !!inner.querySelector('.nav-link.active');
+        // Only the red "needs attention" counts, not labels such as "Mine".
+        const hasBadge = !!inner.querySelector('.badge.bg-danger, .badge.bg-warning:not(.nav-label)');
+        // The section holding the current page always opens; otherwise the
+        // remembered choice, otherwise closed.
+        const startOpen = hasActive || (key in saved ? saved[key] : false);
+
+        const setOpen = (open) => {
+            button.setAttribute('aria-expanded', String(open));
+            group.classList.toggle('is-open', open);
+            button.classList.toggle('has-attention', !open && hasBadge);
+            inner.inert = !open;
+        };
+
+        setOpen(startOpen);
+        // Shown in its final state immediately; animate only after the first paint.
+        requestAnimationFrame(() => group.classList.add('is-ready'));
+
+        button.addEventListener('click', () => {
+            const open = button.getAttribute('aria-expanded') !== 'true';
+            setOpen(open);
+            remember(key, open);
+        });
+    });
 }
 
 /**

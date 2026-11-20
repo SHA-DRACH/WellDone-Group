@@ -230,6 +230,9 @@ The site sends these emails (all share the WellDone design in
 | Job application | The candidate (with reference) and HR |
 | Leave request / decision | The manager / the employee |
 | Expiring certificates | HR — weekday mornings |
+| Division sends a document for review | The CEO and Managing Director |
+| Reviewer approves / rejects / asks for changes | The person who submitted it |
+| Staff message or reply | The recipient (the document stays in the staff panel) |
 
 The receiving inboxes (sales, HR, info) are set in **Administration → Website
 Settings → Contact / System**.
@@ -301,6 +304,8 @@ Then open the site and work through the checklist below.
 
 - [ ] Each leader received "Your account is ready" and can sign in
 - [ ] Stephen and William land on their own division dashboards
+- [ ] A test document sent for review from a division reaches the CEO's dashboard, and the decision email reaches the division
+- [ ] A test message from the CEO reaches a division head's Inbox and email
 - [ ] Home, About, Leadership, Divisions, Services, Contact pages load
 - [ ] A test contact message and quotation request arrive in the right inboxes
 - [ ] Newsletter sign-up sends the confirmation email

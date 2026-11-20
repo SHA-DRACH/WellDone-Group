@@ -1539,6 +1539,62 @@ body {
       padding: 1.1rem 0.75rem 0.5rem;
     }
 
+    // Section headings as dropdowns (grouped by initSidebarSections in admin.js).
+    .nav-section--toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      margin-top: 0.35rem;
+      padding: 0.6rem 0.75rem;
+      border: 0;
+      border-radius: 0.55rem;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: color 0.15s ease, background-color 0.15s ease;
+
+      &:hover,
+      &:focus-visible {
+        color: rgba(#fff, 0.8);
+        background: rgba(#fff, 0.05);
+      }
+
+      &:focus-visible { outline: 2px solid rgba($wd-gold, 0.7); outline-offset: 1px; }
+
+      &[aria-expanded='true'] { color: rgba(#fff, 0.6); }
+
+      .nav-section__label { flex: 1 1 auto; }
+
+      .nav-section__chevron {
+        font-size: 0.65rem;
+        transition: transform 0.2s ease;
+      }
+
+      &[aria-expanded='false'] .nav-section__chevron { transform: rotate(-90deg); }
+
+      // A closed section with something waiting in it.
+      .nav-section__dot {
+        display: none;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: $danger;
+      }
+
+      &.has-attention .nav-section__dot { display: inline-block; }
+    }
+
+    .nav-group {
+      display: grid;
+      grid-template-rows: 0fr;
+
+      &.is-ready { transition: grid-template-rows 0.22s ease; }
+      &.is-open { grid-template-rows: 1fr; }
+
+      > .nav-group__inner { overflow: hidden; min-height: 0; }
+    }
+
     .nav-link {
       display: flex;
       align-items: center;

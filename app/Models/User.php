@@ -182,6 +182,21 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Active Managing Director accounts. The MD oversees every division, so
+     * they are copied on each division's new quotations, enquiries and job
+     * applications, and are asked to review documents the divisions submit.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public static function managingDirectors()
+    {
+        return static::query()
+            ->where('is_active', true)
+            ->whereHas('roles', fn (Builder $q) => $q->where('name', \App\Support\Roles::MANAGING_DIRECTOR))
+            ->get();
+    }
+
+    /**
      * An uploaded avatar wins; otherwise fall back to the picture from the
      * identity provider, so accounts created with Google already have one.
      */

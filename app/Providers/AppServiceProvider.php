@@ -100,6 +100,8 @@ class AppServiceProvider extends ServiceProvider
             'csr-initiative' => CsrInitiative::class,
             'division' => Division::class,
             'division-record' => \App\Models\DivisionRecord::class,
+            'document-review' => \App\Models\DocumentReview::class,
+            'staff-message' => \App\Models\StaffMessage::class,
             'employee-training' => \App\Models\EmployeeTraining::class,
             'employee-document' => \App\Models\EmployeeDocument::class,
             'payroll-run' => \App\Models\PayrollRun::class,
