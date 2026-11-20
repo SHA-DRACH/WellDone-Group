@@ -41,6 +41,9 @@ still needed from the company. Then follow [DEPLOYMENT.md](DEPLOYMENT.md):
 | Some emails read "WellDone Group Inc.." (double full stop) | Looks careless | Fixed in four emails |
 | Emails used Laravel's stock body text | Generic look; codes hard to read | New design: gold accent bar, branded card, large code box for one-time codes, proper sign-off with slogan, tidy fallback link, footer listing the five divisions and contact details |
 | No deployment documentation | — | [DEPLOYMENT.md](DEPLOYMENT.md) |
+| Division heads saw every division's name in filters and form pickers (Services, Quotes, Projects, Vacancies, Galleries, Downloads, Employees and others) | A division head could see, and pick, divisions that are not theirs | All 18 division lists in the staff panel now show a division head only their own division; group-wide roles still see all five |
+| No roles for the Managing Director or the Strategy Director; both were plain Administrators | Full system control for people whose jobs do not need it | New roles: **Managing Director**, **Director of Strategy, Business Development, Innovation & Research**, and **System Administrator** (all content and system settings) |
+| Website Settings page failed when no settings existed yet | Crash on a brand-new install | Falls back to an empty page |
 
 New command: `php artisan staff:invite [email…]` re-sends the
 "choose your password" email.
@@ -57,9 +60,10 @@ New command: `php artisan staff:invite [email…]` re-sends the
 - **SMTP mailbox.** Mail is currently sent to Mailpit on the development PC
   and never delivered. Create `no-reply@welldonegroupinc.com` (or similar)
   with your host and add SPF/DKIM DNS records — see DEPLOYMENT.md section 6.
-- **Philip Gongar's role.** Set to *Administrator* (group-wide), as strategy
-  spans every division. Change it in **Administration → Users** if it should be
-  narrower.
+- **Who should hold System Administrator.** The role exists but nobody holds
+  it yet: Shadrach Jimice Jr. is Super Administrator, which already includes
+  everything. Assign it in **Administration → Users** to whoever will run the
+  website day to day.
 
 ### Content that is still demo material
 

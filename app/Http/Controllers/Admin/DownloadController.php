@@ -88,7 +88,7 @@ class DownloadController extends BaseCrudController
             'thumbnail' => ['type' => 'image', 'label' => 'Thumbnail', 'panel' => 'side',
                 'preview' => 'thumbnail_url'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Group-wide'],
             'is_active' => ['type' => 'checkbox', 'label' => 'Published', 'panel' => 'side',
                 'value' => $record?->exists ? $record->is_active : true],

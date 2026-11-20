@@ -56,7 +56,7 @@ class GalleryController extends BaseCrudController
         return [[
             'name' => 'division',
             'placeholder' => 'All divisions',
-            'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+            'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
         ]];
     }
 
@@ -83,7 +83,7 @@ class GalleryController extends BaseCrudController
                 'preview' => 'cover_url',
                 'help' => 'Optional — the first photo is used when this is blank.'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Group-wide'],
             'is_active' => ['type' => 'checkbox', 'label' => 'Published', 'panel' => 'side',
                 'value' => $record?->exists ? $record->is_active : true],

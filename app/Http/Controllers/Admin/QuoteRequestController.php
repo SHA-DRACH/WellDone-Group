@@ -44,7 +44,7 @@ class QuoteRequestController extends Controller
         return view('admin.quotes.index', [
             'records' => $quotes,
             'search' => $request->query('q', ''),
-            'divisions' => Division::query()->ordered()->pluck('name', 'id'),
+            'divisions' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id'),
             'counts' => $this->scopedQuery()
                 ->selectRaw('status, COUNT(*) as total')
                 ->groupBy('status')

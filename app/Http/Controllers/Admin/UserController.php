@@ -44,7 +44,7 @@ class UserController extends Controller
             'records' => $users,
             'search' => $request->query('q', ''),
             'roles' => Role::query()->orderBy('name')->pluck('name', 'name'),
-            'divisions' => Division::query()->ordered()->pluck('name', 'id'),
+            'divisions' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id'),
         ]);
     }
 
@@ -265,8 +265,7 @@ class UserController extends Controller
         return [
             'record' => $user,
             'roles' => $this->selectableRoles(),
-            'divisions' => Division::query()
-                ->when(DivisionScope::idFor($this->user()), fn ($q, $id) => $q->whereKey($id))
+            'divisions' => Division::query()->visibleTo($this->user())
                 ->ordered()
                 ->pluck('name', 'id'),
             'currentRoles' => $user->exists ? $user->getRoleNames()->all() : [],

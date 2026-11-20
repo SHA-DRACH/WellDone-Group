@@ -127,6 +127,22 @@ class Division extends Model
         return $query->orderBy('sort_order')->orderBy('name');
     }
 
+    /**
+     * Only the divisions this user may see — for every division picker,
+     * filter and link in the staff panel.
+     *
+     * Group-wide accounts see them all. A division head sees only their own,
+     * so another division is never named, offered or linked to them. A
+     * confined account with no division recorded sees none (rather than,
+     * by a falsy id slipping through, all of them).
+     */
+    public function scopeVisibleTo(Builder $query, ?User $user): Builder
+    {
+        $id = \App\Support\DivisionScope::idFor($user);
+
+        return $id === null ? $query : $query->whereKey($id);
+    }
+
     // -------------------------------------------------- Accessors
 
     public function getHeroUrlAttribute(): ?string

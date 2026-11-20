@@ -37,7 +37,9 @@ class SettingController extends Controller
             ->get()
             ->groupBy('group');
 
-        $group = $group && $groups->has($group) ? $group : $groups->keys()->first();
+        // Falls back to "company" so an install with no settings yet shows an
+        // empty page instead of failing to build the save URL.
+        $group = $group && $groups->has($group) ? $group : ($groups->keys()->first() ?? 'company');
 
         return view('admin.settings', [
             'groups' => $groups,

@@ -57,9 +57,9 @@ the six leaders in the Company Profile:
 | Leader | Email | Role | Lands on |
 |---|---|---|---|
 | Gbogbah Matthew Tarr — Founder & CEO | gbogbah@welldonegroupinc.com | CEO | `/staff` |
-| Garjay Jestin Tarr — Co-Founder & Managing Director | garjay@welldonegroupinc.com | Administrator | `/staff` |
+| Garjay Jestin Tarr — Co-Founder & Managing Director | garjay@welldonegroupinc.com | Managing Director | `/staff` |
 | Shadrach Jimice Jr. — Director of ICT Services | shadrach@welldonegroupinc.com | Super Administrator | `/staff` |
-| Philip Saywray Gongar — Strategy & Business Development | philip@welldonegroupinc.com | Administrator | `/staff` |
+| Philip Saywray Gongar — Strategy & Business Development | philip@welldonegroupinc.com | Director of Strategy, Business Development, Innovation & Research | `/staff` |
 | Stephen V. Kollie — Logistics, Procurement & Trading | stephen@welldonegroupinc.com | Division Manager | `/staff/division/procurement-logistics` |
 | William Lee Davis — Medical Supplies & Healthcare | william@welldonegroupinc.com | Division Manager | `/staff/division/medical-equipment` |
 

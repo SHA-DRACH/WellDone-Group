@@ -18,7 +18,10 @@ final class Navigation
     public const GROUP_ROLES = [
         Roles::SUPER_ADMIN,
         Roles::ADMIN,
+        Roles::SYSTEM_ADMIN,
         Roles::CEO,
+        Roles::MANAGING_DIRECTOR,
+        Roles::STRATEGY_DIRECTOR,
         Roles::ICT_MANAGER,
         Roles::CONTENT_MANAGER,
         Roles::MARKETING_OFFICER,

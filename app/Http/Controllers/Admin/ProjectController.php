@@ -75,7 +75,7 @@ class ProjectController extends BaseCrudController
             [
                 'name' => 'division',
                 'placeholder' => 'All divisions',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
             ],
             [
                 'name' => 'status',
@@ -115,7 +115,7 @@ class ProjectController extends BaseCrudController
             'featured_image' => ['type' => 'image', 'label' => 'Featured image', 'panel' => 'side',
                 'preview' => 'featured_image_url'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Not assigned'],
             'client_id' => ['type' => 'select', 'label' => 'Client', 'panel' => 'side',
                 'options' => Client::query()->ordered()->pluck('name', 'id')->all(),

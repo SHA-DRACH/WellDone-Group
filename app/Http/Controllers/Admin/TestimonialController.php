@@ -74,7 +74,7 @@ class TestimonialController extends BaseCrudController
                 'options' => Client::query()->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Not linked'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'All divisions'],
             'avatar' => ['type' => 'image', 'label' => 'Author photo', 'panel' => 'side',
                 'preview' => 'avatar_url',

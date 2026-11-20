@@ -152,7 +152,7 @@ class UserSeeder extends Seeder
                 'department' => 'Executive',
                 'avatar' => '/images/team/garjay-jestin-tarr.jpg',
                 'bio' => 'Managing Director with more than 16 years in public-sector administration, program support and project management with the U.S. Department of State and USAID.',
-                'role' => Roles::ADMIN,
+                'role' => Roles::MANAGING_DIRECTOR,
             ],
             [
                 'name' => 'Shadrach Jimice Jr.',
@@ -171,7 +171,7 @@ class UserSeeder extends Seeder
                 'department' => 'Strategy',
                 'avatar' => '/images/team/philip-saywray-gongar.jpg',
                 'bio' => 'Management professional with 10 years in human resource management, administration, project coordination and executive support.',
-                'role' => Roles::ADMIN,
+                'role' => Roles::STRATEGY_DIRECTOR,
             ],
             [
                 'name' => 'Stephen V. Kollie',

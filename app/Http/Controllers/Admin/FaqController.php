@@ -76,7 +76,7 @@ class FaqController extends BaseCrudController
                 'value' => $record?->category ?? 'general',
                 'help' => 'Groups questions on the FAQs page, e.g. general, mining, logistics.'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Not division-specific'],
             'sort_order' => ['label' => 'Order', 'input' => 'number', 'panel' => 'side', 'min' => 0],
             'is_active' => ['type' => 'checkbox', 'label' => 'Published', 'panel' => 'side',

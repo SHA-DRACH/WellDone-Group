@@ -72,7 +72,7 @@ class CareerController extends BaseCrudController
             [
                 'name' => 'division',
                 'placeholder' => 'All divisions',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
             ],
             [
                 'name' => 'state',
@@ -112,7 +112,7 @@ class CareerController extends BaseCrudController
             'benefits' => ['type' => 'editor', 'label' => 'What we offer'],
 
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Group-level role'],
             'employment_type' => ['type' => 'select', 'label' => 'Employment type', 'panel' => 'side',
                 'required' => true, 'value' => $record?->employment_type ?? 'full_time',

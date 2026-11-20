@@ -139,11 +139,25 @@ Company Profile, with their role and division:
 | Leader | Role | Division dashboard |
 |---|---|---|
 | Gbogbah Matthew Tarr | CEO | Whole group |
-| Garjay Jestin Tarr | Administrator | Whole group |
+| Garjay Jestin Tarr | Managing Director | Whole group |
 | Shadrach Jimice Jr. | Super Administrator | Whole group (based in ICT Services) |
-| Philip Saywray Gongar | Administrator | Whole group |
+| Philip Saywray Gongar | Director of Strategy, Business Development, Innovation & Research | Whole group |
 | Stephen V. Kollie | Division Manager | Logistics & Procurement only |
 | William Lee Davis | Division Manager | Medical Supply only |
+
+What the leadership roles can do:
+
+| Role | Can do | Cannot do |
+|---|---|---|
+| Super Administrator | Everything, including editing roles | — |
+| System Administrator | All website content (pages, divisions, services, projects, news, galleries, partners, downloads, vacancies), staff accounts, settings, SEO, media, activity log | HR records and pay, finance, editing roles |
+| CEO | See everything across the group; final sign-off on hiring, payroll and expenses | Edit content or records |
+| Managing Director | Run operations across all divisions: quotations, projects, clients, enquiries, announcements, division logs; approve leave, hiring and expenses | Payroll sign-off (CEO), settings, accounts |
+| Director of Strategy, Business Development, Innovation & Research | Clients, partners, quotations and enquiries, projects, news and research articles, newsletter list, division and finance figures | Settings, accounts, HR records, approvals |
+| Division Manager | Everything for their own division only; never sees or is offered another division | Other divisions, group settings |
+
+No account holds System Administrator yet. Give it to whoever runs the website
+day to day, from **Administration → Users**.
 
 Each account uses the person's company mailbox, `firstname@welldonegroupinc.com`
 (`shadrach@`, `gbogbah@`, `garjay@`, `philip@`, `stephen@`, `william@`).

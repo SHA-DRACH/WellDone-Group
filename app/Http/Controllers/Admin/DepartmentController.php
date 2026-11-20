@@ -71,7 +71,7 @@ class DepartmentController extends BaseCrudController
             'phone' => ['label' => 'Department phone', 'col' => 6],
 
             'division_id' => ['type' => 'select', 'label' => 'Business division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Central function (no division)',
                 'help' => 'Only set this where the department mirrors a public division.'],
             'head_employee_id' => ['type' => 'select', 'label' => 'Department head', 'panel' => 'side',

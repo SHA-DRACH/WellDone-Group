@@ -14,6 +14,31 @@ final class Roles
 
     public const ADMIN = 'Administrator';
 
+    /**
+     * Runs the website and the system: every piece of public content, staff
+     * accounts, settings, SEO, media and the activity log. Not HR records,
+     * pay or the books, and not the role definitions themselves.
+     */
+    public const SYSTEM_ADMIN = 'System Administrator';
+
+    // ------------------------------------------------------------------
+    // Executive
+    // ------------------------------------------------------------------
+
+    /**
+     * Co-Founder & Managing Director — runs operations across every
+     * division: leads, projects, people and spending, with approval
+     * authority short of payroll (the CEO's).
+     */
+    public const MANAGING_DIRECTOR = 'Managing Director';
+
+    /**
+     * Director of Strategy, Business Development, Innovation & Research —
+     * grows the business: clients, quotations and pipeline, partners,
+     * projects, published research and the figures behind them.
+     */
+    public const STRATEGY_DIRECTOR = 'Director of Strategy, Business Development, Innovation & Research';
+
     public const CONTENT_MANAGER = 'Content Manager';
 
     public const HR_MANAGER = 'HR Manager';
@@ -74,7 +99,10 @@ final class Roles
         return [
             self::SUPER_ADMIN,
             self::ADMIN,
+            self::SYSTEM_ADMIN,
             self::CEO,
+            self::MANAGING_DIRECTOR,
+            self::STRATEGY_DIRECTOR,
             self::CONTENT_MANAGER,
             self::HR_DIRECTOR,
             self::HR_MANAGER,
@@ -126,6 +154,89 @@ final class Roles
                 // Only a super administrator may edit roles themselves.
                 Permissions::forModule('roles')
             )),
+
+            /*
+             * System Administrator — every piece of website content plus the
+             * system itself (accounts, settings, SEO, media, activity log).
+             * HR records, pay and finance stay with HR and finance; editing
+             * role definitions stays with the Super Administrator.
+             */
+            self::SYSTEM_ADMIN => array_merge(
+                Permissions::forModule('dashboard'),
+                Permissions::forModule('divisions'),
+                Permissions::forModule('services'),
+                Permissions::forModule('projects'),
+                Permissions::forModule('galleries'),
+                Permissions::forModule('clients'),
+                Permissions::forModule('blogs'),
+                Permissions::forModule('testimonials'),
+                Permissions::forModule('partners'),
+                Permissions::forModule('sliders'),
+                Permissions::forModule('downloads'),
+                Permissions::forModule('company'),
+                Permissions::forModule('careers'),
+                Permissions::forModule('newsletters'),
+                Permissions::forModule('contact'),
+                Permissions::forModule('media'),
+                Permissions::forModule('seo'),
+                Permissions::forModule('settings'),
+                Permissions::forModule('users'),
+                Permissions::forModule('activity'),
+                [$p::ANNOUNCEMENTS_VIEW, $p::ANNOUNCEMENTS_CREATE, $p::ANNOUNCEMENTS_UPDATE],
+            ),
+
+            /*
+             * Managing Director — runs operations across all divisions.
+             * Everything the CEO sees, plus the authority to act on leads,
+             * projects and people, and to approve spending. Payroll sign-off
+             * stays with the CEO.
+             */
+            self::MANAGING_DIRECTOR => array_merge(
+                Permissions::forModule('quotes'),
+                Permissions::forModule('projects'),
+                Permissions::forModule('clients'),
+                Permissions::forModule('contact'),
+                Permissions::forModule('division_records'),
+                Permissions::forModule('announcements'),
+                Permissions::forModule('hr_reports'),
+                [
+                    $p::DASHBOARD_VIEW, $p::ACTIVITY_VIEW, $p::USERS_VIEW, $p::MEDIA_VIEW,
+                    $p::DIVISIONS_VIEW, $p::SERVICES_VIEW, $p::COMPANY_VIEW,
+                    $p::CAREERS_VIEW, $p::APPLICATIONS_VIEW,
+                    $p::EMPLOYEES_VIEW, $p::EMPLOYEES_VIEW_SALARY,
+                    $p::DEPARTMENTS_VIEW, $p::POSITIONS_VIEW,
+                    $p::RECRUITMENT_VIEW, $p::RECRUITMENT_DECIDE,
+                    $p::LEAVE_VIEW, $p::LEAVE_APPROVE, $p::LEAVE_TYPES_VIEW,
+                    $p::TRAINING_VIEW, $p::EMPLOYEE_DOCUMENTS_VIEW,
+                    $p::PAYROLL_VIEW,
+                    $p::EXPENSES_VIEW, $p::EXPENSES_APPROVE,
+                    $p::INVOICES_VIEW, $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+                ],
+            ),
+
+            /*
+             * Strategy, Business Development, Innovation & Research — owns the
+             * pipeline and the partnerships: clients, quotations, enquiries,
+             * partners and projects, publishes research and news, and reads
+             * the division and finance figures that strategy is built on.
+             */
+            self::STRATEGY_DIRECTOR => array_merge(
+                Permissions::forModule('clients'),
+                Permissions::forModule('partners'),
+                [
+                    $p::DASHBOARD_VIEW, $p::MEDIA_VIEW, $p::MEDIA_CREATE,
+                    $p::QUOTES_VIEW, $p::QUOTES_UPDATE, $p::QUOTES_ASSIGN, $p::QUOTES_DOWNLOAD,
+                    $p::CONTACT_VIEW, $p::CONTACT_REPLY,
+                    $p::PROJECTS_VIEW, $p::PROJECTS_CREATE, $p::PROJECTS_UPDATE,
+                    $p::DIVISIONS_VIEW, $p::SERVICES_VIEW, $p::COMPANY_VIEW,
+                    $p::BLOGS_VIEW, $p::BLOGS_CREATE, $p::BLOGS_UPDATE,
+                    $p::TESTIMONIALS_VIEW, $p::DOWNLOADS_VIEW,
+                    $p::NEWSLETTERS_VIEW, $p::NEWSLETTERS_EXPORT,
+                    $p::DIVISION_RECORDS_VIEW, $p::DIVISION_RECORDS_EXPORT,
+                    $p::BUDGETS_VIEW, $p::FINANCE_REPORTS_VIEW,
+                    $p::HR_REPORTS_VIEW, $p::ANNOUNCEMENTS_VIEW,
+                ],
+            ),
 
             self::CONTENT_MANAGER => array_merge(
                 Permissions::forModule('divisions'),

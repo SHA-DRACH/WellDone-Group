@@ -103,7 +103,7 @@ class TeamMemberController extends BaseCrudController
             'photo' => ['type' => 'image', 'label' => 'Photograph', 'panel' => 'side', 'preview' => 'photo_url',
                 'help' => 'Square works best — photos are shown as circles.'],
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Group-level'],
             'phone' => ['label' => 'Phone', 'panel' => 'side'],
             'is_leadership' => ['type' => 'checkbox', 'label' => 'Group leadership', 'panel' => 'side',

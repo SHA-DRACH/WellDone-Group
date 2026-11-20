@@ -62,7 +62,7 @@ class ServiceController extends BaseCrudController
         return [[
             'name' => 'division',
             'placeholder' => 'All divisions',
-            'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+            'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
         ]];
     }
 
@@ -93,7 +93,7 @@ class ServiceController extends BaseCrudController
                 'help' => 'One item per line.'],
 
             'division_id' => ['type' => 'select', 'label' => 'Division', 'panel' => 'side',
-                'options' => Division::query()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Not assigned'],
             'image' => ['type' => 'image', 'label' => 'Image', 'panel' => 'side', 'preview' => 'image_url'],
             'is_quotable' => ['type' => 'checkbox', 'label' => 'Selectable on the quote form', 'panel' => 'side',

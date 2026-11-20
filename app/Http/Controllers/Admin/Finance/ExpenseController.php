@@ -294,8 +294,7 @@ class ExpenseController extends Controller
 
     protected function divisionOptions(Request $request)
     {
-        return Division::query()
-            ->when(DivisionScope::idFor($request->user()), fn (Builder $q, $id) => $q->whereKey($id))
+        return Division::query()->visibleTo($request->user())
             ->ordered()
             ->pluck('name', 'id');
     }

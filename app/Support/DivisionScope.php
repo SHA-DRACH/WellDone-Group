@@ -48,7 +48,10 @@ final class DivisionScope
     public const UNCONFINED_ROLES = [
         Roles::SUPER_ADMIN,
         Roles::ADMIN,
+        Roles::SYSTEM_ADMIN,
         Roles::CEO,
+        Roles::MANAGING_DIRECTOR,
+        Roles::STRATEGY_DIRECTOR,
     ];
 
     /**

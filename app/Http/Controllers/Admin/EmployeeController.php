@@ -65,7 +65,7 @@ class EmployeeController extends Controller
             'records' => $employees,
             'search' => $request->query('q', ''),
             'departments' => Department::query()->ordered()->pluck('name', 'id'),
-            'divisions' => Division::query()->ordered()->pluck('name', 'id'),
+            'divisions' => Division::query()->visibleTo(auth()->user())->ordered()->pluck('name', 'id'),
             'counts' => $this->scopedQuery()
                 ->selectRaw('employment_status, COUNT(*) as total')
                 ->groupBy('employment_status')
@@ -609,7 +609,7 @@ class EmployeeController extends Controller
         return [
             'record' => $employee,
             'departments' => Department::query()->active()->ordered()->pluck('name', 'id'),
-            'divisions' => Division::query()->active()->ordered()->pluck('name', 'id'),
+            'divisions' => Division::query()->visibleTo(auth()->user())->active()->ordered()->pluck('name', 'id'),
             // Eager-load the department: the label shows it, and lazy loading
             // is disabled outside production so an N+1 fails loudly.
             'positions' => Position::query()->active()->with('department:id,name')->ordered()->get()

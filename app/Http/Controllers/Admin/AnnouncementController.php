@@ -115,7 +115,7 @@ class AnnouncementController extends BaseCrudController
                 'options' => Department::query()->active()->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Everyone'],
             'division_id' => ['type' => 'select', 'label' => 'For division', 'panel' => 'side',
-                'options' => Division::query()->active()->ordered()->pluck('name', 'id')->all(),
+                'options' => Division::query()->visibleTo(auth()->user())->active()->ordered()->pluck('name', 'id')->all(),
                 'placeholder' => 'Everyone'],
             'attachment' => ['type' => 'file', 'label' => 'Attachment', 'panel' => 'side',
                 'accept' => '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png'],
