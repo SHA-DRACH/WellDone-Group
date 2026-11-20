@@ -25,7 +25,7 @@ class NewsletterConfirmation extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Please confirm your newsletter subscription')
             ->greeting($this->subscriber->name ? 'Hello '.$this->subscriber->name.',' : 'Hello,')
-            ->line('Please confirm that you would like to receive news and updates from '.setting('company.name').'.')
+            ->line('Please confirm that you would like to receive news and updates from '.rtrim(setting('company.name'), '.').'.')
             ->action('Confirm subscription', route('site.newsletter.confirm', $this->subscriber->token))
             ->line('If you did not request this, you can safely ignore this email — no subscription will be created without your confirmation.');
     }

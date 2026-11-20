@@ -88,7 +88,7 @@ final class Navigation
                 ]))
                 ->where('is_active', true)
                 // Prefer a company address over anyone's personal one.
-                ->orderByRaw("CASE WHEN email LIKE '%@welldonegroup.com' THEN 0 ELSE 1 END")
+                ->orderByRaw("CASE WHEN email LIKE '%@welldonegroup%' THEN 0 ELSE 1 END")
                 ->orderBy('id')
                 ->value('email');
         });

@@ -84,3 +84,37 @@ Artisan::command('assistant:refresh', function (KnowledgeBase $knowledge) {
 
     $this->info('Rebuilt the site assistant knowledge base: '.count($knowledge->all()).' entries.');
 })->purpose('Rebuild the site assistant knowledge base from current site content');
+
+/*
+ * Re-send the "your account is ready — choose your password" email.
+ *
+ *   php artisan staff:invite                     everyone who has not yet set a password
+ *   php artisan staff:invite someone@example.com  just these people
+ *
+ * Use it after correcting a leader's email address, or when a link expired
+ * before they used it. Queued like every other email: a queue worker must be
+ * running for it to send.
+ */
+Artisan::command('staff:invite {email?* : Addresses to invite; omit for everyone still on a first password}', function () {
+    $emails = $this->argument('email');
+
+    $users = User::query()
+        ->where('is_active', true)
+        ->whereDoesntHave('roles', fn ($q) => $q->where('name', Roles::CLIENT))
+        ->when($emails, fn ($q) => $q->whereIn('email', $emails), fn ($q) => $q->where('must_change_password', true))
+        ->with('division')
+        ->get();
+
+    if ($users->isEmpty()) {
+        $this->warn('No matching staff accounts.');
+
+        return;
+    }
+
+    foreach ($users as $user) {
+        $user->notify(new App\Notifications\StaffAccountCreated($user));
+        $this->line('  Queued invitation for '.$user->name.' <'.$user->email.'>');
+    }
+
+    $this->info($users->count().' invitation(s) queued.');
+})->purpose('Email staff a link to choose their password');

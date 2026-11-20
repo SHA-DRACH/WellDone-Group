@@ -20,19 +20,17 @@
         : brand('logo');
 @endphp
 <tr>
+<td class="header-accent" height="5" style="font-size:0; line-height:0;">&nbsp;</td>
+</tr>
+<tr>
 <td class="header">
 <a href="{{ $url }}" style="display: inline-block;">
 @if(\App\Support\Brand::hasLogo())
 <img src="{{ $logoSrc }}" class="logo" alt="{{ setting('company.name') }}">
-<div class="brand-name">{{ setting('company.name') }}</div>
-@if($slogan = setting('company.slogan'))
-<div class="brand-slogan">{{ $slogan }}</div>
 @endif
-@else
 <div class="brand-name">{{ setting('company.name', config('app.name')) }}</div>
-@if($slogan = setting('company.slogan'))
-<div class="brand-slogan">{{ $slogan }}</div>
-@endif
+@if($motto = setting('company.motto'))
+<div class="brand-slogan">{{ $motto }}</div>
 @endif
 </a>
 </td>

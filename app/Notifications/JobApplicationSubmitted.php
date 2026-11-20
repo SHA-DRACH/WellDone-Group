@@ -25,7 +25,7 @@ class JobApplicationSubmitted extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Your application has been received — '.$this->application->reference)
             ->greeting('Dear '.$this->application->full_name.',')
-            ->line('Thank you for applying to '.setting('company.name').'.')
+            ->line('Thank you for applying to '.rtrim(setting('company.name'), '.').'.')
             ->line('**Position:** '.($this->application->career?->title ?? 'General application'))
             ->line('**Your reference:** '.$this->application->reference)
             ->line('Our recruitment team will review your application. If your experience matches what the role requires, we will be in touch to arrange the next step.')

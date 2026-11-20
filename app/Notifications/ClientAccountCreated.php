@@ -30,7 +30,7 @@ class ClientAccountCreated extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Welcome to '.setting('company.name'))
             ->greeting('Welcome, '.$this->user->name.'.')
-            ->line('Thank you for creating an account with '.setting('company.name').'.')
+            ->line('Thank you for creating an account with '.rtrim(setting('company.name'), '.').'.')
             ->line('Your account lets you:')
             ->line('• Request a written quotation and track its progress')
             ->line('• Apply for vacancies and follow your applications')

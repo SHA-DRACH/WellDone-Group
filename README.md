@@ -3,8 +3,15 @@
 Laravel 12 · PHP 8.3 · MySQL 8.4 · Bootstrap 5 · Laragon
 
 An enterprise corporate website and content management system for WellDone
-Group Inc., covering four business divisions: Mining & Quarry, Procurement &
-Logistics, Medical Equipment & Supplies, and ICT Services & Systems.
+Group Inc., covering five business divisions: ICT Services, Logistics &
+Procurement Services, Mining Services, Medical Supply Services, and Trading &
+Investment. Company content comes from the October 2026 Company Profile.
+
+| Document | For |
+|---|---|
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Putting the site live: server setup, `.env`, mail, queue worker, cron, staff accounts, launch checklist |
+| [docs/LAUNCH-AUDIT.md](docs/LAUNCH-AUDIT.md) | What was checked before launch, what was fixed, and what is still open |
+| This README | Local development and how the system works |
 
 ---
 
@@ -42,32 +49,32 @@ Uploaded media is *not* affected: the `public` disk URL is deliberately
 root-relative (`/storage`), so images resolve against whatever host served
 the page and keep working across localhost, the vhost and production.
 
-### Development accounts
+### Staff accounts
 
-All seeded accounts use the password **`WellDone@2026`**. Change every one of
-them before this goes anywhere near production.
+The seeder (`database/seeders/UserSeeder.php`) creates one account for each of
+the six leaders in the Company Profile:
 
-**Group-level staff** — these land on `/admin`:
+| Leader | Email | Role | Lands on |
+|---|---|---|---|
+| Gbogbah Matthew Tarr — Founder & CEO | gbogbah.tarr@welldonegroupinc.com | CEO | `/staff` |
+| Garjay Jestin Tarr — Co-Founder & Managing Director | garjay.tarr@welldonegroupinc.com | Administrator | `/staff` |
+| Shadrach Jimice Jr. — Director of ICT Services | shadrach.jimice@welldonegroupinc.com | Super Administrator | `/staff` |
+| Philip Saywray Gongar — Strategy & Business Development | philip.gongar@welldonegroupinc.com | Administrator | `/staff` |
+| Stephen V. Kollie — Logistics, Procurement & Trading | stephen.kollie@welldonegroupinc.com | Division Manager | `/staff/division/procurement-logistics` |
+| William Lee Davis — Medical Supplies & Healthcare | william.davis@welldonegroupinc.com | Division Manager | `/staff/division/medical-equipment` |
 
-| Email | Role |
-|---|---|
-| superadmin@welldonegroup.com | Super Administrator |
-| admin@welldonegroup.com | Administrator |
-| content@welldonegroup.com | Content Manager |
-| hr@welldonegroup.com | HR Manager |
-| marketing@welldonegroup.com | Marketing Officer |
-| sales@welldonegroup.com | Sales Officer |
-| ict@welldonegroup.com | ICT Manager |
+**Locally** (`APP_ENV=local`) they all use the development password
+**`WellDone@2026`** and no emails are sent.
 
-**Division officers** — each lands on its own division dashboard and is
-refused the other three:
+**On a live server** none of that applies: each account gets a private
+password, must choose a new one at first sign-in, and is emailed a "Choose
+your password" link as it is created. See
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#staff-accounts).
 
-| Email | Division | Lands on |
-|---|---|---|
-| mining@welldonegroup.com | Mining & Quarry | `/admin/division/mining-quarry` |
-| logistics@welldonegroup.com | Procurement & Logistics | `/admin/division/procurement-logistics` |
-| medical@welldonegroup.com | Medical Equipment & Supplies | `/admin/division/medical-equipment` |
-| ictdesk@welldonegroup.com | ICT Services & Systems | `/admin/division/ict-services` |
+Replace the email addresses in the seeder with each person's real address
+before deploying — the profile did not list them. Earlier versions seeded 14
+placeholder accounts (`superadmin@welldonegroup.com` and so on); the seeder now
+removes those wherever they exist.
 
 ### Creating a division account
 
@@ -98,9 +105,9 @@ There is **one** sign-in form for the whole organisation, at `/login`.
 Where a user goes next is decided by `App\Support\Navigation`:
 
 - **Group-level roles** (Super Administrator, Administrator, ICT, Content,
-  Marketing, HR) → `/admin`, the group dashboard.
+  Marketing, HR) → `/staff`, the group dashboard.
 - **Division-scoped staff** (a user with a division assigned and no group
-  role) → `/admin/division/{slug}`, their own division's dashboard.
+  role) → `/staff/division/{slug}`, their own division's dashboard.
 - **Clients** → the public website.
 
 A division dashboard shows that division's requests and orders, pipeline

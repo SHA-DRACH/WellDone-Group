@@ -40,7 +40,7 @@ class ContactMessageReply extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject('Re: '.$this->message->subject)
             ->greeting('Dear '.$this->message->name.',')
-            ->line('Thank you for contacting '.setting('company.name').'. Our response follows.')
+            ->line('Thank you for contacting '.rtrim(setting('company.name'), '.').'. Our response follows.')
             ->line('---');
 
         foreach (preg_split('/\r\n|\r|\n/', $this->message->reply_body) as $paragraph) {
