@@ -9,7 +9,7 @@ The site is ready to deploy. Every page, form route and dashboard was
 exercised and none returned a server error. Before launch, three things are
 still needed from the company. Then follow [DEPLOYMENT.md](DEPLOYMENT.md):
 
-1. Real email addresses for the six leaders
+1. The six leaders' mailboxes created in cPanel (firstname@welldonegroupinc.com)
 2. SMTP details for a mailbox on the company domain
 3. A decision on the demo content listed under *Open items*
 
@@ -51,10 +51,9 @@ New command: `php artisan staff:invite [email…]` re-sends the
 
 ### Needed from the company before launch
 
-- **Leaders' email addresses.** The profile gave none, so the seeder uses
-  `firstname.lastname@welldonegroupinc.com`. Replace them in
-  `database/seeders/UserSeeder.php` before deploying, or the welcome emails go
-  to mailboxes that may not exist.
+- **Leaders' mailboxes.** The accounts use each person's company mailbox,
+  `firstname@welldonegroupinc.com`. Create the six mailboxes in cPanel before
+  deploying, or the welcome emails bounce.
 - **SMTP mailbox.** Mail is currently sent to Mailpit on the development PC
   and never delivered. Create `no-reply@welldonegroupinc.com` (or similar)
   with your host and add SPF/DKIM DNS records — see DEPLOYMENT.md section 6.

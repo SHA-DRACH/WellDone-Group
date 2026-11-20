@@ -56,12 +56,12 @@ the six leaders in the Company Profile:
 
 | Leader | Email | Role | Lands on |
 |---|---|---|---|
-| Gbogbah Matthew Tarr — Founder & CEO | gbogbah.tarr@welldonegroupinc.com | CEO | `/staff` |
-| Garjay Jestin Tarr — Co-Founder & Managing Director | garjay.tarr@welldonegroupinc.com | Administrator | `/staff` |
-| Shadrach Jimice Jr. — Director of ICT Services | shadrach.jimice@welldonegroupinc.com | Super Administrator | `/staff` |
-| Philip Saywray Gongar — Strategy & Business Development | philip.gongar@welldonegroupinc.com | Administrator | `/staff` |
-| Stephen V. Kollie — Logistics, Procurement & Trading | stephen.kollie@welldonegroupinc.com | Division Manager | `/staff/division/procurement-logistics` |
-| William Lee Davis — Medical Supplies & Healthcare | william.davis@welldonegroupinc.com | Division Manager | `/staff/division/medical-equipment` |
+| Gbogbah Matthew Tarr — Founder & CEO | gbogbah@welldonegroupinc.com | CEO | `/staff` |
+| Garjay Jestin Tarr — Co-Founder & Managing Director | garjay@welldonegroupinc.com | Administrator | `/staff` |
+| Shadrach Jimice Jr. — Director of ICT Services | shadrach@welldonegroupinc.com | Super Administrator | `/staff` |
+| Philip Saywray Gongar — Strategy & Business Development | philip@welldonegroupinc.com | Administrator | `/staff` |
+| Stephen V. Kollie — Logistics, Procurement & Trading | stephen@welldonegroupinc.com | Division Manager | `/staff/division/procurement-logistics` |
+| William Lee Davis — Medical Supplies & Healthcare | william@welldonegroupinc.com | Division Manager | `/staff/division/medical-equipment` |
 
 **Locally** (`APP_ENV=local`) they all use the development password
 **`WellDone@2026`** and no emails are sent.
@@ -71,8 +71,8 @@ password, must choose a new one at first sign-in, and is emailed a "Choose
 your password" link as it is created. See
 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#staff-accounts).
 
-Replace the email addresses in the seeder with each person's real address
-before deploying — the profile did not list them. Earlier versions seeded 14
+The addresses are each person's company mailbox, created in cPanel on the
+`welldonegroupinc.com` domain. Earlier versions seeded 14
 placeholder accounts (`superadmin@welldonegroup.com` and so on); the seeder now
 removes those wherever they exist.
 

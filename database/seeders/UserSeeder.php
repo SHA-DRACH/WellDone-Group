@@ -127,9 +127,9 @@ class UserSeeder extends Seeder
      * division — App\Support\DivisionScope narrows every admin query to it and
      * App\Support\Navigation sends them to its dashboard on sign-in.
      *
-     * EMAIL ADDRESSES: the profile does not list personal addresses, so these
-     * use the company website's domain. Replace each with the person's real
-     * address before deploying — the welcome email goes there.
+     * EMAIL ADDRESSES: each person's company mailbox (firstname@ the company
+     * domain), created in cPanel. Create the mailbox before deploying — the
+     * welcome email and sign-in both use it.
      *
      * @return array<int, array<string, string>>
      */
@@ -138,7 +138,7 @@ class UserSeeder extends Seeder
         return [
             [
                 'name' => 'Gbogbah Matthew Tarr',
-                'email' => 'gbogbah.tarr@welldonegroupinc.com',
+                'email' => 'gbogbah@welldonegroupinc.com',
                 'position' => 'Founder & Chief Executive Officer',
                 'department' => 'Executive',
                 'avatar' => '/images/team/gbogbah-matthew-tarr.jpg',
@@ -147,7 +147,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Garjay Jestin Tarr',
-                'email' => 'garjay.tarr@welldonegroupinc.com',
+                'email' => 'garjay@welldonegroupinc.com',
                 'position' => 'Co-Founder & Managing Director',
                 'department' => 'Executive',
                 'avatar' => '/images/team/garjay-jestin-tarr.jpg',
@@ -156,7 +156,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Shadrach Jimice Jr.',
-                'email' => 'shadrach.jimice@welldonegroupinc.com',
+                'email' => 'shadrach@welldonegroupinc.com',
                 'position' => 'Senior Software Engineer & Director of ICT Services',
                 'department' => 'ICT',
                 'avatar' => '/images/team/shadrach-jimice-jr.jpg',
@@ -166,7 +166,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Philip Saywray Gongar',
-                'email' => 'philip.gongar@welldonegroupinc.com',
+                'email' => 'philip@welldonegroupinc.com',
                 'position' => 'Director of Strategy, Business Development, Innovation & Research',
                 'department' => 'Strategy',
                 'avatar' => '/images/team/philip-saywray-gongar.jpg',
@@ -175,7 +175,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Stephen V. Kollie',
-                'email' => 'stephen.kollie@welldonegroupinc.com',
+                'email' => 'stephen@welldonegroupinc.com',
                 'position' => 'Logistics, Procurement & General Trading Director',
                 'department' => 'Logistics & Procurement',
                 'avatar' => '/images/team/stephen-v-kollie.jpg',
@@ -185,7 +185,7 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'William Lee Davis',
-                'email' => 'william.davis@welldonegroupinc.com',
+                'email' => 'william@welldonegroupinc.com',
                 'position' => 'Director of Medical Supplies & Healthcare Services',
                 'department' => 'Medical Supply',
                 'avatar' => '/images/team/william-lee-davis.jpg',

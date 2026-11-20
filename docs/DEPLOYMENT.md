@@ -145,10 +145,11 @@ Company Profile, with their role and division:
 | Stephen V. Kollie | Division Manager | Logistics & Procurement only |
 | William Lee Davis | Division Manager | Medical Supply only |
 
-**Before you seed, put each person's real email address** in
-`database/seeders/UserSeeder.php` (the `leaders()` list). The profile did not
-list them, so the file uses `firstname.lastname@welldonegroupinc.com`
-addresses. The welcome email goes to whatever address is there.
+Each account uses the person's company mailbox, `firstname@welldonegroupinc.com`
+(`shadrach@`, `gbogbah@`, `garjay@`, `philip@`, `stephen@`, `william@`).
+**Create these six mailboxes in cPanel before you seed** — the welcome email is
+sent to them, and they are the sign-in usernames. To use different addresses,
+edit the `leaders()` list in `database/seeders/UserSeeder.php`.
 
 What happens to each account on a live install:
 
@@ -170,7 +171,7 @@ expired — links last 60 minutes):
 
 ```bash
 php artisan staff:invite                                  # everyone who has not set a password yet
-php artisan staff:invite william.davis@welldonegroupinc.com  # one person
+php artisan staff:invite william@welldonegroupinc.com  # one person
 ```
 
 Add more staff later from **Administration → Users → New account**; they get the
@@ -269,7 +270,7 @@ Then open the site and work through the checklist below.
 
 **Before**
 
-- [ ] Real email addresses for the six leaders are in `UserSeeder.php`
+- [ ] The six leader mailboxes (`shadrach@welldonegroupinc.com` etc.) exist in cPanel
 - [ ] `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` is the real https address
 - [ ] Document root is `public/`
 - [ ] SMTP details are in `.env` and `php artisan mail:test` arrives

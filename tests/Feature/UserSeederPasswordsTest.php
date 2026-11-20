@@ -23,7 +23,7 @@ class UserSeederPasswordsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const ICT_DIRECTOR = 'shadrach.jimice@welldonegroupinc.com';
+    private const ICT_DIRECTOR = 'shadrach@welldonegroupinc.com';
 
     protected function setUp(): void
     {
@@ -73,7 +73,7 @@ class UserSeederPasswordsTest extends TestCase
         $this->seed(UserSeeder::class);
 
         $ict = User::query()->where('email', self::ICT_DIRECTOR)->firstOrFail();
-        $medical = User::query()->where('email', 'william.davis@welldonegroupinc.com')->firstOrFail();
+        $medical = User::query()->where('email', 'william@welldonegroupinc.com')->firstOrFail();
 
         $this->assertTrue($ict->hasRole('Super Administrator'));
         $this->assertSame('ict-services', $ict->division->slug);
